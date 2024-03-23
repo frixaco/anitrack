@@ -5,6 +5,6 @@ export default defineConfig({
   out: "database/out/",
   driver: "pg",
   dbCredentials: {
-    connectionString: process.env.DATABASE_URL!,
+    connectionString: process.env.POSTGRES_URL!,
   },
 });
