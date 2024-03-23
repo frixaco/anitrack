@@ -3,15 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "AWS_PROFILE=admin@rr-ashurmatov-root sst dev next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "deploy:dev": "AWS_PROFILE=admin@rr-ashurmatov-root sst deploy --stage=development",
     "db:generate": "drizzle-kit generate:pg",
     "db:push": "drizzle-kit push:pg"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^0.8.0",
+    "@aws-sdk/client-rds-data": "^3.540.0",
     "@radix-ui/react-slot": "^1.0.2",
     "@vercel/postgres": "^0.7.2",
     "class-variance-authority": "^0.7.0",
@@ -23,6 +25,7 @@
     "pg": "^8.11.3",
     "react": "^18",
     "react-dom": "^18",
+    "sst": "^3.0.1",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7"
   },
