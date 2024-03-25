@@ -9,6 +9,7 @@ export const config = {
   providers: [Google],
   basePath: "/auth",
   callbacks: {},
+  trustHost: true,
 } satisfies NextAuthConfig;
 
 export const { handlers, auth, signIn, signOut } = NextAuth(config);
