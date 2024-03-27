@@ -1,34 +1,45 @@
-import { signIn, signOut } from "auth";
+"use client";
 import { Button } from "./ui/button";
+import { LogIn } from "lucide-react";
+import { signout } from "@/app/auth/signout/action";
+import { createClient } from "@/lib/supabase/client";
 
 export function SignIn({
   provider,
   ...props
 }: { provider?: string } & React.ComponentPropsWithRef<typeof Button>) {
   return (
-    <form
-      action={async () => {
-        "use server";
-        await signIn(provider);
+    <Button
+      {...props}
+      onClick={async () => {
+        const supabase = createClient();
+        const response = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          // options: {
+          //   redirectTo:
+          //     "https://myevsotpzreetmmhyodr.supabase.co/auth/v1/callback",
+          // },
+        });
+        console.log(response);
       }}
     >
-      <Button {...props}>Sign In</Button>
-    </form>
+      <LogIn />
+      <span className="hidden sm:block">Sign In</span>
+    </Button>
   );
 }
 
 export function SignOut(props: React.ComponentPropsWithRef<typeof Button>) {
   return (
-    <form
-      action={async () => {
-        "use server";
-        await signOut();
+    <Button
+      variant="ghost"
+      {...props}
+      onClick={async () => {
+        const supabase = createClient();
+        await supabase.auth.signOut();
       }}
-      className="w-full"
     >
-      <Button variant="ghost" {...props}>
-        Sign Out
-      </Button>
-    </form>
+      Sign Out
+    </Button>
   );
 }
