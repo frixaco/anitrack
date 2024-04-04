@@ -1,57 +1,29 @@
-"use client";
-import { SignIn, SignOut } from "@/components/auth";
+import Header from "@/components/header";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { createClient } from "@/lib/supabase/client";
-import { useEffect, useState } from "react";
-const supabase = createClient();
 
-export default function Index() {
-  const [user, setUser] = useState({});
-  useEffect(() => {
-    (async () => {
-      const { data: user } = await supabase.auth.getUser();
-      setUser(user);
-    })();
-  }, []);
-  //
-  // const { data: users } = await supabase.from("users").select();
-
+export default async function Index() {
   return (
     <main className="flex flex-col gap-6 p-4">
-      <h1 className="text-3xl font-bold">Anitrack</h1>
+      <Header />
 
-      <div className="grid grid-cols-2 gap-4">
-        <Input placeholder="Enter URL here" />
-        <Select>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Source" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="nyaa.si">nyaa.si</SelectItem>
-            <SelectItem value="9animetv.to">9animetv.to</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <form className="grid grid-cols-1 gap-4">
+        <label>
+          <Input required name="url" type="url" placeholder="Enter URL here" />
+        </label>
 
-      <pre className="py-6 px-4 whitespace-pre-wrap break-all">
-        <SignIn />
-        <SignOut />
+        <Button size="lg" className="font-bold tracking-wide" type="submit">
+          Start Tracking
+        </Button>
+      </form>
 
-        <p>Session:</p>
-        {JSON.stringify(user, null, 2)}
+      <section>
+        <h2 className="font-semibold text-lg">New Episodes</h2>
+      </section>
 
-        <br />
-
-        <p>Users:</p>
-        {/* {JSON.stringify(users, null, 2)} */}
-      </pre>
+      <section>
+        <h2 className="font-semibold text-lg">Tracking</h2>
+      </section>
     </main>
   );
 }
