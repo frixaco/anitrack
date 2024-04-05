@@ -1,4 +1,4 @@
-import { signin } from "@/app/auth/signin/action";
+import { signin } from "@/app/actions/signin";
 import { Button } from "./ui/button";
 import { LogIn } from "lucide-react";
 
