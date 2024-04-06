@@ -17,7 +17,7 @@ export async function addRelease(formData: FormData) {
     }),
   });
 
-  console.log("Response: ", response);
+  console.log("Response: ", await response.json());
 
   return {
     message: "Finished",

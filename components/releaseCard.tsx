@@ -3,7 +3,7 @@ import Image from "next/image";
 import { AspectRatio } from "./ui/aspect-ratio";
 import { Badge } from "./ui/badge";
 import { randomUUID } from "crypto";
-import { Magnet, Video } from "lucide-react";
+import { Eye, Magnet, Video } from "lucide-react";
 import { Button } from "./ui/button";
 
 export default async function ReleaseCard({ latestEpisode }) {
@@ -29,14 +29,22 @@ export default async function ReleaseCard({ latestEpisode }) {
           {latestEpisode.title}
         </CardTitle>
 
-        <div className="pt-2 flex flex-col gap-2 items-center justify-around">
-          <Button variant="secondary" className="w-full rounded-xl">
-            <Magnet />
-            <span className="pl-2 hidden sm:block">Download from nyaa.si</span>
-          </Button>
-          <Button variant="secondary" className="w-full rounded-xl">
-            <Video />
-            <span className="pl-2 hidden sm:block">Watch at 9animetv.to</span>
+        <div className="flex flex-col gap-4">
+          <div className="pt-2 flex flex-col gap-2 items-center justify-around">
+            <Button variant="secondary" className="w-full rounded-xl">
+              <Magnet />
+              <span className="pl-2 hidden sm:block">
+                Download from nyaa.si
+              </span>
+            </Button>
+            <Button variant="secondary" className="w-full rounded-xl">
+              <Video />
+              <span className="pl-2 hidden sm:block">Watch at 9animetv.to</span>
+            </Button>
+          </div>
+
+          <Button className="w-full rounded-xl">
+            <Eye />
           </Button>
         </div>
       </CardContent>

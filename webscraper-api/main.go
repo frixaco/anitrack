@@ -7,95 +7,225 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
+	"regexp"
+	"strconv"
 
+	"github.com/go-rod/rod"
+	"github.com/go-rod/stealth"
 	"github.com/gocolly/colly"
 )
 
-type Release struct {
-	Url string `json:"url"`
+type NewReleaseData struct {
+	Title                              string
+	LatestEpisode                      int
+	nyaaUrlForFirstUnwatchedEpisode    string
+	aniwaveUrlForFirstUnwatchedEpisode string
 }
 
-type pageInfo struct {
-	StatusCode int
-	Links      map[string]int
+type NyaaEpisode struct {
+	Title         string
+	Season        int
+	EpisodeNumber int
+	MagnetUrl     string
+}
+
+type AniwaveEpisode struct {
+	Title         string
+	Season        int
+	EpisodeNumber int
+	StreamUrl     string
+}
+
+type NewReleasePayload struct {
+	UserId     string `json:"userId"`
+	NyaaUrl    string `json:"nyaaUrl"`
+	AniwaveUrl string `json:"aniwaveUrl"`
+}
+
+type CheckReleasesPayload struct {
+	UserId string `json:"userId"`
+}
+
+type ScrapeResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
+func SetReponse(success bool, message string, w http.ResponseWriter, status int) {
+	fmt.Println(message)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+
+	response := ScrapeResponse{
+		Success: success,
+		Message: message,
+	}
+	rb, _ := json.Marshal(response)
+
+	w.Write(rb)
+}
+
+func getNyaaEpisodes(rp *NewReleasePayload) []NyaaEpisode {
+	c := colly.NewCollector(
+		colly.MaxDepth(1),
+		colly.AllowedDomains("nyaa.si", "aniwave.to"),
+	)
+	c.WithTransport(&http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	})
+
+	var title string
+	var episodeNumbers []int
+
+	var nyaaEpisodes []NyaaEpisode
+
+	c.OnHTML("tr.danger", func(e *colly.HTMLElement) {
+		uploadInfo := e.ChildAttr("a[href^='/view']:not(.comments)", "title")
+
+		seasonEpisodePattern := regexp.MustCompile(`S(\d{2})E(\d{2})`)
+		matches := seasonEpisodePattern.FindStringSubmatch(uploadInfo)
+		if len(matches) < 3 {
+			log.Fatal("Could not extract episode and season numbers")
+			return
+		}
+
+		seasonNumber, err := strconv.Atoi(matches[1])
+		if err != nil {
+			log.Fatal("Could not get episode number")
+		}
+		episodeNumber, err := strconv.Atoi(matches[2])
+		if err != nil {
+			log.Fatal("Could not get episode number")
+		}
+
+		showTitlePattern := regexp.MustCompile(`\[(.*?)\`)
+		titleMatches := showTitlePattern.FindAllStringSubmatch(uploadInfo, -1)
+		if len(titleMatches) < 1 {
+			log.Fatal("Could not extract title")
+			return
+		}
+
+		title = titleMatches[0][1]
+
+		episode := NyaaEpisode{
+			Title:         title,
+			Season:        seasonNumber,
+			EpisodeNumber: episodeNumber,
+			MagnetUrl:     e.ChildAttr("a[href^='magnet:']", "href"),
+		}
+
+		episodeNumbers = append(episodeNumbers, episodeNumber)
+		nyaaEpisodes = append(nyaaEpisodes, episode)
+	})
+
+	c.Visit(rp.NyaaUrl)
+
+	for _, episode := range nyaaEpisodes {
+		fmt.Println(episode.EpisodeNumber, " - ", episode.MagnetUrl)
+	}
+
+	return nyaaEpisodes
+}
+
+func getAniwaveEpisodes(rp *NewReleasePayload) []AniwaveEpisode {
+	var aniwaveEpisodes []AniwaveEpisode
+
+	browser := rod.New().MustConnect()
+	defer browser.MustClose()
+
+	page := stealth.MustPage(browser)
+	page.MustNavigate(rp.AniwaveUrl).MustWaitStable()
+
+	uploadInfoEl := page.MustElement("h1.title.d-title")
+	uploadInfo := uploadInfoEl.MustText()
+
+	seasonPattern := regexp.MustCompile(`Season (\d+)`)
+	matches := seasonPattern.FindStringSubmatch(uploadInfo)
+	if len(matches) < 2 {
+		log.Fatal("Could not get season number")
+	}
+	seasonNumber, err := strconv.Atoi(matches[1])
+	if err != nil {
+		log.Fatal("Could not get season number")
+	}
+
+	els := page.MustElements("ul.ep-range a")
+	for _, el := range els {
+		hrefAttr, err := el.Attribute("href")
+		if err != nil {
+			log.Fatal(err)
+		}
+		numberAttr, err := el.Attribute("data-num")
+		if err != nil {
+			log.Fatal(err)
+		}
+		number, err := strconv.Atoi(*numberAttr)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		episode := AniwaveEpisode{
+			Title:         uploadInfo,
+			Season:        seasonNumber,
+			EpisodeNumber: number,
+			StreamUrl:     *hrefAttr,
+		}
+
+		aniwaveEpisodes = append(aniwaveEpisodes, episode)
+	}
+
+	for _, episode := range aniwaveEpisodes {
+		fmt.Println(episode.EpisodeNumber, " - ", episode.StreamUrl)
+	}
+
+	return aniwaveEpisodes
 }
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+	http.HandleFunc("POST /scrape", func(w http.ResponseWriter, r *http.Request) {
+		var releasePayload NewReleasePayload
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "POST" {
-			http.Error(w, "Method is not supported.", http.StatusNotFound)
-			return
-		}
+		b, err := io.ReadAll(r.Body)
 
-		// Read the body of the request
-		body, err := io.ReadAll(r.Body)
+		err = json.Unmarshal(b, &releasePayload)
 		if err != nil {
-			http.Error(w, "Error reading request body", http.StatusInternalServerError)
-			return
-		}
-		defer r.Body.Close()
-
-		// Unmarshal the JSON into the struct
-		var release Release
-		err = json.Unmarshal(body, &release)
-		if err != nil {
-			http.Error(w, "Error unmarshalling JSON", http.StatusInternalServerError)
+			SetReponse(false, "Failed to parse request body", w, http.StatusBadRequest)
 			return
 		}
 
-		// Print the struct to the console
-		fmt.Printf("Received: %+v\n", release)
+		fmt.Println("User ID:", releasePayload.UserId)
+		fmt.Println("nyaa.si URL:", releasePayload.NyaaUrl)
+		fmt.Println("aniwave.to URL:", releasePayload.AniwaveUrl)
 
-		//  ==================== Colly =================
-		c := colly.NewCollector(
-			colly.AllowedDomains("nyaa.si", "9animetv.to"),
-		)
-		c.WithTransport(&http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		})
+		nyaaEpisodes := getNyaaEpisodes(&releasePayload)
+		aniwaveEpisodes := getAniwaveEpisodes(&releasePayload)
 
-		p := &pageInfo{Links: make(map[string]int)}
-
-		// count links
-		c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-			link := e.Request.AbsoluteURL(e.Attr("href"))
-			if link != "" {
-				p.Links[link]++
-			}
-		})
-
-		// extract status code
-		c.OnResponse(func(r *colly.Response) {
-			log.Println("response received", r.StatusCode)
-			p.StatusCode = r.StatusCode
-		})
-		c.OnError(func(r *colly.Response, err error) {
-			log.Println("error:", r.StatusCode, err)
-			p.StatusCode = r.StatusCode
-		})
-
-		c.Visit(release.Url)
-
-		// ==================================================
-
-		fmt.Println("Links:", p.Links)
-
-		// dump results
-		b, err := json.Marshal(p)
-		if err != nil {
-			log.Println("failed to serialize response:", err)
-			return
+		newReleaseData := NewReleaseData{
+			Title: aniwaveEpisodes[0].Title,
+			// Latest episode should be checked both for nyaa and aniwave
+			nyaaUrlForFirstUnwatchedEpisode:    nyaaEpisodes[0].MagnetUrl,
+			aniwaveUrlForFirstUnwatchedEpisode: aniwaveEpisodes[0].StreamUrl,
 		}
-		w.Header().Add("Content-Type", "application/json")
-		w.Write(b)
+		fmt.Println(newReleaseData)
+
+		SetReponse(true, "Successfully scraped nyaa URL", w, http.StatusOK)
 	})
 
-	log.Println("listening on", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	http.HandleFunc("POST /check-releases", func(w http.ResponseWriter, r *http.Request) {
+		var releasePayload CheckReleasesPayload
+
+		b, err := io.ReadAll(r.Body)
+
+		err = json.Unmarshal(b, &releasePayload)
+		if err != nil {
+			SetReponse(false, "Failed to parse request body", w, http.StatusBadRequest)
+			return
+		}
+
+		fmt.Println("User ID:", releasePayload.UserId)
+
+		SetReponse(true, fmt.Sprint("Successfully checked releases for user with ID:", releasePayload.UserId), w, http.StatusOK)
+	})
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

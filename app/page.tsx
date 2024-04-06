@@ -13,6 +13,10 @@ export default async function Index() {
       <NewEpisodesSection />
 
       <TrackedAnimesSection />
+
+      <section>
+        <h2>History</h2>
+      </section>
     </main>
   );
 }
