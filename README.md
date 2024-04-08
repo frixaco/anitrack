@@ -18,21 +18,22 @@ Tags: IN PROGRESS
   ```jsx
   {
   	"nyaaUrl": "https://nyaa.si/?f=0&c=1_2&q=ember+frieren",
-  	"nineanimeUrl": "https://9animetv.to/watch/frieren-beyond-journeys-end-18542?ep=107257"
+  	"aniwaveUrl": "https://aniwave.to/watch/sousou-no-frieren.3rp2y/ep-2"
   }
   ```
-- [x] Create Colly Collector that can visit [nyaa.si](http://nyaa.si) and [9animetv.to](http://9animetv.to) (let’s call this “webscraping”
-  - [x] For [nyaa.si](http://nyaa.si) links it should get all <a> tag URLS that start with `magnet:`
-  - [x] For [9animetv.to](http://9animetv.to) links it should get all <a> tag URLS that have same URL as passed `url` without query params. <a> tag URLs must have `?ep=123123` query param at the end
-- [ ] Get `latestEpisode`
-  - [ ] [nyaa.si](http://nyaa.si) - Get count of all <a> tags that match `^/view/[0-9]$` . Then make a list of titles using `title` attribute of each <a>. Somehow (using AI?) figure out the number of last episode (!= total episodes)
-  - [ ] [9animetv.to](http://9animetv.to) - Last valid (see above) <a> has child <div>. It’s content is the number of last episode (!= total episodes)
-- [ ] Get `title`
-  - [ ] [nyaa.si](http://nyaa.si) - Use method above and extract (using AI?) the release title from <a> `title` attribute
-  - [ ] [9animetv.to](http://9animetv.to) - `h2.film-name`'s text content
-- [ ] Get `nyaaUrlForFirstUnwatchedEpisode` - Similar to `latestEpisode` for [nyaa.si](http://nyaa.si)
-- [ ] Get `nineanimeUrlForFirstUnwatchedEpisode` - Similar to `latestEpisode` for [9animetv.to](http://9animetv.to)
-- [ ] For route 2, add a function that gets users existing releases’ [nyaa.si](http://nyaa.si) and [9animetv.to](http://9animetv.to) urls and does “webscraping” and updates releases in DB
+- [x] Create Colly Collector that can visit [nyaa.si](https://nyaa.si) and [aniwave.to](https://aniwave.to) (let’s call this “webscraping”
+  - [x] For [nyaa.si](https://nyaa.si), extract episode number using regex (from upload title) and magnet link
+  - [x] For [aniwave.to](https://aniwave.to), extract episode number (from episodes section) and stream url
+- [x] Get `latestEpisode`
+  - [x] [nyaa.si](https://nyaa.si) - Sort by episode number, get last one
+  - [x] [aniwave.to](https://9animetv.to) - same
+- [x] Get `title`
+  - [x] [nyaa.si](https://nyaa.si) - Extract from any upload/episode title using regex
+  - [x] [aniwave.to](https://aniwave.to) - Use correct selector
+- [ x Get `nyaaUrlForFirstUnwatchedEpisode` - Similar to `latestEpisode` for [nyaa.si](https://nyaa.si)
+- [x] Get `nineanimeUrlForFirstUnwatchedEpisode` - Similar to `latestEpisode` for [aniwave.to](https://aniwave.to)
+- [x] Implement database connection and add new row to `Release` table
+- [ ] For route 2, add a function that gets users existing releases’ [nyaa.si](http://nyaa.si) and [aniwave.to](https://aniwave.to) urls and does “webscraping” and updates releases in DB
 
 ### TODO for Next.js app:
 
