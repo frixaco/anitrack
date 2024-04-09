@@ -2,6 +2,7 @@ import AddReleaseDrawer from "@/components/addReleaseDrawer";
 import Header from "@/components/header";
 import NewEpisodesSection from "@/components/newEpisodesSection";
 import TrackedAnimesSection from "@/components/trackedAnimesSection";
+import WatchHistory from "@/components/watchHistory";
 
 export default async function Index() {
   return (
@@ -12,11 +13,9 @@ export default async function Index() {
 
       <NewEpisodesSection />
 
-      <TrackedAnimesSection />
+      <WatchHistory />
 
-      <section>
-        <h2>History</h2>
-      </section>
+      <TrackedAnimesSection />
     </main>
   );
 }

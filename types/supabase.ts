@@ -9,23 +9,88 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      users: {
+      release: {
         Row: {
-          created_at: string
-          email: string
-          id: number
+          aniwaveSourceUrl: string
+          aniwaveUrlForFirstUnwatchedEpisode: string | null
+          createdAt: string
+          id: string
+          lastWatchedEpisode: number
+          latestEpisode: number
+          nyaaSourceUrl: string
+          nyaaUrlForFirstUnwatchedEpisode: string | null
+          season: number
+          thumbnailUrl: string
+          title: string
+          userId: string | null
         }
         Insert: {
-          created_at?: string
-          email?: string
-          id?: number
+          aniwaveSourceUrl: string
+          aniwaveUrlForFirstUnwatchedEpisode?: string | null
+          createdAt?: string
+          id?: string
+          lastWatchedEpisode?: number
+          latestEpisode?: number
+          nyaaSourceUrl: string
+          nyaaUrlForFirstUnwatchedEpisode?: string | null
+          season?: number
+          thumbnailUrl: string
+          title: string
+          userId?: string | null
         }
         Update: {
-          created_at?: string
-          email?: string
-          id?: number
+          aniwaveSourceUrl?: string
+          aniwaveUrlForFirstUnwatchedEpisode?: string | null
+          createdAt?: string
+          id?: string
+          lastWatchedEpisode?: number
+          latestEpisode?: number
+          nyaaSourceUrl?: string
+          nyaaUrlForFirstUnwatchedEpisode?: string | null
+          season?: number
+          thumbnailUrl?: string
+          title?: string
+          userId?: string | null
         }
         Relationships: []
+      }
+      watchHistory: {
+        Row: {
+          createdAt: string
+          episodeNumber: number
+          episodeUrl: string
+          id: number
+          releaseId: string | null
+          seasonNumber: number
+          userId: string
+        }
+        Insert: {
+          createdAt?: string
+          episodeNumber: number
+          episodeUrl: string
+          id?: number
+          releaseId?: string | null
+          seasonNumber?: number
+          userId?: string
+        }
+        Update: {
+          createdAt?: string
+          episodeNumber?: number
+          episodeUrl?: string
+          id?: number
+          releaseId?: string | null
+          seasonNumber?: number
+          userId?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_watchHistory_releaseId_fkey"
+            columns: ["releaseId"]
+            isOneToOne: false
+            referencedRelation: "release"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

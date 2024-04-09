@@ -8,6 +8,12 @@ const nextConfig = {
         port: "",
         pathname: "/images/**",
       },
+      {
+        protocol: "https",
+        hostname: "static.aniwave.to",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };

@@ -1,29 +1,66 @@
 import { randomUUID } from "crypto";
 import ReleaseCard from "./releaseCard";
+import { createClient } from "@/lib/supabase/server";
+
+export type Release = {
+  releaseId: string;
+  episodeNumber: number;
+  nyaaUrl: string;
+  aniwaveUrl: string;
+  season: number;
+  thumbnailUrl: string;
+  title: string;
+};
 
 export default async function NewEpisodesSection() {
-  const newEpisodes = [
-    {
-      title: "Frieren: Beyond Journey's End",
-      thumbnailUrl: "https://cdn.myanimelist.net/images/anime/1015/138006l.jpg",
-      episode: 1,
-      season: 2,
-    },
-    {
-      title: "The Eminence in Shadow",
-      thumbnailUrl: "https://cdn.myanimelist.net/images/anime/1874/121869l.jpg",
-      episode: 1,
-      season: 3,
-    },
-  ];
+  const newRelease: Release[] = [];
+
+  const supabase = createClient();
+  const { data } = await supabase.auth.getUser();
+  if (data.user == null) {
+    return (
+      <section>
+        <h2 className="font-semibold text-2xl pb-2">New Episodes</h2>
+      </section>
+    );
+  }
+  const { data: releasesWithNewEpisodes } = await supabase
+    .from("release")
+    .select("*")
+    .eq("userId", data.user?.id);
+
+  if (releasesWithNewEpisodes == null) {
+    return (
+      <section>
+        <h2 className="font-semibold text-2xl pb-2">New Episodes</h2>
+      </section>
+    );
+  }
+
+  for (const release of releasesWithNewEpisodes) {
+    if (release.latestEpisode > release.lastWatchedEpisode) {
+      newRelease.push({
+        episodeNumber: release.lastWatchedEpisode + 1,
+        releaseId: release.id,
+        nyaaUrl:
+          release.nyaaUrlForFirstUnwatchedEpisode || release.nyaaSourceUrl,
+        aniwaveUrl:
+          release.aniwaveUrlForFirstUnwatchedEpisode ||
+          release.aniwaveSourceUrl,
+        title: release.title,
+        season: release.season,
+        thumbnailUrl: release.thumbnailUrl,
+      });
+    }
+  }
 
   return (
     <section>
       <h2 className="font-semibold text-2xl pb-2">New Episodes</h2>
 
       <div className="grid grid-cols-2 gap-2">
-        {newEpisodes.map((episode) => (
-          <ReleaseCard key={randomUUID()} latestEpisode={episode} />
+        {newRelease.map((episode) => (
+          <ReleaseCard key={randomUUID()} episode={episode} />
         ))}
       </div>
     </section>
