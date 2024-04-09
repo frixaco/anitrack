@@ -33,7 +33,7 @@ Tags: IN PROGRESS
 - [ x Get `nyaaUrlForFirstUnwatchedEpisode` - Similar to `latestEpisode` for [nyaa.si](https://nyaa.si)
 - [x] Get `nineanimeUrlForFirstUnwatchedEpisode` - Similar to `latestEpisode` for [aniwave.to](https://aniwave.to)
 - [x] Implement database connection and add new row to `Release` table
-- [ ] For route 2, add a function that gets users existing releases’ [nyaa.si](http://nyaa.si) and [aniwave.to](https://aniwave.to) urls and does “webscraping” and updates releases in DB
+- [x] For route 2, add a function that gets users existing releases’ [nyaa.si](http://nyaa.si) and [aniwave.to](https://aniwave.to) urls and does “webscraping” and updates releases in DB
 
 ### TODO for Next.js app:
 

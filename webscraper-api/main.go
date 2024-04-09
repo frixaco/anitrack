@@ -23,6 +23,8 @@ import (
 )
 
 type NewReleaseData struct {
+	Id                                 string
+	CreatedAt                          time.Time
 	Title                              string
 	LatestEpisode                      int
 	LastWatchedEpisode                 int
@@ -232,7 +234,7 @@ func saveReleaseInDB(r *NewReleaseData) error {
 	return nil
 }
 
-func getUserReleases(userId string) error {
+func getUserReleases(userId string) ([]NewReleaseData, error) {
 	DATABASE_URL := "postgres://postgres.myevsotpzreetmmhyodr:elps1kongr0@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
 
 	conn, err := pgx.Connect(context.Background(), DATABASE_URL)
@@ -242,15 +244,6 @@ func getUserReleases(userId string) error {
 	}
 	defer conn.Close(context.Background())
 
-	var id string
-	var createdAt time.Time
-	var latestEpisode int
-	var lastWatchedEpisode int
-	var title string
-	var nyaaSourceUrl string
-	var aniwaveSourceUrl string
-	var nyaaUrlForFirstUnwatchedEpisode string
-	var aniwaveUrlForFirstUnwatchedEpisode string
 	query := `select 
       "id",
       "createdAt",
@@ -263,14 +256,70 @@ func getUserReleases(userId string) error {
       "aniwaveUrlForFirstUnwatchedEpisode"
     from release where "userId"=$1`
 
-	err = conn.QueryRow(context.Background(), query, userId).Scan(&id, &createdAt, &latestEpisode,
-		&lastWatchedEpisode, &title, &nyaaSourceUrl, &aniwaveSourceUrl, &nyaaUrlForFirstUnwatchedEpisode,
-		&aniwaveUrlForFirstUnwatchedEpisode)
+	dbRows, err := conn.Query(context.Background(), query, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	var releases []NewReleaseData
+
+	defer dbRows.Close()
+
+	for dbRows.Next() {
+		var id string
+		var createdAt time.Time
+		var latestEpisode int
+		var lastWatchedEpisode int
+		var title string
+		var nyaaSourceUrl string
+		var aniwaveSourceUrl string
+		var nyaaUrlForFirstUnwatchedEpisode string
+		var aniwaveUrlForFirstUnwatchedEpisode string
+
+		err := dbRows.Scan(&id, &createdAt, &latestEpisode,
+			&lastWatchedEpisode, &title, &nyaaSourceUrl, &aniwaveSourceUrl, &nyaaUrlForFirstUnwatchedEpisode,
+			&aniwaveUrlForFirstUnwatchedEpisode)
+		if err != nil {
+			return nil, err
+		}
+
+		releases = append(releases, NewReleaseData{
+			Id:                                 id,
+			CreatedAt:                          createdAt,
+			LatestEpisode:                      latestEpisode,
+			LastWatchedEpisode:                 lastWatchedEpisode,
+			Title:                              title,
+			NyaaSourceUrl:                      nyaaSourceUrl,
+			AniwaveSourceUrl:                   aniwaveSourceUrl,
+			NyaaUrlForFirstUnwatchedEpisode:    nyaaUrlForFirstUnwatchedEpisode,
+			AniwaveUrlForFirstUnwatchedEpisode: aniwaveUrlForFirstUnwatchedEpisode,
+		})
+	}
+
+	fmt.Println("Finished working with DB")
+
+	return releases, nil
+}
+
+func updateReleaseInDB(r *NewReleaseData) error {
+	DATABASE_URL := "postgres://postgres.myevsotpzreetmmhyodr:elps1kongr0@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
+
+	conn, err := pgx.Connect(context.Background(), DATABASE_URL)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	defer conn.Close(context.Background())
+
+	query := `update release
+    set "latestEpisode"=$1
+    where "id"=$2
+  `
+
+	_, err = conn.Exec(context.Background(), query, r.LatestEpisode, r.Id)
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(id, createdAt, latestEpisode, lastWatchedEpisode, title, nyaaSourceUrl, aniwaveSourceUrl, nyaaUrlForFirstUnwatchedEpisode, aniwaveUrlForFirstUnwatchedEpisode)
 
 	fmt.Println("Finished working with DB")
 
@@ -344,9 +393,47 @@ func main() {
 
 		fmt.Println("User ID:", releasePayload.UserId)
 
-		err = getUserReleases(releasePayload.UserId)
+		releases, err := getUserReleases(releasePayload.UserId)
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		for _, release := range releases {
+			nyaaEpisodes := getNyaaEpisodes(&NewReleasePayload{
+				NyaaUrl:    release.NyaaSourceUrl,
+				AniwaveUrl: release.AniwaveSourceUrl,
+			})
+			aniwaveEpisodes := getAniwaveEpisodes(&NewReleasePayload{
+				NyaaUrl:    release.NyaaSourceUrl,
+				AniwaveUrl: release.AniwaveSourceUrl,
+			})
+
+			latestEpisode := 1
+			if len(nyaaEpisodes) > len(aniwaveEpisodes) {
+				latestEpisode = len(nyaaEpisodes) - 1
+			} else {
+				latestEpisode = len(aniwaveEpisodes) - 1
+			}
+
+			newReleaseData := NewReleaseData{
+				Id:                                 release.Id,
+				Title:                              release.Title,
+				LatestEpisode:                      latestEpisode,
+				NyaaUrlForFirstUnwatchedEpisode:    release.NyaaUrlForFirstUnwatchedEpisode,
+				AniwaveUrlForFirstUnwatchedEpisode: release.AniwaveUrlForFirstUnwatchedEpisode,
+				NyaaSourceUrl:                      release.NyaaSourceUrl,
+				AniwaveSourceUrl:                   release.AniwaveSourceUrl,
+				LastWatchedEpisode:                 release.LastWatchedEpisode,
+				UserId:                             "5f5f62f6-2ef5-47e8-b494-7fe8131532ae",
+				// UserId:                             releasePayload.UserId,
+			}
+			fmt.Println("T", newReleaseData.Title)
+			fmt.Println("LE", newReleaseData.LatestEpisode)
+
+			err := updateReleaseInDB(&newReleaseData)
+			if err != nil {
+				log.Fatal("Failed to update release in DB")
+			}
 		}
 
 		SetReponse(true, fmt.Sprint("Successfully checked releases for user with ID:", releasePayload.UserId), w, http.StatusOK)
