@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"slices"
 	"strconv"
+	"time"
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/stealth"
@@ -231,6 +232,51 @@ func saveReleaseInDB(r *NewReleaseData) error {
 	return nil
 }
 
+func getUserReleases(userId string) error {
+	DATABASE_URL := "postgres://postgres.myevsotpzreetmmhyodr:elps1kongr0@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
+
+	conn, err := pgx.Connect(context.Background(), DATABASE_URL)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	defer conn.Close(context.Background())
+
+	var id string
+	var createdAt time.Time
+	var latestEpisode int
+	var lastWatchedEpisode int
+	var title string
+	var nyaaSourceUrl string
+	var aniwaveSourceUrl string
+	var nyaaUrlForFirstUnwatchedEpisode string
+	var aniwaveUrlForFirstUnwatchedEpisode string
+	query := `select 
+      "id",
+      "createdAt",
+      "latestEpisode",
+      "lastWatchedEpisode",
+      "title",
+      "nyaaSourceUrl", 
+      "aniwaveSourceUrl",
+      "nyaaUrlForFirstUnwatchedEpisode",
+      "aniwaveUrlForFirstUnwatchedEpisode"
+    from release where "userId"=$1`
+
+	err = conn.QueryRow(context.Background(), query, userId).Scan(&id, &createdAt, &latestEpisode,
+		&lastWatchedEpisode, &title, &nyaaSourceUrl, &aniwaveSourceUrl, &nyaaUrlForFirstUnwatchedEpisode,
+		&aniwaveUrlForFirstUnwatchedEpisode)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(id, createdAt, latestEpisode, lastWatchedEpisode, title, nyaaSourceUrl, aniwaveSourceUrl, nyaaUrlForFirstUnwatchedEpisode, aniwaveUrlForFirstUnwatchedEpisode)
+
+	fmt.Println("Finished working with DB")
+
+	return nil
+}
+
 func main() {
 	http.HandleFunc("POST /scrape", func(w http.ResponseWriter, r *http.Request) {
 		var releasePayload NewReleasePayload
@@ -297,6 +343,11 @@ func main() {
 		}
 
 		fmt.Println("User ID:", releasePayload.UserId)
+
+		err = getUserReleases(releasePayload.UserId)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		SetReponse(true, fmt.Sprint("Successfully checked releases for user with ID:", releasePayload.UserId), w, http.StatusOK)
 	})
