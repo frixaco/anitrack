@@ -1,29 +1,68 @@
-import { randomUUID } from "crypto";
-import ReleaseCard from "./releaseCard";
+import { createClient } from "@/lib/supabase/server";
+import { Release } from "./newEpisodesSection";
+import TrackedReleaseCard from "./trackedReleaseCard";
 
 export default async function TrackedAnimesSection() {
-  const newEpisodes = [
-    {
-      title: "Frieren: Beyond Journey's End",
-      thumbnailUrl: "https://cdn.myanimelist.net/images/anime/1015/138006l.jpg",
-      episode: 1,
-      season: 2,
-    },
-    {
-      title: "The Eminence in Shadow",
-      thumbnailUrl: "https://cdn.myanimelist.net/images/anime/1874/121869l.jpg",
-      episode: 1,
-      season: 3,
-    },
-  ];
+  const newReleases: Release[] = [];
+
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user == null) {
+    return (
+      <section>
+        <h2 className="font-semibold text-2xl pb-2">Tracking</h2>
+
+        <div className="grid grid-cols-2 gap-2"></div>
+      </section>
+    );
+  }
+
+  const { data: releases } = await supabase
+    .from("release")
+    .select("*")
+    .eq("userId", user.id)
+    .eq("isWatching", true);
+
+  if (releases == null) {
+    return (
+      <section>
+        <h2 className="font-semibold text-2xl pb-2">Tracking</h2>
+
+        <div className="grid grid-cols-2 gap-2"></div>
+      </section>
+    );
+  }
+
+  for (const release of releases) {
+    if (release.latestEpisode > release.lastWatchedEpisode) {
+      newReleases.push({
+        episodeNumber: release.lastWatchedEpisode + 1,
+        releaseId: release.id,
+        nyaaUrl:
+          release.nyaaUrlForFirstUnwatchedEpisode || release.nyaaSourceUrl,
+        aniwaveUrl:
+          release.aniwaveUrlForFirstUnwatchedEpisode ||
+          release.aniwaveSourceUrl,
+        title: release.title,
+        season: release.season,
+        thumbnailUrl: release.thumbnailUrl,
+      });
+    }
+  }
 
   return (
     <section>
       <h2 className="font-semibold text-2xl pb-2">Tracking</h2>
 
       <div className="grid grid-cols-2 gap-2">
-        {newEpisodes.map((episode) => (
-          <ReleaseCard key={randomUUID()} latestEpisode={episode} />
+        {newReleases.map((episode) => (
+          <TrackedReleaseCard
+            key={episode.releaseId}
+            episode={episode}
+            asRelease
+          />
         ))}
       </div>
     </section>

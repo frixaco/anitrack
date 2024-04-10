@@ -15,6 +15,7 @@ export type Database = {
           aniwaveUrlForFirstUnwatchedEpisode: string | null
           createdAt: string
           id: string
+          isWatching: boolean
           lastWatchedEpisode: number
           latestEpisode: number
           nyaaSourceUrl: string
@@ -29,6 +30,7 @@ export type Database = {
           aniwaveUrlForFirstUnwatchedEpisode?: string | null
           createdAt?: string
           id?: string
+          isWatching?: boolean
           lastWatchedEpisode?: number
           latestEpisode?: number
           nyaaSourceUrl: string
@@ -43,6 +45,7 @@ export type Database = {
           aniwaveUrlForFirstUnwatchedEpisode?: string | null
           createdAt?: string
           id?: string
+          isWatching?: boolean
           lastWatchedEpisode?: number
           latestEpisode?: number
           nyaaSourceUrl?: string
@@ -56,28 +59,31 @@ export type Database = {
       }
       watchHistory: {
         Row: {
+          aniwaveUrl: string
           createdAt: string
           episodeNumber: number
-          episodeUrl: string
           id: number
+          nyaaUrl: string
           releaseId: string | null
           seasonNumber: number
           userId: string
         }
         Insert: {
+          aniwaveUrl: string
           createdAt?: string
           episodeNumber: number
-          episodeUrl: string
           id?: number
+          nyaaUrl: string
           releaseId?: string | null
           seasonNumber?: number
           userId?: string
         }
         Update: {
+          aniwaveUrl?: string
           createdAt?: string
           episodeNumber?: number
-          episodeUrl?: string
           id?: number
+          nyaaUrl?: string
           releaseId?: string | null
           seasonNumber?: number
           userId?: string

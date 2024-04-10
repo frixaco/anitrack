@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto";
 import ReleaseCard from "./releaseCard";
 import { createClient } from "@/lib/supabase/server";
 
@@ -13,7 +12,7 @@ export type Release = {
 };
 
 export default async function NewEpisodesSection() {
-  const newRelease: Release[] = [];
+  const newReleases: Release[] = [];
 
   const supabase = createClient();
   const { data } = await supabase.auth.getUser();
@@ -27,7 +26,8 @@ export default async function NewEpisodesSection() {
   const { data: releasesWithNewEpisodes } = await supabase
     .from("release")
     .select("*")
-    .eq("userId", data.user?.id);
+    .eq("userId", data.user?.id)
+    .eq("isWatching", true);
 
   if (releasesWithNewEpisodes == null) {
     return (
@@ -39,7 +39,7 @@ export default async function NewEpisodesSection() {
 
   for (const release of releasesWithNewEpisodes) {
     if (release.latestEpisode > release.lastWatchedEpisode) {
-      newRelease.push({
+      newReleases.push({
         episodeNumber: release.lastWatchedEpisode + 1,
         releaseId: release.id,
         nyaaUrl:
@@ -53,14 +53,15 @@ export default async function NewEpisodesSection() {
       });
     }
   }
+  console.log("new releases", newReleases);
 
   return (
     <section>
       <h2 className="font-semibold text-2xl pb-2">New Episodes</h2>
 
       <div className="grid grid-cols-2 gap-2">
-        {newRelease.map((episode) => (
-          <ReleaseCard key={randomUUID()} episode={episode} />
+        {newReleases.map((episode) => (
+          <ReleaseCard key={episode.releaseId} episode={episode} />
         ))}
       </div>
     </section>

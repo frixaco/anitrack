@@ -37,12 +37,12 @@ Tags: IN PROGRESS
 
 ### TODO for Next.js app:
 
-- [ ] Write action for marking an episode as watched
-- [ ] Write action for getting episode watch history
-- [ ] Write action for getting tracked releases
+- [x] Write action for marking an episode as watched
+- [x] Write action for getting episode watch history
+- [x] Write action for getting tracked releases
 - [ ] Add UI for displaying multiple unwatched episodes
-- [ ] Add UI for tracked releases
-- [ ] Add UI for watch history
+- [x] Add UI for tracked releases
+- [x] Add UI for watch history
 - [ ] Implement release adding - adding new release closes the drawer, new release should be in Tracked Releases section, unwatched episode(s) should be in New Episodes section
 - [ ] Mark episodes as watched - removed from New Releases section, once release is updated in db, all sections should be refetched+updated
 

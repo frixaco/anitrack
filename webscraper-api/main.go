@@ -345,11 +345,9 @@ func main() {
 		nyaaEpisodes := getNyaaEpisodes(&releasePayload)
 		aniwaveEpisodes := getAniwaveEpisodes(&releasePayload)
 
-		latestEpisode := 1
+		latestEpisode := len(aniwaveEpisodes)
 		if len(nyaaEpisodes) > len(aniwaveEpisodes) {
-			latestEpisode = len(nyaaEpisodes) - 1
-		} else {
-			latestEpisode = len(aniwaveEpisodes) - 1
+			latestEpisode = len(nyaaEpisodes)
 		}
 
 		newReleaseData := NewReleaseData{
@@ -359,9 +357,8 @@ func main() {
 			AniwaveUrlForFirstUnwatchedEpisode: aniwaveEpisodes[0].StreamUrl,
 			NyaaSourceUrl:                      releasePayload.NyaaUrl,
 			AniwaveSourceUrl:                   releasePayload.AniwaveUrl,
-			// UserId:                             releasePayload.UserId,
-			UserId:             "5f5f62f6-2ef5-47e8-b494-7fe8131532ae",
-			LastWatchedEpisode: 0,
+			UserId:                             releasePayload.UserId,
+			LastWatchedEpisode:                 0,
 		}
 		fmt.Println("T", newReleaseData.Title)
 		fmt.Println("LE", newReleaseData.LatestEpisode)
@@ -424,8 +421,7 @@ func main() {
 				NyaaSourceUrl:                      release.NyaaSourceUrl,
 				AniwaveSourceUrl:                   release.AniwaveSourceUrl,
 				LastWatchedEpisode:                 release.LastWatchedEpisode,
-				UserId:                             "5f5f62f6-2ef5-47e8-b494-7fe8131532ae",
-				// UserId:                             releasePayload.UserId,
+				UserId:                             releasePayload.UserId,
 			}
 			fmt.Println("T", newReleaseData.Title)
 			fmt.Println("LE", newReleaseData.LatestEpisode)

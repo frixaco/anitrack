@@ -2,40 +2,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import Image from "next/image";
 import { AspectRatio } from "./ui/aspect-ratio";
 import { Badge } from "./ui/badge";
-import { Eye, Magnet, Video } from "lucide-react";
+import { Magnet, Video } from "lucide-react";
 import { Button } from "./ui/button";
-import { markEpisodeWatched } from "@/app/actions/markEpisodeWatched";
-import { Release } from "./newEpisodesSection";
+import { WatchedEpisode } from "./watchHistory";
 
-export default async function ReleaseCard({
+export default async function WatchedEpisodeCard({
   episode,
-  asRelease,
 }: {
-  episode: Release;
-  asRelease?: boolean;
+  episode: WatchedEpisode;
 }) {
   const {
+    title,
     episodeNumber,
-    releaseId,
+    seasonNumber,
+    thumbnailUrl,
     nyaaUrl,
     aniwaveUrl,
-    season,
-    title,
-    thumbnailUrl,
   } = episode;
-
-  const markEpisodeAsWatched = markEpisodeWatched.bind(null, {
-    lastWatchedEpisode: episodeNumber,
-    releaseId,
-  });
 
   return (
     <Card className="relative">
-      {!asRelease && (
-        <Badge className="absolute drop-shadow-lg z-10 right-2 top-2 text-xl">
-          E{episodeNumber} - S{season}
-        </Badge>
-      )}
+      <Badge className="absolute drop-shadow-lg z-10 right-2 top-2 text-xl">
+        E{seasonNumber} - S{episodeNumber}
+      </Badge>
 
       <CardHeader className="relative w-[280px] max-w-full pb-2">
         <AspectRatio ratio={2 / 3}>
@@ -65,12 +54,6 @@ export default async function ReleaseCard({
               </a>
             </Button>
           </div>
-
-          <form action={markEpisodeAsWatched}>
-            <Button className="w-full rounded-xl">
-              <Eye />
-            </Button>
-          </form>
         </div>
       </CardContent>
     </Card>
