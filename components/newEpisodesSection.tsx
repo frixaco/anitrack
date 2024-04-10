@@ -53,7 +53,6 @@ export default async function NewEpisodesSection() {
       });
     }
   }
-  console.log("new releases", newReleases);
 
   return (
     <section>
