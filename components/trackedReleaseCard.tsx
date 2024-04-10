@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import Image from "next/image";
 import { AspectRatio } from "./ui/aspect-ratio";
 import { Badge } from "./ui/badge";
-import { Eye, Magnet, Trash, Video } from "lucide-react";
+import { Trash } from "lucide-react";
 import { Button } from "./ui/button";
 import { untrackRelease } from "@/app/actions/untrackRelease";
 import { Release } from "./newEpisodesSection";

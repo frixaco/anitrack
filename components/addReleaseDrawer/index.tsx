@@ -21,7 +21,7 @@ import SubmitButton from "./submitButton";
 //         for which I can ask user's permission to use their Google Drive
 // TODO: Add batch download link to download batch torrent file
 
-export default async function AddReleaseDrawer() {
+export default async function AddReleaseDrawer({ userId }: { userId: string }) {
   return (
     <Drawer>
       <DrawerTrigger asChild>
@@ -33,29 +33,37 @@ export default async function AddReleaseDrawer() {
         <form action={addRelease} className="grid grid-cols-1 pt-4">
           <DrawerHeader>
             <DrawerTitle>
-              Enter either <u>nyaa.si</u> or <u>9animetv.to</u> URL
+              Enter <u>nyaa.si</u> and <u>aniwave.to</u> URL
             </DrawerTitle>
             <DrawerDescription>
               Anitrack will start tracking the release using the link
             </DrawerDescription>
 
-            <label className="pt-4">
+            <label className="pt-4 text-left text-xs">
+              Aniwave URL
               <Input
                 required
-                name="nineanimeUrl"
+                name="aniwaveUrl"
                 type="url"
                 placeholder="Enter URL here"
+                value={
+                  "https://aniwave.to/watch/dosanko-gal-wa-namaramenkoi.4q12o/ep-1"
+                }
               />
             </label>
 
-            <label className="pt-4">
+            <label className="pt-4 text-left text-xs">
+              Nyaa.si
               <Input
                 required
                 name="nyaaUrl"
                 type="url"
                 placeholder="Enter URL here"
+                value={"https://nyaa.si/?f=0&c=1_2&q=ember+hokkaido"}
               />
             </label>
+
+            <input name="userId" value={userId} type="hidden" />
           </DrawerHeader>
 
           <DrawerFooter>

@@ -33,6 +33,7 @@ type NewReleaseData struct {
 	AniwaveSourceUrl                   string
 	NyaaUrlForFirstUnwatchedEpisode    string
 	AniwaveUrlForFirstUnwatchedEpisode string
+	ThumbnailUrl                       string
 }
 
 type NyaaEpisode struct {
@@ -47,6 +48,7 @@ type AniwaveEpisode struct {
 	Season        int
 	EpisodeNumber int
 	StreamUrl     string
+	ThumbnailUrl  string
 }
 
 type NewReleasePayload struct {
@@ -186,11 +188,18 @@ func getAniwaveEpisodes(rp *NewReleasePayload) []AniwaveEpisode {
 			log.Fatal(err)
 		}
 
+		imgEl := page.MustElement(".binfo .poster img")
+		thumbnailUrl, err := imgEl.Attribute("src")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		episode := AniwaveEpisode{
 			Title:         uploadInfo,
 			Season:        seasonNumber,
 			EpisodeNumber: number,
 			StreamUrl:     *hrefAttr,
+			ThumbnailUrl:  *thumbnailUrl,
 		}
 
 		aniwaveEpisodes = append(aniwaveEpisodes, episode)
@@ -218,12 +227,30 @@ func saveReleaseInDB(r *NewReleaseData) error {
 	defer conn.Close(context.Background())
 
 	query := `insert into release
-    ("latestEpisode", "lastWatchedEpisode", "title", "userId", "nyaaSourceUrl", "aniwaveSourceUrl", "nyaaUrlForFirstUnwatchedEpisode", "aniwaveUrlForFirstUnwatchedEpisode") values
-    ($1, $2, $3, $4, $5, $6, $7, $8)
+    (
+      "latestEpisode",
+      "lastWatchedEpisode",
+      "title",
+      "userId",
+      "nyaaSourceUrl",
+      "aniwaveSourceUrl",
+      "nyaaUrlForFirstUnwatchedEpisode",
+      "aniwaveUrlForFirstUnwatchedEpisode",
+      "thumbnailUrl"
+    ) values
+      ($1, $2, $3, $4, $5, $6, $7, $8, $9)
   `
 
 	_, err = conn.Exec(context.Background(), query,
-		r.LatestEpisode, r.LastWatchedEpisode, r.Title, r.UserId, r.NyaaSourceUrl, r.AniwaveSourceUrl, r.NyaaUrlForFirstUnwatchedEpisode, r.AniwaveUrlForFirstUnwatchedEpisode,
+		r.LatestEpisode,
+		r.LastWatchedEpisode,
+		r.Title,
+		r.UserId,
+		r.NyaaSourceUrl,
+		r.AniwaveSourceUrl,
+		r.NyaaUrlForFirstUnwatchedEpisode,
+		r.AniwaveUrlForFirstUnwatchedEpisode,
+		r.ThumbnailUrl,
 	)
 	if err != nil {
 		return err
@@ -359,15 +386,8 @@ func main() {
 			AniwaveSourceUrl:                   releasePayload.AniwaveUrl,
 			UserId:                             releasePayload.UserId,
 			LastWatchedEpisode:                 0,
+			ThumbnailUrl:                       aniwaveEpisodes[0].ThumbnailUrl,
 		}
-		fmt.Println("T", newReleaseData.Title)
-		fmt.Println("LE", newReleaseData.LatestEpisode)
-		fmt.Println("NUFFUE", newReleaseData.NyaaUrlForFirstUnwatchedEpisode)
-		fmt.Println("AUFFUE", newReleaseData.AniwaveUrlForFirstUnwatchedEpisode)
-		fmt.Println("NSU", newReleaseData.NyaaSourceUrl)
-		fmt.Println("ASU", newReleaseData.AniwaveSourceUrl)
-		fmt.Println("UID", newReleaseData.UserId)
-		fmt.Println("LWE", newReleaseData.LastWatchedEpisode)
 
 		err = saveReleaseInDB(&newReleaseData)
 		if err != nil {
