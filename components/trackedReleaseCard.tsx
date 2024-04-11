@@ -14,7 +14,8 @@ export default async function TrackedReleaseCard({
   episode: Release;
   asRelease?: boolean;
 }) {
-  const { episodeNumber, releaseId, season, title, thumbnailUrl } = episode;
+  const { episodeNumber, releaseId, seasonNumber, title, thumbnailUrl } =
+    episode;
 
   const untrackReleaseById = untrackRelease.bind(null, releaseId);
 
@@ -22,7 +23,7 @@ export default async function TrackedReleaseCard({
     <Card className="relative">
       {!asRelease && (
         <Badge className="absolute drop-shadow-lg z-10 right-2 top-2 text-xl">
-          E{episodeNumber} - S{season}
+          E{episodeNumber} - S{seasonNumber}
         </Badge>
       )}
 

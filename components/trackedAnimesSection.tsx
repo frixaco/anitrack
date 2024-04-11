@@ -46,7 +46,7 @@ export default async function TrackedAnimesSection() {
           release.aniwaveUrlForFirstUnwatchedEpisode ||
           release.aniwaveSourceUrl,
         title: release.title,
-        season: release.season,
+        seasonNumber: release.seasonNumber,
         thumbnailUrl: release.thumbnailUrl,
       });
     }
