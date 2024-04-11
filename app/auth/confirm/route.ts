@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 
 // Creating a handler to a GET request to route /auth/confirm
 export async function GET(request: NextRequest) {
+  console.log("CONFIRM URL", request.url);
+  const origin = "https://anitrack-misty-glitter-3784.fly.dev";
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;

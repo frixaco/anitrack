@@ -6,12 +6,13 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export async function signin() {
+  console.log("SIGN IN URL", "https://anitrack-misty-glitter-3784.fly.dev");
   const supabase = createClient();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: "http://localhost:3000/auth/callback",
+      redirectTo: "https://anitrack-misty-glitter-3784.fly.dev/auth/callback",
     },
   });
 
