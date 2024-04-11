@@ -1,6 +1,4 @@
-# Anitrack - anime release tracker
-
-Tags: IN PROGRESS
+# Anitrack - Web app to auto-track new episodes of any anime from nyaa.si and aniwave.to
 
 | Database provider  | Supabase (Postgres)     |
 | ------------------ | ----------------------- |
@@ -9,7 +7,7 @@ Tags: IN PROGRESS
 | API deployment     | Fly.io                  |
 | Next.js deployment | Fly.io                  |
 
-## Golang API to webscrape [nyaa.si](http://nyaa.si) and [9animetv.to](http://9animetv.to)
+## Golang API to webscrape [nyaa.si](http://nyaa.si) and [aniwave.to](http://aniwave.to)
 
 ### TODO for Webscraper API:
 
@@ -26,7 +24,7 @@ Tags: IN PROGRESS
   - [x] For [aniwave.to](https://aniwave.to), extract episode number (from episodes section) and stream url
 - [x] Get `latestEpisode`
   - [x] [nyaa.si](https://nyaa.si) - Sort by episode number, get last one
-  - [x] [aniwave.to](https://9animetv.to) - same
+  - [x] [aniwave.to](https://aniwave.to) - same
 - [x] Get `title`
   - [x] [nyaa.si](https://nyaa.si) - Extract from any upload/episode title using regex
   - [x] [aniwave.to](https://aniwave.to) - Use correct selector
@@ -40,10 +38,14 @@ Tags: IN PROGRESS
 - [x] Write action for marking an episode as watched
 - [x] Write action for getting episode watch history
 - [x] Write action for getting tracked releases
-- [ ] Add UI for displaying multiple unwatched episodes
 - [x] Add UI for tracked releases
 - [x] Add UI for watch history
-- [ ] Implement release adding - adding new release closes the drawer, new release should be in Tracked Releases section, unwatched episode(s) should be in New Episodes section
-- [ ] Mark episodes as watched - removed from New Releases section, once release is updated in db, all sections should be refetched+updated
+- [x] Implement release adding
+- [x] Mark episodes as watched
+
+**Polish**
+
+- [ ] Improve UI for displaying multiple unwatched episodes
+- [ ] Improve UI for release adding
 
 - [ ] For unauthorized users, research how to have “temporary” users and handle their data
