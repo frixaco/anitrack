@@ -16,10 +16,10 @@ import { Input } from "@/components/ui/input";
 import { useFormState, useFormStatus } from "react-dom";
 
 // TODO: Add live search, auto search on nyaa.si and 9animetv.to
-// TODO: Ideally, I should be able to select anime by its name only
+// TODO: Ideally, I should be able to add new release by its title only
 // TODO: Ideally, I should parse the subtitles from the video,
 //         summarize it and add it to release description.
-//         This requires downloading the anime (easier for nyaa.si, but idk for 9animetv.to),
+//         This requires downloading the anime (easier for nyaa.si, but idk for aniwave.to),
 //         for which I can ask user's permission to use their Google Drive
 // TODO: Add batch download link to download batch torrent file
 

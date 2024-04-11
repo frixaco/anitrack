@@ -157,6 +157,14 @@ func getAniwaveEpisodes(rp *NewReleasePayload) []AniwaveEpisode {
 	page := stealth.MustPage(browser)
 	page.MustNavigate(rp.AniwaveUrl).MustWaitStable()
 
+	html := page.MustHTML()
+	f, err := os.Create("index.html")
+	if err != nil {
+		log.Fatal()
+	}
+	defer f.Close()
+	f.WriteString(html)
+
 	uploadInfoEl := page.MustElement("h1.title.d-title")
 	uploadInfo := uploadInfoEl.MustText()
 
@@ -354,6 +362,39 @@ func updateReleaseInDB(r *NewReleaseData) error {
 }
 
 func main() {
+	http.HandleFunc("POST /test", func(w http.ResponseWriter, r *http.Request) {
+
+		browser := rod.New().MustConnect()
+		defer browser.MustClose()
+
+		page := stealth.MustPage(browser)
+		page.MustNavigate("https://aniwave.to/watch/dosanko-gal-wa-namaramenkoi.4q12o/ep-1").MustWaitStable()
+		fmt.Println("Stable page")
+		el := page.MustElement("#player .play")
+		fmt.Println("Element found", el.MustHTML())
+		el.MustClick()
+		fmt.Println("Clicked play")
+		page.MustWaitDOMStable()
+		fmt.Println("DOM stable")
+		iframeEl := page.MustElement("#player iframe")
+		fmt.Println("iframe found")
+		iframeSrc := iframeEl.MustAttribute("src")
+		fmt.Println("iframe src", iframeSrc)
+
+		page.MustNavigate(*iframeSrc).MustWaitStable()
+		fmt.Println("Navigated to iframe src")
+		el = page.MustElement("video.jw-video")
+		fmt.Println("Element found", el.MustAttribute("src"))
+
+		html := page.MustHTML()
+		f, err := os.Create("index.html")
+		if err != nil {
+			log.Fatal()
+		}
+		defer f.Close()
+		f.WriteString(html)
+	})
+
 	http.HandleFunc("POST /scrape", func(w http.ResponseWriter, r *http.Request) {
 		var releasePayload NewReleasePayload
 

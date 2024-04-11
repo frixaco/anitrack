@@ -19,7 +19,7 @@ export default async function ReleaseCard({
     releaseId,
     nyaaUrl,
     aniwaveUrl,
-    season,
+    seasonNumber,
     title,
     thumbnailUrl,
   } = episode;
@@ -27,13 +27,16 @@ export default async function ReleaseCard({
   const markEpisodeAsWatched = markEpisodeWatched.bind(null, {
     lastWatchedEpisode: episodeNumber,
     releaseId,
+    nyaaUrl,
+    aniwaveUrl,
+    seasonNumber,
   });
 
   return (
     <Card className="relative">
       {!asRelease && (
         <Badge className="absolute drop-shadow-lg z-10 right-2 top-2 text-xl">
-          E{episodeNumber} - S{season}
+          E{episodeNumber} - S{seasonNumber}
         </Badge>
       )}
 
@@ -48,7 +51,7 @@ export default async function ReleaseCard({
 
         <div className="flex flex-col gap-4">
           <div className="pt-2 flex flex-col gap-2 items-center justify-around">
-            <Button variant="secondary" className="w-full rounded-xl">
+            <Button variant="secondary" className="w-full rounded-xl" asChild>
               <a href={nyaaUrl}>
                 <Magnet />
                 <span className="pl-2 hidden sm:block">

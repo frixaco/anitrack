@@ -20,7 +20,7 @@ export type Database = {
           latestEpisode: number
           nyaaSourceUrl: string
           nyaaUrlForFirstUnwatchedEpisode: string | null
-          season: number
+          seasonNumber: number
           thumbnailUrl: string
           title: string
           userId: string | null
@@ -35,7 +35,7 @@ export type Database = {
           latestEpisode?: number
           nyaaSourceUrl: string
           nyaaUrlForFirstUnwatchedEpisode?: string | null
-          season?: number
+          seasonNumber?: number
           thumbnailUrl: string
           title: string
           userId?: string | null
@@ -50,7 +50,7 @@ export type Database = {
           latestEpisode?: number
           nyaaSourceUrl?: string
           nyaaUrlForFirstUnwatchedEpisode?: string | null
-          season?: number
+          seasonNumber?: number
           thumbnailUrl?: string
           title?: string
           userId?: string | null

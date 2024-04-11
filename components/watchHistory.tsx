@@ -28,7 +28,7 @@ export default async function WatchHistory() {
   const { data: watchedEpisodes } = await supabase
     .from("watchHistory")
     .select(
-      "id, episodeNumber, seasonNumber, releaseId, nyaaUrl, aniwaveUrl, release (title, season, thumbnailUrl)",
+      "id, episodeNumber, seasonNumber, releaseId, nyaaUrl, aniwaveUrl, release (title, seasonNumber, thumbnailUrl)",
     )
     .eq("userId", user.id);
 

@@ -6,7 +6,7 @@ export type Release = {
   episodeNumber: number;
   nyaaUrl: string;
   aniwaveUrl: string;
-  season: number;
+  seasonNumber: number;
   thumbnailUrl: string;
   title: string;
 };
@@ -48,7 +48,7 @@ export default async function NewEpisodesSection() {
           release.aniwaveUrlForFirstUnwatchedEpisode ||
           release.aniwaveSourceUrl,
         title: release.title,
-        season: release.season,
+        seasonNumber: release.seasonNumber,
         thumbnailUrl: release.thumbnailUrl,
       });
     }
