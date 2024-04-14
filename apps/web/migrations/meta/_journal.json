@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1713477937560,
+      "tag": "0000_amused_madame_web",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1713511306024,
+      "tag": "0001_small_galactus",
+      "breakpoints": true
+    }
+  ]
+}
