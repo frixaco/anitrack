@@ -11,11 +11,11 @@ import ThemeSwitcher from "./theme-switcher";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 
-export default function Navbar() {
+export function Header() {
   const { user } = useUser();
 
   return (
-    <nav className="p-4 flex items-center justify-between">
+    <header className="p-4 flex items-center justify-between">
       <div className="flex flex-col items-start">
         <p className="text-lg font-bold leading-none">Anitrack</p>
 
@@ -47,6 +47,6 @@ export default function Navbar() {
           </SignInButton>
         </SignedOut>
       </div>
-    </nav>
+    </header>
   );
 }
