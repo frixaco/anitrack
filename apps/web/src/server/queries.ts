@@ -7,6 +7,7 @@ import { z } from "zod";
 import { release, watchHistory } from "./db/schema";
 import { and, eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { env } from "@/env";
 
 // export async function getCurrentUser() {
 //   const authorizedUser = auth();
@@ -75,7 +76,7 @@ export async function addRelease(_: any, formData: FormData) {
 
   const { nyaaUrl, aniwaveUrl, userId } = validatedFields.data;
 
-  const response = await fetch(`${process.env.API_URL!}/scrape`, {
+  const response = await fetch(`${env.API_URL!}/scrape`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -18,6 +18,7 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/stealth"
 	"github.com/gocolly/colly"
+	"github.com/joho/godotenv"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -225,7 +226,7 @@ func getAniwaveEpisodes(rp *NewReleasePayload) []AniwaveEpisode {
 }
 
 func saveReleaseInDB(r *NewReleaseData) error {
-	DATABASE_URL := "postgres://postgres.myevsotpzreetmmhyodr:elps1kongr0@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
+	DATABASE_URL := os.Getenv("POSTGRES_URL")
 
 	conn, err := pgx.Connect(context.Background(), DATABASE_URL)
 	if err != nil {
@@ -270,7 +271,7 @@ func saveReleaseInDB(r *NewReleaseData) error {
 }
 
 func getUserReleases(userId string) ([]NewReleaseData, error) {
-	DATABASE_URL := "postgres://postgres.myevsotpzreetmmhyodr:elps1kongr0@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
+	DATABASE_URL := os.Getenv("POSTGRES_URL")
 
 	conn, err := pgx.Connect(context.Background(), DATABASE_URL)
 	if err != nil {
@@ -337,7 +338,7 @@ func getUserReleases(userId string) ([]NewReleaseData, error) {
 }
 
 func updateReleaseInDB(r *NewReleaseData) error {
-	DATABASE_URL := "postgres://postgres.myevsotpzreetmmhyodr:elps1kongr0@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
+	DATABASE_URL := os.Getenv("POSTGRES_URL")
 
 	conn, err := pgx.Connect(context.Background(), DATABASE_URL)
 	if err != nil {
@@ -362,6 +363,27 @@ func updateReleaseInDB(r *NewReleaseData) error {
 }
 
 func main() {
+	godotenv.Load()
+
+	port, err := strconv.Atoi(os.Getenv("PORT"))
+	if err != nil {
+		port = 4000
+	}
+
+	http.HandleFunc("GET /check", func(w http.ResponseWriter, r *http.Request) {
+		response := map[string]string{"msg": "Hello, World"}
+
+		w.Header().Set("Content-Type", "application/json")
+
+		jsonResponse, err := json.Marshal(response)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(jsonResponse)
+	})
+
 	http.HandleFunc("POST /test", func(w http.ResponseWriter, r *http.Request) {
 
 		browser := rod.New().MustConnect()
@@ -496,5 +518,5 @@ func main() {
 		SetReponse(true, fmt.Sprint("Successfully checked releases for user with ID:", releasePayload.UserId), w, http.StatusOK)
 	})
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 }

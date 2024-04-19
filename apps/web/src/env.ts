@@ -8,6 +8,7 @@ export const env = createEnv({
     SENTRY_AUTH_TOKEN: z.string().min(1),
     UPSTASH_REDIS_REST_URL: z.string().min(1),
     UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
+    API_URL: z.string().url(),
   },
 
   client: {
@@ -45,5 +46,6 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    API_URL: process.env.API_URL,
   },
 });
