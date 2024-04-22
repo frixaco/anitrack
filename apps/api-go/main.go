@@ -4,9 +4,7 @@ import (
 	"cmp"
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -18,70 +16,61 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/stealth"
 	"github.com/gocolly/colly"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo"
 
 	"github.com/jackc/pgx/v5"
 )
 
-type NewReleaseData struct {
-	Id                                 string
-	CreatedAt                          time.Time
-	Title                              string
-	LatestEpisode                      int
-	LastWatchedEpisode                 int
-	UserId                             string
-	NyaaSourceUrl                      string
-	AniwaveSourceUrl                   string
-	NyaaUrlForFirstUnwatchedEpisode    string
-	AniwaveUrlForFirstUnwatchedEpisode string
-	ThumbnailUrl                       string
+type DefaultResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
 }
 
-type NyaaEpisode struct {
-	Title         string
-	Season        int
-	EpisodeNumber int
-	MagnetUrl     string
+type Release struct {
+	Uuid                       string
+	Title                      string
+	UserId                     string
+	IsTracking                 bool
+	NyaaSourceUrl              string
+	AniwaveSourceUrl           string
+	NyaaUrlFirstUnwatchedEp    string
+	AniwaveUrlFirstUnwatchedEp string
+	LatestEpisode              int
+	Season                     int
+	ThumbnailUrl               string
+	LastWatchedEpisode         int
+	CreatedAt                  time.Time
+	UpdatedAt                  time.Time
 }
 
-type AniwaveEpisode struct {
-	Title         string
-	Season        int
-	EpisodeNumber int
-	StreamUrl     string
-	ThumbnailUrl  string
+type WatchHistory struct {
+	Uuid              string
+	NyaaEpisodeUrl    string
+	AniwaveEpisodeUrl string
+	Season            int
+	ReleaseUuid       string
+	UserId            string
 }
 
-type NewReleasePayload struct {
+type ScrapedEpisodeData struct {
+	EpisodeTitle   string
+	ReleaseTitle   string
+	Season         int
+	EpisodeNumber  int
+	NyaaMagnetUrl  string
+	AniwavePageUrl string
+	ThumbnailUrl   string
+}
+
+type ScrapePayload struct {
 	UserId     string `json:"userId"`
 	NyaaUrl    string `json:"nyaaUrl"`
 	AniwaveUrl string `json:"aniwaveUrl"`
 }
 
-type CheckReleasesPayload struct {
-	UserId string `json:"userId"`
-}
-
-type ScrapeResponse struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
-}
-
-func SetReponse(success bool, message string, w http.ResponseWriter, status int) {
-	fmt.Println(message)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-
-	response := ScrapeResponse{
-		Success: success,
-		Message: message,
-	}
-	rb, _ := json.Marshal(response)
-
-	w.Write(rb)
-}
-
-func getNyaaEpisodes(rp *NewReleasePayload) []NyaaEpisode {
+func scrapeNyaaForEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 	c := colly.NewCollector(
 		colly.MaxDepth(1),
 		colly.AllowedDomains("nyaa.si", "aniwave.to"),
@@ -93,7 +82,7 @@ func getNyaaEpisodes(rp *NewReleasePayload) []NyaaEpisode {
 	var title string
 	var episodeNumbers []int
 
-	var nyaaEpisodes []NyaaEpisode
+	var nyaaEpisodes []ScrapedEpisodeData
 
 	c.OnHTML("tr.danger", func(e *colly.HTMLElement) {
 		uploadInfo := e.ChildAttr("a[href^='/view']:not(.comments)", "title")
@@ -125,11 +114,11 @@ func getNyaaEpisodes(rp *NewReleasePayload) []NyaaEpisode {
 
 		title = titleMatches[0][1]
 
-		episode := NyaaEpisode{
-			Title:         title,
+		episode := ScrapedEpisodeData{
+			ReleaseTitle:  title,
 			Season:        seasonNumber,
 			EpisodeNumber: episodeNumber,
-			MagnetUrl:     e.ChildAttr("a[href^='magnet:']", "href"),
+			NyaaMagnetUrl: e.ChildAttr("a[href^='magnet:']", "href"),
 		}
 
 		episodeNumbers = append(episodeNumbers, episodeNumber)
@@ -138,19 +127,19 @@ func getNyaaEpisodes(rp *NewReleasePayload) []NyaaEpisode {
 
 	c.Visit(rp.NyaaUrl)
 
-	slices.SortFunc(nyaaEpisodes, func(a, b NyaaEpisode) int {
+	slices.SortFunc(nyaaEpisodes, func(a, b ScrapedEpisodeData) int {
 		return cmp.Compare(a.EpisodeNumber, b.EpisodeNumber)
 	})
 
 	for _, episode := range nyaaEpisodes {
-		fmt.Println(episode.EpisodeNumber, " - ", episode.MagnetUrl)
+		fmt.Println(episode.EpisodeNumber, " - ", episode.NyaaMagnetUrl)
 	}
 
 	return nyaaEpisodes
 }
 
-func getAniwaveEpisodes(rp *NewReleasePayload) []AniwaveEpisode {
-	var aniwaveEpisodes []AniwaveEpisode
+func getAniwaveEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
+	var aniwaveEpisodes []ScrapedEpisodeData
 
 	browser := rod.New().MustConnect()
 	defer browser.MustClose()
@@ -203,29 +192,29 @@ func getAniwaveEpisodes(rp *NewReleasePayload) []AniwaveEpisode {
 			log.Fatal(err)
 		}
 
-		episode := AniwaveEpisode{
-			Title:         uploadInfo,
-			Season:        seasonNumber,
-			EpisodeNumber: number,
-			StreamUrl:     *hrefAttr,
-			ThumbnailUrl:  *thumbnailUrl,
+		episode := ScrapedEpisodeData{
+			ReleaseTitle:   uploadInfo,
+			Season:         seasonNumber,
+			EpisodeNumber:  number,
+			AniwavePageUrl: *hrefAttr,
+			ThumbnailUrl:   *thumbnailUrl,
 		}
 
 		aniwaveEpisodes = append(aniwaveEpisodes, episode)
 	}
 
-	slices.SortFunc(aniwaveEpisodes, func(a, b AniwaveEpisode) int {
+	slices.SortFunc(aniwaveEpisodes, func(a, b ScrapedEpisodeData) int {
 		return cmp.Compare(a.EpisodeNumber, b.EpisodeNumber)
 	})
 
 	for _, episode := range aniwaveEpisodes {
-		fmt.Println(episode.EpisodeNumber, " - ", episode.StreamUrl)
+		fmt.Println(episode.EpisodeNumber, " - ", episode.AniwavePageUrl)
 	}
 
 	return aniwaveEpisodes
 }
 
-func saveReleaseInDB(r *NewReleaseData) error {
+func saveReleaseInDB(r *Release) error {
 	DATABASE_URL := os.Getenv("POSTGRES_URL")
 
 	conn, err := pgx.Connect(context.Background(), DATABASE_URL)
@@ -237,29 +226,33 @@ func saveReleaseInDB(r *NewReleaseData) error {
 
 	query := `insert into release
     (
-      "latestEpisode",
-      "lastWatchedEpisode",
+      "uuid",
       "title",
-      "userId",
-      "nyaaSourceUrl",
-      "aniwaveSourceUrl",
-      "nyaaUrlForFirstUnwatchedEpisode",
-      "aniwaveUrlForFirstUnwatchedEpisode",
-      "thumbnailUrl"
+      "user_id",
+      "nyaa_source_url",
+      "aniwave_source_url",
+      "nyaa_url_first_unwatched_ep",
+      "aniwave_url_first_unwatched_ep",
+      "latest_episode",
+      "season",
+      "thumbnail_url"
+      "last_watched_episode"
     ) values
       ($1, $2, $3, $4, $5, $6, $7, $8, $9)
   `
 
 	_, err = conn.Exec(context.Background(), query,
-		r.LatestEpisode,
-		r.LastWatchedEpisode,
+		r.Uuid,
 		r.Title,
 		r.UserId,
 		r.NyaaSourceUrl,
 		r.AniwaveSourceUrl,
-		r.NyaaUrlForFirstUnwatchedEpisode,
-		r.AniwaveUrlForFirstUnwatchedEpisode,
+		r.NyaaUrlFirstUnwatchedEp,
+		r.AniwaveUrlFirstUnwatchedEp,
+		r.LatestEpisode,
+		r.Season,
 		r.ThumbnailUrl,
+		r.LastWatchedEpisode,
 	)
 	if err != nil {
 		return err
@@ -270,7 +263,7 @@ func saveReleaseInDB(r *NewReleaseData) error {
 	return nil
 }
 
-func getUserReleases(userId string) ([]NewReleaseData, error) {
+func getUserReleases(userId string) ([]Release, error) {
 	DATABASE_URL := os.Getenv("POSTGRES_URL")
 
 	conn, err := pgx.Connect(context.Background(), DATABASE_URL)
@@ -281,15 +274,20 @@ func getUserReleases(userId string) ([]NewReleaseData, error) {
 	defer conn.Close(context.Background())
 
 	query := `select 
-      "id",
-      "createdAt",
-      "latestEpisode",
-      "lastWatchedEpisode",
+      "uuid",
       "title",
-      "nyaaSourceUrl", 
-      "aniwaveSourceUrl",
-      "nyaaUrlForFirstUnwatchedEpisode",
-      "aniwaveUrlForFirstUnwatchedEpisode"
+      "user_id",
+      "is_tracking",
+      "nyaa_source_url",
+      "aniwave_source_url",
+      "nyaa_url_first_unwatched_ep",
+      "aniwave_url_first_unwatched_ep",
+      "latest_episode",
+      "season",
+      "thumbnail_url",
+      "last_watched_episode",
+      "created_at",
+      "updated_at"
     from release where "userId"=$1`
 
 	dbRows, err := conn.Query(context.Background(), query, userId)
@@ -297,47 +295,70 @@ func getUserReleases(userId string) ([]NewReleaseData, error) {
 		return nil, err
 	}
 
-	var releases []NewReleaseData
+	var releases []Release
 
 	defer dbRows.Close()
 
 	for dbRows.Next() {
-		var id string
-		var createdAt time.Time
-		var latestEpisode int
-		var lastWatchedEpisode int
+		var uuid string
 		var title string
+		var userId string
+		var isTracking bool
 		var nyaaSourceUrl string
 		var aniwaveSourceUrl string
-		var nyaaUrlForFirstUnwatchedEpisode string
-		var aniwaveUrlForFirstUnwatchedEpisode string
+		var nyaaUrlFirstUnwatchedEp string
+		var aniwaveUrlFirstUnwatchedEp string
+		var latestEpisode int
+		var season int
+		var thumbnailUrl string
+		var lastWatchedEpisode int
+		var createdAt time.Time
+		var updatedAt time.Time
 
-		err := dbRows.Scan(&id, &createdAt, &latestEpisode,
-			&lastWatchedEpisode, &title, &nyaaSourceUrl, &aniwaveSourceUrl, &nyaaUrlForFirstUnwatchedEpisode,
-			&aniwaveUrlForFirstUnwatchedEpisode)
+		err := dbRows.Scan(
+			&uuid,
+			&title,
+			&userId,
+			&isTracking,
+			&nyaaSourceUrl,
+			&aniwaveSourceUrl,
+			&nyaaUrlFirstUnwatchedEp,
+			&aniwaveUrlFirstUnwatchedEp,
+			&latestEpisode,
+			&season,
+			&thumbnailUrl,
+			&lastWatchedEpisode,
+			&createdAt,
+			&updatedAt,
+		)
 		if err != nil {
 			return nil, err
 		}
 
-		releases = append(releases, NewReleaseData{
-			Id:                                 id,
-			CreatedAt:                          createdAt,
-			LatestEpisode:                      latestEpisode,
-			LastWatchedEpisode:                 lastWatchedEpisode,
-			Title:                              title,
-			NyaaSourceUrl:                      nyaaSourceUrl,
-			AniwaveSourceUrl:                   aniwaveSourceUrl,
-			NyaaUrlForFirstUnwatchedEpisode:    nyaaUrlForFirstUnwatchedEpisode,
-			AniwaveUrlForFirstUnwatchedEpisode: aniwaveUrlForFirstUnwatchedEpisode,
+		releases = append(releases, Release{
+			Uuid:                       uuid,
+			Title:                      title,
+			UserId:                     userId,
+			IsTracking:                 isTracking,
+			NyaaSourceUrl:              nyaaSourceUrl,
+			AniwaveSourceUrl:           aniwaveSourceUrl,
+			NyaaUrlFirstUnwatchedEp:    nyaaUrlFirstUnwatchedEp,
+			AniwaveUrlFirstUnwatchedEp: aniwaveUrlFirstUnwatchedEp,
+			LatestEpisode:              latestEpisode,
+			Season:                     season,
+			ThumbnailUrl:               thumbnailUrl,
+			LastWatchedEpisode:         lastWatchedEpisode,
+			CreatedAt:                  createdAt,
+			UpdatedAt:                  updatedAt,
 		})
 	}
 
-	fmt.Println("Finished working with DB")
+	fmt.Println("Fetched user releases")
 
 	return releases, nil
 }
 
-func updateReleaseInDB(r *NewReleaseData) error {
+func updateReleaseInDB(r *Release) error {
 	DATABASE_URL := os.Getenv("POSTGRES_URL")
 
 	conn, err := pgx.Connect(context.Background(), DATABASE_URL)
@@ -349,10 +370,10 @@ func updateReleaseInDB(r *NewReleaseData) error {
 
 	query := `update release
     set "latestEpisode"=$1
-    where "id"=$2
+    where "uuid"=$2
   `
 
-	_, err = conn.Exec(context.Background(), query, r.LatestEpisode, r.Id)
+	_, err = conn.Exec(context.Background(), query, r.LatestEpisode, r.Uuid)
 	if err != nil {
 		return err
 	}
@@ -360,6 +381,115 @@ func updateReleaseInDB(r *NewReleaseData) error {
 	fmt.Println("Finished working with DB")
 
 	return nil
+}
+
+func checkhealth(c echo.Context) error {
+	type Message struct {
+		Message string `json:"message"`
+	}
+	message := &Message{
+		Message: "Hello World",
+	}
+	c.JSONPretty(http.StatusOK, message, "  ")
+	return c.String(http.StatusOK, "Hello, World!")
+}
+
+func scrapeSources(c echo.Context) error {
+	var releasePayload ScrapePayload
+
+	err := c.Bind(&releasePayload)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Failed to bind request body")
+	}
+
+	fmt.Println("User ID:", releasePayload.UserId)
+	fmt.Println("nyaa.si URL:", releasePayload.NyaaUrl)
+	fmt.Println("aniwave.to URL:", releasePayload.AniwaveUrl)
+
+	nyaaEpisodes := scrapeNyaaForEpisodes(&releasePayload)
+	aniwaveEpisodes := getAniwaveEpisodes(&releasePayload)
+
+	latestEpisode := len(aniwaveEpisodes)
+	if len(nyaaEpisodes) > len(aniwaveEpisodes) {
+		latestEpisode = len(nyaaEpisodes)
+	}
+
+	uuid := uuid.New().String()
+	newReleaseData := Release{
+		Uuid:                       uuid,
+		Title:                      aniwaveEpisodes[0].ReleaseTitle,
+		LatestEpisode:              latestEpisode,
+		NyaaUrlFirstUnwatchedEp:    nyaaEpisodes[0].NyaaMagnetUrl,
+		AniwaveUrlFirstUnwatchedEp: aniwaveEpisodes[0].AniwavePageUrl,
+		NyaaSourceUrl:              releasePayload.NyaaUrl,
+		AniwaveSourceUrl:           releasePayload.AniwaveUrl,
+		UserId:                     releasePayload.UserId,
+		LastWatchedEpisode:         0,
+		ThumbnailUrl:               aniwaveEpisodes[0].ThumbnailUrl,
+	}
+
+	err = saveReleaseInDB(&newReleaseData)
+	if err != nil {
+		return err
+	}
+
+	response := &DefaultResponse{
+		Success: true,
+		Message: "Successfully scraped the urls and stored them in database",
+	}
+	return c.JSONPretty(http.StatusOK, response, "  ")
+}
+
+func syncReleases(c echo.Context) error {
+	userId := c.QueryParam("userId")
+	fmt.Println("User ID:", userId)
+
+	releases, err := getUserReleases(userId)
+	if err != nil {
+		return err
+	}
+
+	for _, release := range releases {
+		nyaaEpisodes := scrapeNyaaForEpisodes(&ScrapePayload{
+			NyaaUrl:    release.NyaaSourceUrl,
+			AniwaveUrl: release.AniwaveSourceUrl,
+		})
+		aniwaveEpisodes := getAniwaveEpisodes(&ScrapePayload{
+			UserId:     release.UserId,
+			NyaaUrl:    release.NyaaSourceUrl,
+			AniwaveUrl: release.AniwaveSourceUrl,
+		})
+
+		latestEpisode := 1
+		if len(nyaaEpisodes) > len(aniwaveEpisodes) {
+			latestEpisode = len(nyaaEpisodes) - 1
+		} else {
+			latestEpisode = len(aniwaveEpisodes) - 1
+		}
+
+		newReleaseData := Release{
+			UserId:                     userId,
+			Uuid:                       release.Uuid,
+			Title:                      release.Title,
+			LatestEpisode:              latestEpisode,
+			NyaaUrlFirstUnwatchedEp:    release.NyaaUrlFirstUnwatchedEp,
+			AniwaveUrlFirstUnwatchedEp: release.AniwaveUrlFirstUnwatchedEp,
+			NyaaSourceUrl:              release.NyaaSourceUrl,
+			AniwaveSourceUrl:           release.AniwaveSourceUrl,
+			LastWatchedEpisode:         release.LastWatchedEpisode,
+		}
+
+		err := updateReleaseInDB(&newReleaseData)
+		if err != nil {
+			return err
+		}
+	}
+
+	response := &DefaultResponse{
+		Success: true,
+		Message: "Successfully checked all tracked releases for the user",
+	}
+	return c.JSONPretty(http.StatusOK, response, "  ")
 }
 
 func main() {
@@ -370,153 +500,13 @@ func main() {
 		port = 4000
 	}
 
-	http.HandleFunc("GET /check", func(w http.ResponseWriter, r *http.Request) {
-		response := map[string]string{"msg": "Hello, World"}
+	e := echo.New()
+	e.GET("/checkhealth", checkhealth)
 
-		w.Header().Set("Content-Type", "application/json")
+	e.POST("/scrape", scrapeSources)
 
-		jsonResponse, err := json.Marshal(response)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	// NOTE: I already do it on the frontend. This is just in case
+	e.POST("/sync", syncReleases)
 
-		w.Write(jsonResponse)
-	})
-
-	http.HandleFunc("POST /test", func(w http.ResponseWriter, r *http.Request) {
-
-		browser := rod.New().MustConnect()
-		defer browser.MustClose()
-
-		page := stealth.MustPage(browser)
-		page.MustNavigate("https://aniwave.to/watch/dosanko-gal-wa-namaramenkoi.4q12o/ep-1").MustWaitStable()
-		fmt.Println("Stable page")
-		el := page.MustElement("#player .play")
-		fmt.Println("Element found", el.MustHTML())
-		el.MustClick()
-		fmt.Println("Clicked play")
-		page.MustWaitDOMStable()
-		fmt.Println("DOM stable")
-		iframeEl := page.MustElement("#player iframe")
-		fmt.Println("iframe found")
-		iframeSrc := iframeEl.MustAttribute("src")
-		fmt.Println("iframe src", iframeSrc)
-
-		page.MustNavigate(*iframeSrc).MustWaitStable()
-		fmt.Println("Navigated to iframe src")
-		el = page.MustElement("video.jw-video")
-		fmt.Println("Element found", el.MustAttribute("src"))
-
-		html := page.MustHTML()
-		f, err := os.Create("index.html")
-		if err != nil {
-			log.Fatal()
-		}
-		defer f.Close()
-		f.WriteString(html)
-	})
-
-	http.HandleFunc("POST /scrape", func(w http.ResponseWriter, r *http.Request) {
-		var releasePayload NewReleasePayload
-
-		b, err := io.ReadAll(r.Body)
-
-		err = json.Unmarshal(b, &releasePayload)
-		if err != nil {
-			SetReponse(false, "Failed to parse request body", w, http.StatusBadRequest)
-			return
-		}
-
-		fmt.Println("User ID:", releasePayload.UserId)
-		fmt.Println("nyaa.si URL:", releasePayload.NyaaUrl)
-		fmt.Println("aniwave.to URL:", releasePayload.AniwaveUrl)
-
-		nyaaEpisodes := getNyaaEpisodes(&releasePayload)
-		aniwaveEpisodes := getAniwaveEpisodes(&releasePayload)
-
-		latestEpisode := len(aniwaveEpisodes)
-		if len(nyaaEpisodes) > len(aniwaveEpisodes) {
-			latestEpisode = len(nyaaEpisodes)
-		}
-
-		newReleaseData := NewReleaseData{
-			Title:                              aniwaveEpisodes[0].Title,
-			LatestEpisode:                      latestEpisode,
-			NyaaUrlForFirstUnwatchedEpisode:    nyaaEpisodes[0].MagnetUrl,
-			AniwaveUrlForFirstUnwatchedEpisode: aniwaveEpisodes[0].StreamUrl,
-			NyaaSourceUrl:                      releasePayload.NyaaUrl,
-			AniwaveSourceUrl:                   releasePayload.AniwaveUrl,
-			UserId:                             releasePayload.UserId,
-			LastWatchedEpisode:                 0,
-			ThumbnailUrl:                       aniwaveEpisodes[0].ThumbnailUrl,
-		}
-
-		err = saveReleaseInDB(&newReleaseData)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		SetReponse(true, "Successfully scraped", w, http.StatusOK)
-	})
-
-	http.HandleFunc("POST /check-releases", func(w http.ResponseWriter, r *http.Request) {
-		var releasePayload CheckReleasesPayload
-
-		b, err := io.ReadAll(r.Body)
-
-		err = json.Unmarshal(b, &releasePayload)
-		if err != nil {
-			SetReponse(false, "Failed to parse request body", w, http.StatusBadRequest)
-			return
-		}
-
-		fmt.Println("User ID:", releasePayload.UserId)
-
-		releases, err := getUserReleases(releasePayload.UserId)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		for _, release := range releases {
-			nyaaEpisodes := getNyaaEpisodes(&NewReleasePayload{
-				NyaaUrl:    release.NyaaSourceUrl,
-				AniwaveUrl: release.AniwaveSourceUrl,
-			})
-			aniwaveEpisodes := getAniwaveEpisodes(&NewReleasePayload{
-				NyaaUrl:    release.NyaaSourceUrl,
-				AniwaveUrl: release.AniwaveSourceUrl,
-			})
-
-			latestEpisode := 1
-			if len(nyaaEpisodes) > len(aniwaveEpisodes) {
-				latestEpisode = len(nyaaEpisodes) - 1
-			} else {
-				latestEpisode = len(aniwaveEpisodes) - 1
-			}
-
-			newReleaseData := NewReleaseData{
-				Id:                                 release.Id,
-				Title:                              release.Title,
-				LatestEpisode:                      latestEpisode,
-				NyaaUrlForFirstUnwatchedEpisode:    release.NyaaUrlForFirstUnwatchedEpisode,
-				AniwaveUrlForFirstUnwatchedEpisode: release.AniwaveUrlForFirstUnwatchedEpisode,
-				NyaaSourceUrl:                      release.NyaaSourceUrl,
-				AniwaveSourceUrl:                   release.AniwaveSourceUrl,
-				LastWatchedEpisode:                 release.LastWatchedEpisode,
-				UserId:                             releasePayload.UserId,
-			}
-			fmt.Println("T", newReleaseData.Title)
-			fmt.Println("LE", newReleaseData.LatestEpisode)
-
-			err := updateReleaseInDB(&newReleaseData)
-			if err != nil {
-				log.Fatal("Failed to update release in DB")
-			}
-		}
-
-		SetReponse(true, fmt.Sprint("Successfully checked releases for user with ID:", releasePayload.UserId), w, http.StatusOK)
-	})
-
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
 }
