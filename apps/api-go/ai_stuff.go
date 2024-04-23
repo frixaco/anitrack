@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -24,56 +25,31 @@ func PrettyPrint(jsonString string) (string, error) {
 	return string(prettyJSON), nil
 }
 
-func AiStuff() {
+func ExtractEpisodeSeasonNumber(title string) {
+	API_KEY := os.Getenv("PERPLEXITY_API_KEY")
 	url := "https://api.perplexity.ai/chat/completions"
-	API_KEY := "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"
 
-	// content := "Extrack episode number and season number from following anime title: [EMBER] Dosanko Gal wa Namara Menkoi S01E06 [1080p] [HEVC WEBRip] (Hokkaido Gals Are Super Adorable!). Return comma separated numbers."
-
-	type QueryMessage struct {
+	type Message struct {
 		Role    string `json:"role"`
 		Content string `json:"content"`
 	}
 
 	type Query struct {
-		Model    string         `json:"model"`
-		Messages []QueryMessage `json:"messages"`
+		Model    string    `json:"model"`
+		Messages []Message `json:"messages"`
 	}
 
 	baseQuery := Query{
-		// Model: "sonar-medium-chat",
-		// Model: "mistral-7b-instruct",
-		Model: "sonar-small-chat",
-		Messages: []QueryMessage{
+		Model: "mistral-7b-instruct",
+		Messages: []Message{
 			{
 				Role:    "system",
-				Content: "Be very precise and concise. Do not guess nor assume. Use only provided text. Always return 2 numbers with a comma between.",
+				Content: "I'll provide a filename for TV show episode that I downloaded. You have to analyze it and extract the episode number if it exists and season number if it exists. If either of them don't exist, return 0 number. Respond in JSON format between <json>s with following structure: <json> { episode: 1, season: 0 } <json>",
 			},
-			// [Anime Time] One Piece - 1100 [1080p][HEVC 10bit x265][AAC][Eng Sub] [Weekly]
 			{
-				Role: "user",
-				Content: `
-            Find episode number and season number from title:
-            [Anime Time] One Piece - 1100 [1080p][HEVC 10bit x265][AAC][Eng Sub] [Weekly].
-            If a number is not provided, return just 0. No comments, explanations.
-        `,
+				Role:    "user",
+				Content: fmt.Sprintf("Here is the filename: %s", title),
 			},
-			// {
-			// 	Role: "user",
-			// 	Content: `
-			//          Extract episode number and season number from following anime title:
-			//          [EMBER] Hokkaido Gals Are Super Adorable! (2024) (Season 1) [1080p] [Dual Audio HEVC WEBRip] (Dosanko Gal wa Na.. .
-			//          Respond with ONLY two comma-separated numbers that correspond to episode and seasond number. If a corresponding number does't exist return 0.
-			//      `,
-			// },
-			// {
-			// 	Role: "user",
-			// 	Content: `
-			//          Extract episode number and season number from following anime title:
-			//          [EMBER] Dosanko Gal wa Namara Menkoi S01E06 [1080p] [HEVC WEBRip] (Hokkaido Gals Are Super Adorable!).
-			//          Respond with ONLY two comma-separated numbers that correspond to episode and seasond number. If a corresponding number does't exist return 0.
-			//      `,
-			// },
 		},
 	}
 

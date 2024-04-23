@@ -20,14 +20,14 @@ importers:
   apps/api-ts:
     dependencies:
       '@effect/platform':
-        specifier: ^0.49.4
-        version: 0.49.4(@effect/schema@0.66.2(effect@3.0.2)(fast-check@3.17.1))(effect@3.0.2)(ws@8.16.0)
+        specifier: ^0.50.3
+        version: 0.50.3(@effect/schema@0.66.2(effect@3.0.3)(fast-check@3.17.1))(effect@3.0.3)(ws@8.16.0)
       '@effect/platform-node':
-        specifier: ^0.46.4
-        version: 0.46.4(@effect/platform@0.49.4(@effect/schema@0.66.2(effect@3.0.2)(fast-check@3.17.1))(effect@3.0.2)(ws@8.16.0))(effect@3.0.2)
+        specifier: ^0.47.3
+        version: 0.47.3(@effect/platform@0.50.3(@effect/schema@0.66.2(effect@3.0.3)(fast-check@3.17.1))(effect@3.0.3)(ws@8.16.0))(effect@3.0.3)
       effect:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: ^3.0.3
+        version: 3.0.3
     devDependencies:
       tsx:
         specifier: ^4.7.2
@@ -72,14 +72,14 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@sentry/nextjs':
-        specifier: ^7.111.0
-        version: 7.111.0(next@14.2.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
+        specifier: ^7.112.1
+        version: 7.112.1(next@14.2.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
       '@t3-oss/env-core':
-        specifier: ^0.9.2
-        version: 0.9.2(typescript@5.4.5)(zod@3.22.5)
+        specifier: ^0.10.1
+        version: 0.10.1(typescript@5.4.5)(zod@3.23.3)
       '@t3-oss/env-nextjs':
-        specifier: ^0.9.2
-        version: 0.9.2(typescript@5.4.5)(zod@3.22.5)
+        specifier: ^0.10.1
+        version: 0.10.1(typescript@5.4.5)(zod@3.23.3)
       '@upstash/ratelimit':
         specifier: ^1.1.2
         version: 1.1.2
@@ -90,11 +90,11 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0
       clsx:
-        specifier: ^2.1.0
-        version: 2.1.0
+        specifier: ^2.1.1
+        version: 2.1.1
       drizzle-orm:
-        specifier: ^0.30.8
-        version: 0.30.8(@neondatabase/serverless@0.9.1)(@types/pg@8.6.6)(@types/react@18.2.79)(postgres@3.4.4)(react@18.2.0)
+        specifier: ^0.30.9
+        version: 0.30.9(@neondatabase/serverless@0.9.1)(@types/pg@8.6.6)(@types/react@18.2.79)(postgres@3.4.4)(react@18.2.0)
       jiti:
         specifier: ^1.21.0
         version: 1.21.0
@@ -111,8 +111,8 @@ importers:
         specifier: ^3.4.4
         version: 3.4.4
       posthog-js:
-        specifier: ^1.128.1
-        version: 1.128.1
+        specifier: ^1.128.3
+        version: 1.128.3
       posthog-node:
         specifier: ^4.0.0
         version: 4.0.0
@@ -135,8 +135,8 @@ importers:
         specifier: ^0.9.0
         version: 0.9.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       zod:
-        specifier: ^3.22.5
-        version: 3.22.5
+        specifier: ^3.23.3
+        version: 3.23.3
     devDependencies:
       '@types/node':
         specifier: ^20
@@ -148,8 +148,8 @@ importers:
         specifier: ^18
         version: 18.2.25
       drizzle-kit:
-        specifier: ^0.20.15
-        version: 0.20.15
+        specifier: ^0.20.17
+        version: 0.20.17
       eslint:
         specifier: ^8
         version: 8.57.0
@@ -219,23 +219,23 @@ packages:
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
     engines: {node: '>=10.0.0'}
 
-  '@effect/platform-node-shared@0.4.4':
-    resolution: {integrity: sha512-zbQG6sWe8re/pdIkBuQUPYwmda6zRQSjudqqlKZuEIgvfgqyz76C1Wmq0RwlARqqb6gqdCa6HcBFvgvSoUm+pA==}
+  '@effect/platform-node-shared@0.4.8':
+    resolution: {integrity: sha512-KrqC0WhoQd793Mh7DbZM3xfmbJkOtaI4Jyc2xXKM4VGyDKt7rn7RMMId0R9o8uZWbbSyP+n7skgIRE/EFz5vWA==}
     peerDependencies:
-      '@effect/platform': ^0.49.4
-      effect: ^3.0.2
+      '@effect/platform': ^0.50.3
+      effect: ^3.0.3
 
-  '@effect/platform-node@0.46.4':
-    resolution: {integrity: sha512-owMR6wPOw/AMPyRxmZ6HzxOBTrXTzJAxb/3Ae4U0CQFKXZaMt8IMa0HQHX1CHOA2zwramUQTf6emnVlTHYrcvg==}
+  '@effect/platform-node@0.47.3':
+    resolution: {integrity: sha512-WabWWtltmtqirTkB9QXWZS2JHH9pUG0rB2NuSZ/l+K6+9qaM515CaVXsha2JvwXVYYa3d2ANKz59CklJzYMSUw==}
     peerDependencies:
-      '@effect/platform': ^0.49.4
-      effect: ^3.0.2
+      '@effect/platform': ^0.50.3
+      effect: ^3.0.3
 
-  '@effect/platform@0.49.4':
-    resolution: {integrity: sha512-fz1UQL+bJ1SXgWIN8Qvl+BmdN/DuJRvhGaQtREFVyqPfTW6OfyybYmnt1b5U543WFoM7vQuQvGpkFPafcpAvEg==}
+  '@effect/platform@0.50.3':
+    resolution: {integrity: sha512-rZsuhZ8BOAjb3UMF1U0lpsvYJL4TjkdJOeKsJT7LbE28J3cE+faxLqx+B6pnL50tFdcJfQPYhfFXP5o6RF7i7A==}
     peerDependencies:
-      '@effect/schema': ^0.66.2
-      effect: ^3.0.2
+      '@effect/schema': ^0.66.6
+      effect: ^3.0.3
 
   '@effect/schema@0.66.2':
     resolution: {integrity: sha512-kvQqIDbwqSyghCQHsY7Zt15ljwhoumt8mKR+FKY9AA90fYa92aQaZXKppAY+xYe/VIe5Vy+2ZC3GJO7xCrSQmA==}
@@ -1114,20 +1114,20 @@ packages:
   '@rushstack/eslint-patch@1.10.2':
     resolution: {integrity: sha512-hw437iINopmQuxWPSUEvqE56NCPsiU8N4AYtfHmJFckclktzK9YQJieD3XkDCDH4OjL+C7zgPUh73R/nrcHrqw==}
 
-  '@sentry-internal/feedback@7.111.0':
-    resolution: {integrity: sha512-xaKgPPDEirOan7c9HwzYA1KK87kRp/qfIx9ZKLOEtxwy6nqoMuSByGqSwm1Oqfcjpbd7y6/y+7Bw+69ZKNVLDQ==}
+  '@sentry-internal/feedback@7.112.1':
+    resolution: {integrity: sha512-ejE4eRXLqv5emxVWudBkRQCv5Q7s21thei7gqSxGLBXe8AUrCjTiD0qA1ToJAKcleIyRRf/TQvGb/T7U6vwAAw==}
     engines: {node: '>=12'}
 
-  '@sentry-internal/replay-canvas@7.111.0':
-    resolution: {integrity: sha512-3KPBIpiegTYmuVw9gA2aKuliAQONS3Ny1kJc9x5kz6XQGuLFxqlh6KzoCVaKfQJeq2WJqRNeR4KFFuNGuB3H8w==}
+  '@sentry-internal/replay-canvas@7.112.1':
+    resolution: {integrity: sha512-+xDd/LEiJZGk4PQKs4xcAWKJFzFKpuNF64DFW/JWuJ5FDnKB+t7w198nQyAZKGjupN7LixLb49Z8O2Gda7fHQQ==}
     engines: {node: '>=12'}
 
-  '@sentry-internal/tracing@7.111.0':
-    resolution: {integrity: sha512-CgXly8rsdu4loWVKi2RqpInH3C2cVBuaYsx4ZP5IJpzSinsUAMyyr3Pc0PZzCyoVpBBXGBGj/4HhFsY3q6Z0Vg==}
+  '@sentry-internal/tracing@7.112.1':
+    resolution: {integrity: sha512-pZVIOB6+t4HlgU3mCRtIbvo//t8uQY9tnBjbJJ2nEv8nTu8A7/dZ5ebrLOWStV3bNp/+uCqLuLuuimJeNNn6vQ==}
     engines: {node: '>=8'}
 
-  '@sentry/browser@7.111.0':
-    resolution: {integrity: sha512-x7S9XoJh+TbMnur4eBhPpCVo+p7udABBV2gQk+Iw6LP9e8EFKmGmNyl76vSsT6GeFJ7mwxDEKfuwbVoLBjIvHw==}
+  '@sentry/browser@7.112.1':
+    resolution: {integrity: sha512-NRTo3mJbhiCd9GEFEWL8SplFJhTCPjiAlOhjUw8MnJb7pkxWm2xhC7PVi6SUE8hF/g1rrEwgUr9SX5v8+xwK6g==}
     engines: {node: '>=8'}
 
   '@sentry/cli@1.77.3':
@@ -1135,16 +1135,16 @@ packages:
     engines: {node: '>= 8'}
     hasBin: true
 
-  '@sentry/core@7.111.0':
-    resolution: {integrity: sha512-/ljeMjZu8CSrLGrseBi/7S2zRIFsqMcvfyG6Nwgfc07J9nbHt8/MqouE1bXZfiaILqDBpK7BK9MLAAph4mkAWg==}
+  '@sentry/core@7.112.1':
+    resolution: {integrity: sha512-ZhOxt4sZVLqHurWqIY1ExWYZ20ViFTbqgW2GdJGHz4XwJhBln0ZVpHD+tKXy3GBEY+2Ee4qoqHi6tDrFgPvJqw==}
     engines: {node: '>=8'}
 
-  '@sentry/integrations@7.111.0':
-    resolution: {integrity: sha512-rNS7euKI2/1CneWbAY2NCkEro/GJbGCyxIX7okmqOjcBJ/7AnrMMU0kck7svydReF1nWvkuQ3CT27KXeKgrk4w==}
+  '@sentry/integrations@7.112.1':
+    resolution: {integrity: sha512-jIgXT+ahUS7zmhDMAzsgQHCNA6ZwZAp0Bwjoz0tcuGzNcv7mOCnjHz5YooJVQgXuREV653RmEuGGTklrpn6S2w==}
     engines: {node: '>=8'}
 
-  '@sentry/nextjs@7.111.0':
-    resolution: {integrity: sha512-Jvl/m9QoVw8KBG3pEswJH4YLf7W7o34WLcfomge5pKUcwrgWvhiQ7L0yOOQQxDaj0zTBQhnyEHXVdULRyn7nZA==}
+  '@sentry/nextjs@7.112.1':
+    resolution: {integrity: sha512-Jdwks+pQSAHGO41XQe8yVX+ZZ0BFBG67HJqBFw0wF4hpIEdSOqr8VC5wufE4gHhqTW4euIcWNSzB4cZZ/+3KoQ==}
     engines: {node: '>=8'}
     peerDependencies:
       next: ^10.0.8 || ^11.0 || ^12.0 || ^13.0 || ^14.0
@@ -1154,30 +1154,30 @@ packages:
       webpack:
         optional: true
 
-  '@sentry/node@7.111.0':
-    resolution: {integrity: sha512-bTLZNETT7W89HEk04rwsch02KSpu++Yec/BEyM3AxUNY+ZQ9ZLL/lrNZuCwbe7fURpKoZrvGAhxpPjgs5UcB9w==}
+  '@sentry/node@7.112.1':
+    resolution: {integrity: sha512-4nGqP133jDNgPADJMR+pTroo9TTYyrXuGVI1RO2lhZpLbRu7ksR6hgsQE00+0L/EhPM4IiW75iwwHePFwqWY6A==}
     engines: {node: '>=8'}
 
-  '@sentry/react@7.111.0':
-    resolution: {integrity: sha512-8HVl4D5TsNLaIgXsOa1H+/aOcUHvRBsH+25OzxGpyS5Cu2gSlAQxfXKYxZ0axYoMc7TNkMNdmEhYN+CGV+NUZg==}
+  '@sentry/react@7.112.1':
+    resolution: {integrity: sha512-q0fDW3omq/NPaL7yRqWA1USxGtEAcdFZOngIMsr9Bc4fJBGXDO+xLwPWjo1MIVvdDBJJYL/9Z56ppqTb3kiGXw==}
     engines: {node: '>=8'}
     peerDependencies:
       react: 15.x || 16.x || 17.x || 18.x
 
-  '@sentry/replay@7.111.0':
-    resolution: {integrity: sha512-cSbI4A4hrO0sZ0ynvLQauPg8YyaDOQkhGkyvbws8W9WgfxR8X827bY9S0f1TPfgaFiVcKb0iRaAwyXHg3pyzOg==}
+  '@sentry/replay@7.112.1':
+    resolution: {integrity: sha512-4lobxfgmbB2C7ZHk1inWt9IRIvlQa2Sczau5ngE4Qd4mZSKIgIYGtIJC52uOuGvBcP8gHiIbA7ACihkd7834Ew==}
     engines: {node: '>=12'}
 
-  '@sentry/types@7.111.0':
-    resolution: {integrity: sha512-Oti4pgQ55+FBHKKcHGu51ZUxO1u52G5iVNK4mbtAN+5ArSCy/2s1H8IDJiOMswn3acfUnCR0oB/QsbEgAPZ26g==}
+  '@sentry/types@7.112.1':
+    resolution: {integrity: sha512-5dLIxWZfCXH5kExrsWc+R6loMr3RR6OQuonVNL3Fa8Dw37Q7aExCrjRmocOHeQKhHwNBd3QhYm7phjnbxS6Oaw==}
     engines: {node: '>=8'}
 
-  '@sentry/utils@7.111.0':
-    resolution: {integrity: sha512-CB5rz1EgCSwj3xoXogsCZ5pQtfERrURc/ItcCuoaijUhkD0iMq5MCNWMHW3mBsBrqx/Oba+XGvDu0t/5+SWwBg==}
+  '@sentry/utils@7.112.1':
+    resolution: {integrity: sha512-/AMGDD6OMvT2cpfL5KuDC10oTS8yOt7BAPomXJNS/xn1TRcEEEZ1TWbYZiGT5ijggQEL1OXSojpeQU8XEW8dcQ==}
     engines: {node: '>=8'}
 
-  '@sentry/vercel-edge@7.111.0':
-    resolution: {integrity: sha512-yX28qxG2T30mxch/gIFK4oX7jax/ulahK/FbPTuECux0fvNdXcrIeFky9aeSKE0gr6sERcQm8i19V6mlRlFmpQ==}
+  '@sentry/vercel-edge@7.112.1':
+    resolution: {integrity: sha512-HznnXuhRj+YDgiq3RQxdoRbdHcC32PXrXkUMwHqYH5Y935Es/fEb21G8cd+uHDuykxymqsf6XvCweTLQUIlCQA==}
     engines: {node: '>=8'}
 
   '@sentry/webpack-plugin@1.21.0':
@@ -1190,8 +1190,8 @@ packages:
   '@swc/helpers@0.5.5':
     resolution: {integrity: sha512-KGYxvIOXcceOAbEk4bi/dVLEK9z8sZ0uBB3Il5b1rhfClSpcX0yfRO0KmTkqR2cnQDymwLB+25ZyMzICg/cm/A==}
 
-  '@t3-oss/env-core@0.9.2':
-    resolution: {integrity: sha512-KgWXljUTHgO3o7GMZQPAD5+P+HqpauMNNHowlm7V2b9IeMitSUpNKwG6xQrup/xARWHTdxRVIl0mSI4wCevQhQ==}
+  '@t3-oss/env-core@0.10.1':
+    resolution: {integrity: sha512-GcKZiCfWks5CTxhezn9k5zWX3sMDIYf6Kaxy2Gx9YEQftFcz8hDRN56hcbylyAO3t4jQnQ5ifLawINsNgCDpOg==}
     peerDependencies:
       typescript: '>=5.0.0'
       zod: ^3.0.0
@@ -1199,8 +1199,8 @@ packages:
       typescript:
         optional: true
 
-  '@t3-oss/env-nextjs@0.9.2':
-    resolution: {integrity: sha512-dklHrgKLESStNVB67Jdbu6osxDYA+xNKaPBRerlnkEvzbCccSKMvZENx6EZebJuR4snqB3/yRykNMn/bdIAyiQ==}
+  '@t3-oss/env-nextjs@0.10.1':
+    resolution: {integrity: sha512-iy2qqJLnFh1RjEWno2ZeyTu0ufomkXruUsOZludzDIroUabVvHsrSjtkHqwHp1/pgPUzN3yBRHMILW162X7x2Q==}
     peerDependencies:
       typescript: '>=5.0.0'
       zod: ^3.0.0
@@ -1492,8 +1492,8 @@ packages:
     resolution: {integrity: sha512-rQ1+kcj+ttHG0MKVGBUXwayCCF1oh39BF5COIpRzuCEv8Mwjv0XucrI2ExNTOn9IlLifGClWQcU9BrZORvtw6Q==}
     engines: {node: '>=6'}
 
-  clsx@2.1.0:
-    resolution: {integrity: sha512-m3iNNWpd9rl3jvvcBnu70ylMdrXt8Vlq4HYadnU5fwcOtvkSQWPmj7amUcDT2qYI7risszBjI5AUIUox9D16pg==}
+  clsx@2.1.1:
+    resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
 
   color-convert@2.0.1:
@@ -1645,12 +1645,12 @@ packages:
     resolution: {integrity: sha512-vyJTp8+mC+G+5dfgsY+r3ckxlz+QMX40VjPQsZc5gxVAxLmi64TBoVkP54A/pRAXMXsbu2GMMBrZPxNv23waMg==}
     engines: {node: '>=0.4.0'}
 
-  drizzle-kit@0.20.15:
-    resolution: {integrity: sha512-thjJxrmt3WBRgi1+4C/VzTGCyJm75MHTnckM0dwjaTl5p+oeuK8nhf6mRUzv3Eksr7K+J/mmwhdXeTZIS631eA==}
+  drizzle-kit@0.20.17:
+    resolution: {integrity: sha512-mLVDS4nXmO09wFVlzGrdshWnAL+U9eQGC5zRs6hTN6Q9arwQGWU2XnZ17I8BM8Quau8CQRx3Ms6VPgRWJFVp7Q==}
     hasBin: true
 
-  drizzle-orm@0.30.8:
-    resolution: {integrity: sha512-9pBJA0IjnpPpzZ6s9jlS1CQAbKoBmbn2GJesPhXaVblAA/joOJ4AWWevYcqvLGj9SvThBAl7WscN8Zwgg5mnTw==}
+  drizzle-orm@0.30.9:
+    resolution: {integrity: sha512-VOiCFsexErmgqvNCOmbzmqDCZzZsHoz6SkWAjTFxsTr1AllKDbDJ2+GgedLXsXMDgpg/ljDG1zItIFeZtiO2LA==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=3'
@@ -1735,8 +1735,8 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  effect@3.0.2:
-    resolution: {integrity: sha512-X5/kHcs/hN7D/U/+dzSbqZPeVq1lebt4yBE9vVNcxJKN1NbmZ3eOdI/prXoASt866b+uVObd5jW4DzoYFXfDAQ==}
+  effect@3.0.3:
+    resolution: {integrity: sha512-mgG+FoWrM4sny8OxDFWCpq+6LwGf9cK/JztVhxZQeZM9ZMXY+lKbdMEQmemNYce0QVAz2+YqUKwhKzOidwbZzg==}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -2754,8 +2754,8 @@ packages:
     resolution: {integrity: sha512-IbyN+9KslkqcXa8AO9fxpk97PA4pzewvpi2B3Dwy9u4zpV32QicaEdgmF3eSQUzdRk7ttDHQejNgAEr4XoeH4A==}
     engines: {node: '>=12'}
 
-  posthog-js@1.128.1:
-    resolution: {integrity: sha512-+CIiZf+ijhgAF8g6K+PfaDbSBiADfRaXzrlYKmu5IEN8ghunFd06EV5QM68cwLUEkti4FXn7AAM3k9/KxJgvcA==}
+  posthog-js@1.128.3:
+    resolution: {integrity: sha512-ES5FLTw/u2JTHocJZJtJibVkbk+xc4u9XTxWQPGE1ZVbUOH4lVjSXbEtI56fJvSJaaAuGSQ43kB5crJZ2gNG+g==}
 
   posthog-node@4.0.0:
     resolution: {integrity: sha512-jEZnNbgb/3FNk+gNwtTcyz3j+62zIN+UTPotONfacVXJnoI70KScSkKdIR+rvP9tA2kjBSoHQxGwJuizs27o9A==}
@@ -3334,8 +3334,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod@3.22.5:
-    resolution: {integrity: sha512-HqnGsCdVZ2xc0qWPLdO25WnseXThh0kEYKIdV5F/hTHO75hNZFp8thxSeHhiPrHZKrFTo1SOgkAj9po5bexZlw==}
+  zod@3.23.3:
+    resolution: {integrity: sha512-tPvq1B/2Yu/dh2uAIH2/BhUlUeLIUvAjr6dpL/75I0pCYefHgjhXk1o1Kob3kTU8C7yU1j396jFHlsVWFi9ogg==}
 
 snapshots:
 
@@ -3404,18 +3404,18 @@ snapshots:
 
   '@discoveryjs/json-ext@0.5.7': {}
 
-  '@effect/platform-node-shared@0.4.4(@effect/platform@0.49.4(@effect/schema@0.66.2(effect@3.0.2)(fast-check@3.17.1))(effect@3.0.2)(ws@8.16.0))(effect@3.0.2)':
+  '@effect/platform-node-shared@0.4.8(@effect/platform@0.50.3(@effect/schema@0.66.2(effect@3.0.3)(fast-check@3.17.1))(effect@3.0.3)(ws@8.16.0))(effect@3.0.3)':
     dependencies:
-      '@effect/platform': 0.49.4(@effect/schema@0.66.2(effect@3.0.2)(fast-check@3.17.1))(effect@3.0.2)(ws@8.16.0)
+      '@effect/platform': 0.50.3(@effect/schema@0.66.2(effect@3.0.3)(fast-check@3.17.1))(effect@3.0.3)(ws@8.16.0)
       '@parcel/watcher': 2.4.1
-      effect: 3.0.2
+      effect: 3.0.3
       multipasta: 0.2.0
 
-  '@effect/platform-node@0.46.4(@effect/platform@0.49.4(@effect/schema@0.66.2(effect@3.0.2)(fast-check@3.17.1))(effect@3.0.2)(ws@8.16.0))(effect@3.0.2)':
+  '@effect/platform-node@0.47.3(@effect/platform@0.50.3(@effect/schema@0.66.2(effect@3.0.3)(fast-check@3.17.1))(effect@3.0.3)(ws@8.16.0))(effect@3.0.3)':
     dependencies:
-      '@effect/platform': 0.49.4(@effect/schema@0.66.2(effect@3.0.2)(fast-check@3.17.1))(effect@3.0.2)(ws@8.16.0)
-      '@effect/platform-node-shared': 0.4.4(@effect/platform@0.49.4(@effect/schema@0.66.2(effect@3.0.2)(fast-check@3.17.1))(effect@3.0.2)(ws@8.16.0))(effect@3.0.2)
-      effect: 3.0.2
+      '@effect/platform': 0.50.3(@effect/schema@0.66.2(effect@3.0.3)(fast-check@3.17.1))(effect@3.0.3)(ws@8.16.0)
+      '@effect/platform-node-shared': 0.4.8(@effect/platform@0.50.3(@effect/schema@0.66.2(effect@3.0.3)(fast-check@3.17.1))(effect@3.0.3)(ws@8.16.0))(effect@3.0.3)
+      effect: 3.0.3
       mime: 3.0.0
       undici: 6.13.0
       ws: 8.16.0
@@ -3423,10 +3423,10 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@effect/platform@0.49.4(@effect/schema@0.66.2(effect@3.0.2)(fast-check@3.17.1))(effect@3.0.2)(ws@8.16.0)':
+  '@effect/platform@0.50.3(@effect/schema@0.66.2(effect@3.0.3)(fast-check@3.17.1))(effect@3.0.3)(ws@8.16.0)':
     dependencies:
-      '@effect/schema': 0.66.2(effect@3.0.2)(fast-check@3.17.1)
-      effect: 3.0.2
+      '@effect/schema': 0.66.2(effect@3.0.3)(fast-check@3.17.1)
+      effect: 3.0.3
       find-my-way-ts: 0.1.1
       isows: 1.0.4(ws@8.16.0)
       multipasta: 0.2.0
@@ -3434,9 +3434,9 @@ snapshots:
     transitivePeerDependencies:
       - ws
 
-  '@effect/schema@0.66.2(effect@3.0.2)(fast-check@3.17.1)':
+  '@effect/schema@0.66.2(effect@3.0.3)(fast-check@3.17.1)':
     dependencies:
-      effect: 3.0.2
+      effect: 3.0.3
       fast-check: 3.17.1
 
   '@esbuild-kit/core-utils@3.3.2':
@@ -3626,10 +3626,10 @@ snapshots:
 
   '@hono/node-server@1.10.1': {}
 
-  '@hono/zod-validator@0.2.1(hono@4.2.5)(zod@3.22.5)':
+  '@hono/zod-validator@0.2.1(hono@4.2.5)(zod@3.23.3)':
     dependencies:
       hono: 4.2.5
-      zod: 3.22.5
+      zod: 3.23.3
 
   '@humanwhocodes/config-array@0.11.14':
     dependencies:
@@ -4160,34 +4160,35 @@ snapshots:
 
   '@rushstack/eslint-patch@1.10.2': {}
 
-  '@sentry-internal/feedback@7.111.0':
+  '@sentry-internal/feedback@7.112.1':
     dependencies:
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry/core': 7.112.1
+      '@sentry/types': 7.112.1
+      '@sentry/utils': 7.112.1
 
-  '@sentry-internal/replay-canvas@7.111.0':
+  '@sentry-internal/replay-canvas@7.112.1':
     dependencies:
-      '@sentry/core': 7.111.0
-      '@sentry/replay': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry/core': 7.112.1
+      '@sentry/replay': 7.112.1
+      '@sentry/types': 7.112.1
+      '@sentry/utils': 7.112.1
 
-  '@sentry-internal/tracing@7.111.0':
+  '@sentry-internal/tracing@7.112.1':
     dependencies:
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry/core': 7.112.1
+      '@sentry/types': 7.112.1
+      '@sentry/utils': 7.112.1
 
-  '@sentry/browser@7.111.0':
+  '@sentry/browser@7.112.1':
     dependencies:
-      '@sentry-internal/feedback': 7.111.0
-      '@sentry-internal/replay-canvas': 7.111.0
-      '@sentry-internal/tracing': 7.111.0
-      '@sentry/core': 7.111.0
-      '@sentry/replay': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry-internal/feedback': 7.112.1
+      '@sentry-internal/replay-canvas': 7.112.1
+      '@sentry-internal/tracing': 7.112.1
+      '@sentry/core': 7.112.1
+      '@sentry/integrations': 7.112.1
+      '@sentry/replay': 7.112.1
+      '@sentry/types': 7.112.1
+      '@sentry/utils': 7.112.1
 
   '@sentry/cli@1.77.3':
     dependencies:
@@ -4201,28 +4202,28 @@ snapshots:
       - encoding
       - supports-color
 
-  '@sentry/core@7.111.0':
+  '@sentry/core@7.112.1':
     dependencies:
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry/types': 7.112.1
+      '@sentry/utils': 7.112.1
 
-  '@sentry/integrations@7.111.0':
+  '@sentry/integrations@7.112.1':
     dependencies:
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry/core': 7.112.1
+      '@sentry/types': 7.112.1
+      '@sentry/utils': 7.112.1
       localforage: 1.10.0
 
-  '@sentry/nextjs@7.111.0(next@14.2.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)':
+  '@sentry/nextjs@7.112.1(next@14.2.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@rollup/plugin-commonjs': 24.0.0(rollup@2.78.0)
-      '@sentry/core': 7.111.0
-      '@sentry/integrations': 7.111.0
-      '@sentry/node': 7.111.0
-      '@sentry/react': 7.111.0(react@18.2.0)
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
-      '@sentry/vercel-edge': 7.111.0
+      '@sentry/core': 7.112.1
+      '@sentry/integrations': 7.112.1
+      '@sentry/node': 7.112.1
+      '@sentry/react': 7.112.1(react@18.2.0)
+      '@sentry/types': 7.112.1
+      '@sentry/utils': 7.112.1
+      '@sentry/vercel-edge': 7.112.1
       '@sentry/webpack-plugin': 1.21.0
       chalk: 3.0.0
       next: 14.2.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -4234,41 +4235,43 @@ snapshots:
       - encoding
       - supports-color
 
-  '@sentry/node@7.111.0':
+  '@sentry/node@7.112.1':
     dependencies:
-      '@sentry-internal/tracing': 7.111.0
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry-internal/tracing': 7.112.1
+      '@sentry/core': 7.112.1
+      '@sentry/integrations': 7.112.1
+      '@sentry/types': 7.112.1
+      '@sentry/utils': 7.112.1
 
-  '@sentry/react@7.111.0(react@18.2.0)':
+  '@sentry/react@7.112.1(react@18.2.0)':
     dependencies:
-      '@sentry/browser': 7.111.0
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry/browser': 7.112.1
+      '@sentry/core': 7.112.1
+      '@sentry/types': 7.112.1
+      '@sentry/utils': 7.112.1
       hoist-non-react-statics: 3.3.2
       react: 18.2.0
 
-  '@sentry/replay@7.111.0':
+  '@sentry/replay@7.112.1':
     dependencies:
-      '@sentry-internal/tracing': 7.111.0
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry-internal/tracing': 7.112.1
+      '@sentry/core': 7.112.1
+      '@sentry/types': 7.112.1
+      '@sentry/utils': 7.112.1
 
-  '@sentry/types@7.111.0': {}
+  '@sentry/types@7.112.1': {}
 
-  '@sentry/utils@7.111.0':
+  '@sentry/utils@7.112.1':
     dependencies:
-      '@sentry/types': 7.111.0
+      '@sentry/types': 7.112.1
 
-  '@sentry/vercel-edge@7.111.0':
+  '@sentry/vercel-edge@7.112.1':
     dependencies:
-      '@sentry-internal/tracing': 7.111.0
-      '@sentry/core': 7.111.0
-      '@sentry/types': 7.111.0
-      '@sentry/utils': 7.111.0
+      '@sentry-internal/tracing': 7.112.1
+      '@sentry/core': 7.112.1
+      '@sentry/integrations': 7.112.1
+      '@sentry/types': 7.112.1
+      '@sentry/utils': 7.112.1
 
   '@sentry/webpack-plugin@1.21.0':
     dependencies:
@@ -4285,16 +4288,16 @@ snapshots:
       '@swc/counter': 0.1.3
       tslib: 2.6.2
 
-  '@t3-oss/env-core@0.9.2(typescript@5.4.5)(zod@3.22.5)':
+  '@t3-oss/env-core@0.10.1(typescript@5.4.5)(zod@3.23.3)':
     dependencies:
-      zod: 3.22.5
+      zod: 3.23.3
     optionalDependencies:
       typescript: 5.4.5
 
-  '@t3-oss/env-nextjs@0.9.2(typescript@5.4.5)(zod@3.22.5)':
+  '@t3-oss/env-nextjs@0.10.1(typescript@5.4.5)(zod@3.23.3)':
     dependencies:
-      '@t3-oss/env-core': 0.9.2(typescript@5.4.5)(zod@3.22.5)
-      zod: 3.22.5
+      '@t3-oss/env-core': 0.10.1(typescript@5.4.5)(zod@3.23.3)
+      zod: 3.23.3
     optionalDependencies:
       typescript: 5.4.5
 
@@ -4640,7 +4643,7 @@ snapshots:
 
   clsx@2.0.0: {}
 
-  clsx@2.1.0: {}
+  clsx@2.1.1: {}
 
   color-convert@2.0.1:
     dependencies:
@@ -4768,11 +4771,11 @@ snapshots:
     dependencies:
       wordwrap: 1.0.0
 
-  drizzle-kit@0.20.15:
+  drizzle-kit@0.20.17:
     dependencies:
       '@esbuild-kit/esm-loader': 2.6.5
       '@hono/node-server': 1.10.1
-      '@hono/zod-validator': 0.2.1(hono@4.2.5)(zod@3.22.5)
+      '@hono/zod-validator': 0.2.1(hono@4.2.5)(zod@3.23.3)
       camelcase: 7.0.1
       chalk: 5.3.0
       commander: 9.5.0
@@ -4786,11 +4789,11 @@ snapshots:
       minimatch: 7.4.6
       semver: 7.6.0
       superjson: 2.2.1
-      zod: 3.22.5
+      zod: 3.23.3
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.30.8(@neondatabase/serverless@0.9.1)(@types/pg@8.6.6)(@types/react@18.2.79)(postgres@3.4.4)(react@18.2.0):
+  drizzle-orm@0.30.9(@neondatabase/serverless@0.9.1)(@types/pg@8.6.6)(@types/react@18.2.79)(postgres@3.4.4)(react@18.2.0):
     optionalDependencies:
       '@neondatabase/serverless': 0.9.1
       '@types/pg': 8.6.6
@@ -4802,7 +4805,7 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  effect@3.0.2: {}
+  effect@3.0.3: {}
 
   emoji-regex@8.0.0: {}
 
@@ -6075,7 +6078,7 @@ snapshots:
 
   postgres@3.4.4: {}
 
-  posthog-js@1.128.1:
+  posthog-js@1.128.3:
     dependencies:
       fflate: 0.4.8
       preact: 10.20.2
@@ -6700,4 +6703,4 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod@3.22.5: {}
+  zod@3.23.3: {}
