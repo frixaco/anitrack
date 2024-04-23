@@ -23,7 +23,7 @@ export default async function WatchedEpisodeCard({
   return (
     <Card className="relative">
       <Badge className="absolute drop-shadow-lg z-10 right-2 top-2 text-xl">
-        E{seasonNumber} - S{episodeNumber}
+        E{episodeNumber} - S{seasonNumber}
       </Badge>
 
       <CardHeader className="relative w-[280px] max-w-full pb-2">

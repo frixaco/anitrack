@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/stealth"
-	"github.com/gocolly/colly"
+	"github.com/gocolly/colly/v2"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
@@ -85,7 +85,7 @@ func scrapeNyaaForEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 	var nyaaEpisodes []ScrapedEpisodeData
 
 	c.OnHTML("tr.danger", func(e *colly.HTMLElement) {
-		uploadInfo := e.ChildAttr("a[href^='/view']:not(.comments)", "title")
+		uploadInfo := e.ChildAttr("a[href^='/view']:not([href$='#comments']):not([title*='Batch'])", "title")
 		fmt.Println(uploadInfo)
 
 		seasonEpisodePattern := regexp.MustCompile(`S(\d{2})E(\d{2})`)
@@ -147,14 +147,6 @@ func getAniwaveEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 	page := stealth.MustPage(browser)
 	page.MustNavigate(rp.AniwaveUrl).MustWaitStable()
 
-	html := page.MustHTML()
-	f, err := os.Create("index.html")
-	if err != nil {
-		log.Fatal()
-	}
-	defer f.Close()
-	f.WriteString(html)
-
 	uploadInfoEl := page.MustElement("h1.title.d-title")
 	uploadInfo := uploadInfoEl.MustText()
 
@@ -215,7 +207,7 @@ func getAniwaveEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 }
 
 func saveReleaseInDB(r *Release) error {
-	DATABASE_URL := os.Getenv("POSTGRES_URL")
+	DATABASE_URL := os.Getenv("DATABASE_URL")
 
 	conn, err := pgx.Connect(context.Background(), DATABASE_URL)
 	if err != nil {
@@ -224,22 +216,22 @@ func saveReleaseInDB(r *Release) error {
 	}
 	defer conn.Close(context.Background())
 
-	query := `insert into release
-    (
-      "uuid",
-      "title",
-      "user_id",
-      "nyaa_source_url",
-      "aniwave_source_url",
-      "nyaa_url_first_unwatched_ep",
-      "aniwave_url_first_unwatched_ep",
-      "latest_episode",
-      "season",
-      "thumbnail_url"
-      "last_watched_episode"
-    ) values
-      ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-  `
+	query := `insert into anitrack_release
+	   (
+	     "uuid",
+	     "title",
+	     "user_id",
+	     "nyaa_source_url",
+	     "aniwave_source_url",
+	     "nyaa_url_first_unwatched_ep",
+	     "aniwave_url_first_unwatched_ep",
+	     "latest_episode",
+	     "season",
+	     "thumbnail_url",
+	     "last_watched_episode"
+	   ) values
+	     ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+	 `
 
 	_, err = conn.Exec(context.Background(), query,
 		r.Uuid,
@@ -264,7 +256,7 @@ func saveReleaseInDB(r *Release) error {
 }
 
 func getUserReleases(userId string) ([]Release, error) {
-	DATABASE_URL := os.Getenv("POSTGRES_URL")
+	DATABASE_URL := os.Getenv("DATABASE_URL")
 
 	conn, err := pgx.Connect(context.Background(), DATABASE_URL)
 	if err != nil {
@@ -288,7 +280,7 @@ func getUserReleases(userId string) ([]Release, error) {
       "last_watched_episode",
       "created_at",
       "updated_at"
-    from release where "userId"=$1`
+    from anitrack_release where "userId"=$1`
 
 	dbRows, err := conn.Query(context.Background(), query, userId)
 	if err != nil {
@@ -359,7 +351,7 @@ func getUserReleases(userId string) ([]Release, error) {
 }
 
 func updateReleaseInDB(r *Release) error {
-	DATABASE_URL := os.Getenv("POSTGRES_URL")
+	DATABASE_URL := os.Getenv("DATABASE_URL")
 
 	conn, err := pgx.Connect(context.Background(), DATABASE_URL)
 	if err != nil {
@@ -368,7 +360,7 @@ func updateReleaseInDB(r *Release) error {
 	}
 	defer conn.Close(context.Background())
 
-	query := `update release
+	query := `update anitrack_release
     set "latestEpisode"=$1
     where "uuid"=$2
   `
@@ -422,6 +414,7 @@ func scrapeSources(c echo.Context) error {
 		NyaaUrlFirstUnwatchedEp:    nyaaEpisodes[0].NyaaMagnetUrl,
 		AniwaveUrlFirstUnwatchedEp: aniwaveEpisodes[0].AniwavePageUrl,
 		NyaaSourceUrl:              releasePayload.NyaaUrl,
+		Season:                     nyaaEpisodes[0].Season,
 		AniwaveSourceUrl:           releasePayload.AniwaveUrl,
 		UserId:                     releasePayload.UserId,
 		LastWatchedEpisode:         0,
@@ -430,6 +423,7 @@ func scrapeSources(c echo.Context) error {
 
 	err = saveReleaseInDB(&newReleaseData)
 	if err != nil {
+		log.Fatal(err)
 		return err
 	}
 

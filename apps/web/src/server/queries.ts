@@ -53,11 +53,9 @@ const schema = z.object({
       invalid_type_error: "Invalid URL",
     })
     .url(),
-  userId: z
-    .string({
-      invalid_type_error: "Invalid user ID",
-    })
-    .uuid("Invalid user ID"),
+  userId: z.string({
+    invalid_type_error: "Invalid user ID",
+  }),
 });
 
 export async function addRelease(_: any, formData: FormData) {
@@ -156,6 +154,7 @@ export async function untrackRelease(releaseId: string, formData: FormData) {
     throw new Error("Failed to update database.");
   }
 
+  revalidatePath("/", "page");
   return {
     message: "Release is no longer being tracked",
   };
