@@ -4,7 +4,6 @@ import { useTheme } from "next-themes";
 import { MoonStar, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 
 export default function ThemeSwitcher() {
@@ -15,10 +14,11 @@ export default function ThemeSwitcher() {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    setTheme("dark");
+  }, [setTheme]);
 
   if (!mounted) {
-    return <Skeleton className="w-[4.5rem] h-[1.5rem] rounded-xl" />;
+    return null;
   }
 
   return (

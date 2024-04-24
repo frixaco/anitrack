@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { addRelease } from "@/server/queries";
 import { useFormState, useFormStatus } from "react-dom";
+import { toast } from "sonner";
 
 // TODO: Add live search, auto search on nyaa.si and 9animetv.to
 // TODO: Ideally, I should be able to add new release by its title only
@@ -23,8 +24,32 @@ import { useFormState, useFormStatus } from "react-dom";
 //         for which I can ask user's permission to use their Google Drive
 // TODO: Add batch download link to download batch torrent file
 
-export default function AddReleaseDrawer({ userId }: { userId: string }) {
+function SubmitButton() {
   const status = useFormStatus();
+
+  let toastId: string | number = 0;
+  toast.dismiss(toastId);
+  if (status.pending) {
+    toastId = toast.loading("Adding a new release");
+  }
+
+  return (
+    <DrawerFooter>
+      <Button
+        aria-disabled={status.pending}
+        disabled={status.pending}
+        className="font-semibold"
+        type="submit"
+      >
+        Add
+      </Button>
+
+      <DrawerClose className="py-4">Cancel</DrawerClose>
+    </DrawerFooter>
+  );
+}
+
+export default function AddReleaseDrawer({ userId }: { userId: string }) {
   const [state, action] = useFormState(addRelease, {
     errors: {},
     success: false,
@@ -83,19 +108,7 @@ export default function AddReleaseDrawer({ userId }: { userId: string }) {
           <p aria-live="polite" className="sr-only" role="status">
             {state?.success ? "Success" : "Failure"}
           </p>
-
-          <DrawerFooter>
-            <Button
-              aria-disabled={status.pending}
-              disabled={status.pending}
-              className="font-semibold"
-              type="submit"
-            >
-              Add
-            </Button>
-
-            <DrawerClose className="py-4">Cancel</DrawerClose>
-          </DrawerFooter>
+          <SubmitButton />
         </form>
       </DrawerContent>
     </Drawer>

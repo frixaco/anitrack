@@ -85,7 +85,6 @@ export async function addRelease(_: any, formData: FormData) {
       userId,
     }),
   });
-
   console.log("Response: ", await response.json());
 
   revalidatePath("/", "page");
