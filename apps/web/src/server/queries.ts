@@ -74,18 +74,20 @@ export async function addRelease(_: any, formData: FormData) {
 
   const { nyaaUrl, aniwaveUrl, userId } = validatedFields.data;
 
-  const response = await fetch(`${env.API_URL!}/scrape`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      nyaaUrl,
-      aniwaveUrl,
-      userId,
-    }),
-  });
-  console.log("Response: ", await response.json());
+  await new Promise((r) => setTimeout(() => r("DONE"), 2000));
+  // const response = await fetch(`${env.API_URL!}/scrape`, {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  //   body: JSON.stringify({
+  //     nyaaUrl,
+  //     aniwaveUrl,
+  //     userId,
+  //   }),
+  // });
+  //
+  // console.log("Response: ", await response.json());
 
   revalidatePath("/", "page");
   return { errors: {}, success: true };

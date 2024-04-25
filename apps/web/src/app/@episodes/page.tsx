@@ -1,8 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
-import ReleaseCard from "./release-card";
 import { db } from "@/server/db";
-
-let x = "rs";
+import ReleaseCard from "../_components/release-card";
 
 export type Release = {
   releaseId: string;
@@ -14,16 +12,14 @@ export type Release = {
   title: string;
 };
 
-export default async function NewEpisodesSection() {
+export default async function Page() {
+  await new Promise((r) => setTimeout(() => r("DONE"), 2000));
+
   const newReleases: Release[] = [];
 
   const user = auth();
   if (user.userId == null) {
-    return (
-      <section>
-        <h2 className="font-semibold text-2xl pb-2">New Episodes</h2>
-      </section>
-    );
+    return null;
   }
   const releasesWithNewEpisodes = await db.query.release.findMany({
     where: ({ userId, isTracking }, { eq, and }) =>
@@ -31,11 +27,7 @@ export default async function NewEpisodesSection() {
   });
 
   if (releasesWithNewEpisodes == null) {
-    return (
-      <section>
-        <h2 className="font-semibold text-2xl pb-2">New Episodes</h2>
-      </section>
-    );
+    return null;
   }
 
   for (const release of releasesWithNewEpisodes) {
@@ -54,14 +46,10 @@ export default async function NewEpisodesSection() {
   }
 
   return (
-    <section>
-      <h2 className="font-semibold text-2xl pb-2">New Episodes</h2>
-
-      <div className="grid grid-cols-2 gap-2">
-        {newReleases.map((episode) => (
-          <ReleaseCard key={episode.releaseId} episode={episode} />
-        ))}
-      </div>
-    </section>
+    <div className="grid grid-cols-2 gap-2">
+      {newReleases.map((episode) => (
+        <ReleaseCard key={episode.releaseId} episode={episode} />
+      ))}
+    </div>
   );
 }

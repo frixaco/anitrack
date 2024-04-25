@@ -1,20 +1,14 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/server/db";
-import { Release } from "./new-episodes-section";
-import TrackedReleaseCard from "./tracked-release-card";
+import { Release } from "../@episodes/page";
+import TrackedReleaseCard from "../_components/tracked-release-card";
 
-export default async function TrackedAnimesSection() {
+export default async function Page() {
   const newReleases: Release[] = [];
 
   const user = auth();
   if (user.userId == null) {
-    return (
-      <section>
-        <h2 className="font-semibold text-2xl pb-2">Tracking</h2>
-
-        <div className="grid grid-cols-2 gap-2"></div>
-      </section>
-    );
+    return null;
   }
 
   const releasesWithNewEpisodes = await db.query.release.findMany({
@@ -23,13 +17,7 @@ export default async function TrackedAnimesSection() {
   });
 
   if (releasesWithNewEpisodes == null) {
-    return (
-      <section>
-        <h2 className="font-semibold text-2xl pb-2">Tracking</h2>
-
-        <div className="grid grid-cols-2 gap-2"></div>
-      </section>
-    );
+    return null;
   }
 
   for (const release of releasesWithNewEpisodes) {
@@ -48,18 +36,14 @@ export default async function TrackedAnimesSection() {
   }
 
   return (
-    <section>
-      <h2 className="font-semibold text-2xl pb-2">Tracking</h2>
-
-      <div className="grid grid-cols-2 gap-2">
-        {newReleases.map((episode) => (
-          <TrackedReleaseCard
-            key={episode.releaseId}
-            episode={episode}
-            asRelease
-          />
-        ))}
-      </div>
-    </section>
+    <div className="grid grid-cols-2 gap-2">
+      {newReleases.map((episode) => (
+        <TrackedReleaseCard
+          key={episode.releaseId}
+          episode={episode}
+          asRelease
+        />
+      ))}
+    </div>
   );
 }

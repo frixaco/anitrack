@@ -1,11 +1,11 @@
 import Image from "next/image";
 import { Eye, Magnet, Video } from "lucide-react";
-import { Release } from "./new-episodes-section";
 import { markEpisodeWatched } from "@/server/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
+import { Release } from "../@episodes/page";
 
 export default async function ReleaseCard({
   episode,

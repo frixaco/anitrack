@@ -25,8 +25,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  drawer,
+  episodes,
+  history,
+  releases,
 }: Readonly<{
   children: React.ReactNode;
+  drawer: React.ReactNode;
+  episodes: React.ReactNode;
+  history: React.ReactNode;
+  releases: React.ReactNode;
 }>) {
   return (
     <ClerkProvider>
@@ -41,7 +49,14 @@ export default function RootLayout({
             <NextThemeProvider>
               <TooltipProvider>
                 <Header />
-                {children}
+
+                <main className="flex flex-col gap-6 p-4">
+                  {children}
+                  {drawer}
+                  {episodes}
+                  {history}
+                  {releases}
+                </main>
 
                 <TailwindIndicator />
                 <Toaster />

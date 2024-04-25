@@ -12,9 +12,9 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { addRelease } from "@/server/queries";
 import { useFormState, useFormStatus } from "react-dom";
-import { toast } from "sonner";
 
 // TODO: Add live search, auto search on nyaa.si and 9animetv.to
 // TODO: Ideally, I should be able to add new release by its title only
@@ -25,31 +25,26 @@ import { toast } from "sonner";
 // TODO: Add batch download link to download batch torrent file
 
 function SubmitButton() {
-  const status = useFormStatus();
-
-  let toastId: string | number = 0;
-  toast.dismiss(toastId);
-  if (status.pending) {
-    toastId = toast.loading("Adding a new release");
-  }
-
+  const { pending } = useFormStatus();
   return (
-    <DrawerFooter>
-      <Button
-        aria-disabled={status.pending}
-        disabled={status.pending}
-        className="font-semibold"
-        type="submit"
-      >
-        Add
-      </Button>
-
-      <DrawerClose className="py-4">Cancel</DrawerClose>
-    </DrawerFooter>
+    <Button
+      disabled={pending}
+      aria-disabled={pending}
+      className="font-semibold"
+      type="submit"
+    >
+      {pending ? <Spinner className="px-4" /> : "Add"}
+    </Button>
   );
 }
 
-export default function AddReleaseDrawer({ userId }: { userId: string }) {
+export default function AddReleaseDrawer({
+  userId,
+  disabled,
+}: {
+  userId: string | null;
+  disabled: boolean;
+}) {
   const [state, action] = useFormState(addRelease, {
     errors: {},
     success: false,
@@ -58,7 +53,12 @@ export default function AddReleaseDrawer({ userId }: { userId: string }) {
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <Button size="lg" className="font-bold tracking-wide">
+        <Button
+          disabled={disabled}
+          aria-disabled={disabled}
+          size="lg"
+          className="font-bold tracking-wide"
+        >
           Add Release
         </Button>
       </DrawerTrigger>
@@ -108,7 +108,12 @@ export default function AddReleaseDrawer({ userId }: { userId: string }) {
           <p aria-live="polite" className="sr-only" role="status">
             {state?.success ? "Success" : "Failure"}
           </p>
-          <SubmitButton />
+
+          <DrawerFooter>
+            <SubmitButton />
+
+            <DrawerClose className="py-4">Cancel</DrawerClose>
+          </DrawerFooter>
         </form>
       </DrawerContent>
     </Drawer>
