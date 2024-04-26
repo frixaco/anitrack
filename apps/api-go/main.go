@@ -71,9 +71,10 @@ type ScrapePayload struct {
 }
 
 func scrapeNyaaForEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
+	fmt.Println("GETTING NYAA EPISODES")
 	c := colly.NewCollector(
 		colly.MaxDepth(1),
-		colly.AllowedDomains("nyaa.si", "aniwave.to"),
+		colly.AllowedDomains("nyaa.si"),
 	)
 	c.WithTransport(&http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -84,7 +85,7 @@ func scrapeNyaaForEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 
 	var nyaaEpisodes []ScrapedEpisodeData
 
-	c.OnHTML("tr.danger", func(e *colly.HTMLElement) {
+	c.OnHTML("tr", func(e *colly.HTMLElement) {
 		uploadInfo := e.ChildAttr("a[href^='/view']:not([href$='#comments']):not([title*='Batch'])", "title")
 		fmt.Println(uploadInfo)
 
@@ -135,10 +136,12 @@ func scrapeNyaaForEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 		fmt.Println(episode.EpisodeNumber, " - ", episode.NyaaMagnetUrl)
 	}
 
+	fmt.Println("FINISHED GETTING EPISODES FROM NYAA.SI")
 	return nyaaEpisodes
 }
 
 func getAniwaveEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
+	fmt.Println("GETTING ANIWAVE EPISODES")
 	var aniwaveEpisodes []ScrapedEpisodeData
 
 	browser := rod.New().MustConnect()
@@ -146,6 +149,18 @@ func getAniwaveEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 
 	page := stealth.MustPage(browser)
 	page.MustNavigate(rp.AniwaveUrl).MustWaitStable()
+
+	// html := page.MustHTML()
+	// file, err := os.Create("index.html")
+	// if err != nil {
+	// 	log.Fatal("Error creating file:", err)
+	// }
+	// defer file.Close()
+	//
+	// _, err = file.WriteString(html)
+	// if err != nil {
+	// 	log.Fatal("Error writing to file:", err)
+	// }
 
 	uploadInfoEl := page.MustElement("h1.title.d-title")
 	uploadInfo := uploadInfoEl.MustText()
@@ -203,6 +218,7 @@ func getAniwaveEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 		fmt.Println(episode.EpisodeNumber, " - ", episode.AniwavePageUrl)
 	}
 
+	fmt.Println("FINISHED GETTING EPISODES FROM ANIWAVE.TO")
 	return aniwaveEpisodes
 }
 
@@ -420,7 +436,6 @@ func scrapeSources(c echo.Context) error {
 		LastWatchedEpisode:         0,
 		ThumbnailUrl:               aniwaveEpisodes[0].ThumbnailUrl,
 	}
-
 	err = saveReleaseInDB(&newReleaseData)
 	if err != nil {
 		log.Fatal(err)
