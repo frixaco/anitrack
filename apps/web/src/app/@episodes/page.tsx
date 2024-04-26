@@ -10,6 +10,7 @@ export type Release = {
   seasonNumber: number;
   thumbnailUrl: string;
   title: string;
+  isTracking: boolean;
 };
 
 export default async function Page() {
@@ -41,6 +42,7 @@ export default async function Page() {
         title: release.title,
         seasonNumber: release.season,
         thumbnailUrl: release.thumbnailUrl,
+        isTracking: release.isTracking,
       });
     }
   }

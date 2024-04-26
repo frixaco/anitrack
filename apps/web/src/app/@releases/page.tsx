@@ -12,8 +12,7 @@ export default async function Page() {
   }
 
   const releasesWithNewEpisodes = await db.query.release.findMany({
-    where: ({ userId, isTracking }, { eq, and }) =>
-      and(eq(userId, user.userId), eq(isTracking, true)),
+    where: ({ userId }, { eq, and }) => and(eq(userId, user.userId)),
   });
 
   if (releasesWithNewEpisodes == null) {
@@ -31,16 +30,18 @@ export default async function Page() {
         title: release.title,
         seasonNumber: release.season,
         thumbnailUrl: release.thumbnailUrl,
+        isTracking: release.isTracking,
       });
     }
   }
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      {newReleases.map((episode) => (
+      {newReleases.map((release) => (
         <TrackedReleaseCard
-          key={episode.releaseId}
-          episode={episode}
+          key={release.releaseId}
+          release={release}
+          isTracking={release.isTracking}
           asRelease
         />
       ))}

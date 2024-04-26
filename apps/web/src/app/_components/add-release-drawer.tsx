@@ -14,6 +14,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { addRelease } from "@/server/queries";
+import { warn } from "console";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+import { useState, useTransition } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 
 // TODO: Add live search, auto search on nyaa.si and 9animetv.to
@@ -42,16 +50,37 @@ export default function AddReleaseDrawer({
   userId,
   disabled,
 }: {
-  userId: string | null;
+  userId: string;
   disabled: boolean;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [state, action] = useFormState(addRelease, {
     errors: {},
     success: false,
   });
 
+  const [open, setOpen] = useState(() => searchParams.get("adding") != null);
+  const [_, startTransition] = useTransition();
+
   return (
-    <Drawer>
+    <Drawer
+      open={open}
+      onOpenChange={(open) => {
+        setOpen(open);
+        startTransition(() => {
+          const params = new URLSearchParams(searchParams.toString());
+          if (!open) {
+            params.delete("adding");
+          } else {
+            params.set("adding", "true");
+          }
+          router.push(pathname + "?" + params.toString());
+        });
+      }}
+    >
       <DrawerTrigger asChild>
         <Button
           disabled={disabled}
@@ -79,9 +108,6 @@ export default function AddReleaseDrawer({
                 name="aniwaveUrl"
                 type="url"
                 placeholder="Enter URL here"
-                value={
-                  "https://aniwave.to/watch/dosanko-gal-wa-namaramenkoi.4q12o/ep-1"
-                }
               />
               <p aria-live="polite" className="sr-only" role="status">
                 {state.errors.aniwaveUrl}
@@ -95,7 +121,6 @@ export default function AddReleaseDrawer({
                 name="nyaaUrl"
                 type="url"
                 placeholder="Enter URL here"
-                value={"https://nyaa.si/?f=0&c=1_2&q=ember+hokkaido"}
               />
               <p aria-live="polite" className="sr-only" role="status">
                 {state.errors.nyaaUrl}

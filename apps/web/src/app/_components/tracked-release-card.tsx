@@ -1,23 +1,33 @@
 import Image from "next/image";
-import { Trash } from "lucide-react";
-import { Release } from "./new-episodes-section";
-import { untrackRelease } from "@/server/queries";
+import { StopCircle } from "lucide-react";
+import { continueTrackingRelease, untrackRelease } from "@/server/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Release } from "../@episodes/page";
 
 export default async function TrackedReleaseCard({
-  episode,
+  release,
   asRelease,
+  isTracking,
 }: {
-  episode: Release;
+  release: Release;
   asRelease?: boolean;
+  isTracking: boolean;
 }) {
   const { episodeNumber, releaseId, seasonNumber, title, thumbnailUrl } =
-    episode;
+    release;
 
-  const untrackReleaseById = untrackRelease.bind(null, releaseId);
+  async function handleRelease() {
+    "use server";
+
+    if (isTracking) {
+      await untrackRelease(releaseId);
+    } else {
+      await continueTrackingRelease(releaseId);
+    }
+  }
 
   return (
     <Card className="relative">
@@ -37,9 +47,14 @@ export default async function TrackedReleaseCard({
         <CardTitle className="text-lg text-balance">{title}</CardTitle>
 
         <div className="flex flex-col pt-4">
-          <form action={untrackReleaseById}>
-            <Button variant="secondary" className="w-full rounded-xl">
-              <Trash />
+          <form action={handleRelease}>
+            <Button
+              disabled={!isTracking}
+              aria-disabled={!isTracking}
+              variant="secondary"
+              className="w-full rounded-xl"
+            >
+              <StopCircle />
             </Button>
           </form>
         </div>
