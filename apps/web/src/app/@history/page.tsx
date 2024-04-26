@@ -1,7 +1,7 @@
 import { db } from "@/server/db";
 import { auth } from "@clerk/nextjs/server";
 import { release, watchHistory } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import WatchedEpisodeCard from "../_components/watched-episode-card";
 
 export type WatchedEpisode = {
@@ -23,7 +23,13 @@ export default async function Page() {
   const watchedEpisodes = await db
     .select()
     .from(watchHistory)
-    .innerJoin(release, eq(watchHistory.userId, user.userId));
+    .innerJoin(
+      release,
+      and(
+        eq(watchHistory.userId, user.userId),
+        eq(watchHistory.releaseId, release.uuid),
+      ),
+    );
 
   let result = (
     <>
