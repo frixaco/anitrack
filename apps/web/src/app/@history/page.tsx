@@ -52,5 +52,5 @@ export default async function Page() {
     result = <p className="p-4 text-center col-span-2">Nothing to see</p>;
   }
 
-  return <div className="grid grid-cols-2 gap-2">{result}</div>;
+  return <section className="grid grid-cols-2 gap-2">{result}</section>;
 }

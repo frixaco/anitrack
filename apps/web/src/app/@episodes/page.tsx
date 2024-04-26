@@ -48,10 +48,10 @@ export default async function Page() {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <section className="grid grid-cols-none sm:grid-cols-4 overflow-scroll gap-2">
       {newReleases.map((episode) => (
         <ReleaseCard key={episode.releaseId} episode={episode} />
       ))}
-    </div>
+    </section>
   );
 }

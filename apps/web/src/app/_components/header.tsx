@@ -5,7 +5,7 @@ import { LogIn } from "lucide-react";
 
 export async function Header() {
   return (
-    <header className="p-4 flex items-center justify-between">
+    <header className="w-screen p-4 flex items-center justify-between">
       <div className="flex flex-col items-start">
         <p className="text-lg font-bold leading-none">Anitrack</p>
 

@@ -1,11 +1,11 @@
 import Image from "next/image";
 import { StopCircle } from "lucide-react";
 import { continueTrackingRelease, untrackRelease } from "@/server/queries";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Release } from "../@episodes/page";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 export default async function TrackedReleaseCard({
   release,
@@ -30,34 +30,36 @@ export default async function TrackedReleaseCard({
   }
 
   return (
-    <Card className="relative">
+    <Card className="relative max-w-64 flex flex-col p-4 gap-4">
       {!asRelease && (
-        <Badge className="absolute drop-shadow-lg z-10 right-2 top-2 text-xl">
+        <Badge className="absolute drop-shadow-lg z-10 left-2 top-2 text-xl">
           E{episodeNumber} - S{seasonNumber}
         </Badge>
       )}
 
-      <CardHeader className="relative w-[280px] max-w-full pb-2">
-        <AspectRatio ratio={2 / 3}>
-          <Image className="rounded-md" fill alt={title} src={thumbnailUrl} />
-        </AspectRatio>
-      </CardHeader>
+      <AspectRatio ratio={2 / 3} className="relative p-0">
+        <Image
+          className="object-fit rounded-md"
+          fill
+          alt={title}
+          src={thumbnailUrl}
+        />
+      </AspectRatio>
 
-      <CardContent>
+      <CardContent className="flex flex-col gap-4 justify-between p-0">
         <CardTitle className="text-lg text-balance">{title}</CardTitle>
 
-        <div className="flex flex-col pt-4">
-          <form action={handleRelease}>
-            <Button
-              disabled={!isTracking}
-              aria-disabled={!isTracking}
-              variant="secondary"
-              className="w-full rounded-xl"
-            >
-              <StopCircle />
-            </Button>
-          </form>
-        </div>
+        <form className="w-full" action={handleRelease}>
+          <Button
+            disabled={!isTracking}
+            aria-disabled={!isTracking}
+            variant="secondary"
+            className="w-full rounded-xl"
+          >
+            <StopCircle />
+            <span className="pl-2 hidden sm:block">Stop tracking</span>
+          </Button>
+        </form>
       </CardContent>
     </Card>
   );

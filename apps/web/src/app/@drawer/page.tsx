@@ -11,8 +11,13 @@ export default async function Page() {
   // }
 
   return (
-    user.userId != null && (
-      <AddReleaseDrawer disabled={user.userId === null} userId={user.userId} />
-    )
+    <section className="w-full flex justify-center">
+      {user.userId != null && (
+        <AddReleaseDrawer
+          disabled={user.userId === null}
+          userId={user.userId}
+        />
+      )}
+    </section>
   );
 }
