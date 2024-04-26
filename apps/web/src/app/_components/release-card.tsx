@@ -1,11 +1,12 @@
 import Image from "next/image";
-import { Eye, Magnet, Video } from "lucide-react";
+import { Magnet, Video } from "lucide-react";
 import { markEpisodeWatched } from "@/server/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { Release } from "../@episodes/page";
+import { SubmitButton } from "./release-card-submit-btn";
 
 export default async function ReleaseCard({
   episode,
@@ -70,9 +71,7 @@ export default async function ReleaseCard({
           </div>
 
           <form action={markEpisodeAsWatched}>
-            <Button className="w-full rounded-xl">
-              <Eye />
-            </Button>
+            <SubmitButton />
           </form>
         </div>
       </CardContent>
