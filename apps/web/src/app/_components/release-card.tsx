@@ -33,9 +33,12 @@ export default async function ReleaseCard({
   });
 
   return (
-    <Card className="relative min-w-96 flex flex-row h-64 p-4 gap-4">
+    <Card className="relative min-w-80 flex flex-row h-64 p-4 gap-4">
       {!asRelease && (
-        <Badge className="absolute drop-shadow-lg z-10 left-2 top-2 text-xl">
+        <Badge
+          variant="destructive"
+          className="absolute drop-shadow-2xl z-10 left-3 top-3 text-xl"
+        >
           E{episodeNumber} - S{seasonNumber}
         </Badge>
       )}

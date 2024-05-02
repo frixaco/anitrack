@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"slices"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/go-rod/rod"
@@ -414,8 +415,22 @@ func scrapeSources(c echo.Context) error {
 	fmt.Println("nyaa.si URL:", releasePayload.NyaaUrl)
 	fmt.Println("aniwave.to URL:", releasePayload.AniwaveUrl)
 
-	nyaaEpisodes := scrapeNyaaForEpisodes(&releasePayload)
-	aniwaveEpisodes := getAniwaveEpisodes(&releasePayload)
+	var nyaaEpisodes []ScrapedEpisodeData
+	var aniwaveEpisodes []ScrapedEpisodeData
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		nyaaEpisodes = scrapeNyaaForEpisodes(&releasePayload)
+	}()
+	go func() {
+		defer wg.Done()
+		aniwaveEpisodes = getAniwaveEpisodes(&releasePayload)
+	}()
+
+	wg.Wait()
 
 	latestEpisode := len(aniwaveEpisodes)
 	if len(nyaaEpisodes) > len(aniwaveEpisodes) {

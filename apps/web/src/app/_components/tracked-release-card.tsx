@@ -30,7 +30,7 @@ export default async function TrackedReleaseCard({
   }
 
   return (
-    <Card className="relative max-w-64 flex flex-col p-4 gap-4">
+    <Card className="relative w-64 flex flex-col justify-between p-4 gap-4">
       {!asRelease && (
         <Badge className="absolute drop-shadow-lg z-10 left-2 top-2 text-xl">
           E{episodeNumber} - S{seasonNumber}
@@ -46,8 +46,8 @@ export default async function TrackedReleaseCard({
         />
       </AspectRatio>
 
-      <CardContent className="flex flex-col gap-4 justify-between p-0">
-        <CardTitle className="text-lg text-balance">{title}</CardTitle>
+      <CardContent className="flex-1 flex flex-col justify-between p-0">
+        <CardTitle className="text-lg text-balance pb-4">{title}</CardTitle>
 
         <form className="w-full" action={handleRelease}>
           <Button
