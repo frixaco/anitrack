@@ -95,6 +95,21 @@ export default function AddReleaseDrawer({
               Anitrack will start tracking the release using the link
             </DrawerDescription>
 
+            <p className="pt-4">How to get the URLs:</p>
+            <ul className="pb-4">
+              <li>
+                Try to search for an uploader (like ember, judas, anime time)
+                who has consistent naming -{" "}
+                <strong>https://nyaa.si/?f=0&c=1_2&q=ember+frieren</strong>
+              </li>
+              <li>
+                Just copy the URL from the page and paste it here -
+                <strong>
+                  https://aniwave.to/watch/sousou-no-frieren.3rp2y
+                </strong>
+              </li>
+            </ul>
+
             <label className="pt-4 text-left text-xs">
               Aniwave URL
               <Input
