@@ -6,7 +6,6 @@
     "dev": "air",
     "build": "go build -o dist/ .",
     "start": "go run main.go",
-    "deploy": "railway up",
-    "postinstall": "go mod tidy"
+    "deploy": "railway up"
   }
 }
