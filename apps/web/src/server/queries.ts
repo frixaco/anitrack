@@ -8,8 +8,8 @@ import { release, watchHistory } from "./db/schema";
 import { and, eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { env } from "@/env";
-import analyticsServerClient from "./analytics";
 import { ratelimit } from "./ratelimit";
+import postHogServerClient from "./analytics";
 
 // TODO:
 // 1. Register new user
@@ -39,11 +39,15 @@ export async function addRelease(_: any, formData: FormData) {
   const user = auth();
   if (!user.userId) throw new Error("Unauthorized");
 
-  analyticsServerClient.capture({
+  const posthog = postHogServerClient();
+  posthog.capture({
     distinctId: user.userId,
-    event: "added release",
-    properties: {},
+    event: "release added",
+    properties: {
+      metadata: "metadata",
+    },
   });
+  await posthog.shutdown();
 
   const { success: rateLimited } = await ratelimit.limit(user.userId);
 
@@ -68,7 +72,7 @@ export async function addRelease(_: any, formData: FormData) {
   const { nyaaUrl, aniwaveUrl, userId } = validatedFields.data;
 
   try {
-    const response = await fetch(`${env.API_URL!}/scrape`, {
+    const response = await fetch(`${env.API_URL}/scrape`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -107,11 +111,15 @@ export async function markEpisodeWatched(
   const user = auth();
   if (!user.userId) throw new Error("Unauthorized");
 
-  analyticsServerClient.capture({
+  const posthog = postHogServerClient();
+  posthog.capture({
     distinctId: user.userId,
     event: "episode watched",
-    properties: {},
+    properties: {
+      metadata: "metadata",
+    },
   });
+  await posthog.shutdown();
 
   const { success } = await ratelimit.limit(user.userId);
 

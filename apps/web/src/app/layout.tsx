@@ -4,10 +4,11 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 
 import { ClerkProvider } from "@clerk/nextjs";
-import { CSPostHogProvider } from "./_providers/analytics";
+import { ClientPostHogProvider } from "./_providers/analytics";
 import { NextThemeProvider } from "./_providers/next-theme";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { TailwindIndicator } from "@/components/ui/tailwind-indicator";
+import { ReactQueryProvider } from "./_providers/react-query";
 
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
@@ -38,8 +39,8 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <CSPostHogProvider>
-        <html lang="en" suppressHydrationWarning>
+      <html lang="en" suppressHydrationWarning>
+        <ClientPostHogProvider>
           <body
             className={cn(
               "min-h-screen bg-background font-sans antialiased",
@@ -47,24 +48,26 @@ export default function RootLayout({
             )}
           >
             <NextThemeProvider>
-              <TooltipProvider>
-                <Header />
+              <ReactQueryProvider>
+                <TooltipProvider>
+                  <Header />
 
-                <main className="flex flex-col gap-6 p-4">
-                  {children}
-                  {drawer}
-                  {episodes}
-                  {history}
-                  {releases}
-                </main>
+                  <main className="flex flex-col gap-6 p-4">
+                    {children}
+                    {drawer}
+                    {episodes}
+                    {history}
+                    {releases}
+                  </main>
 
-                <TailwindIndicator />
-                <Toaster />
-              </TooltipProvider>
+                  <TailwindIndicator />
+                  <Toaster />
+                </TooltipProvider>
+              </ReactQueryProvider>
             </NextThemeProvider>
           </body>
-        </html>
-      </CSPostHogProvider>
+        </ClientPostHogProvider>
+      </html>
     </ClerkProvider>
   );
 }

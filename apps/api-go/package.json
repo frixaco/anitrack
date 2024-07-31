@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "air"
+    "dev": "air",
+    "build": "go build -o dist/ .",
+    "start": "go run main.go",
+    "deploy": "railway up",
+    "postinstall": "go mod tidy"
   }
 }

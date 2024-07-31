@@ -1,5 +1,10 @@
 # Anitrack - track new episodes anime releases on nyaa.si and aniwave.to
 
+## Setup
+
+1. Setup Railway CLI
+2. Run `pnpm install`
+
 TODO:
 
 - [ ] Integrate ntfy.sh for notifications
