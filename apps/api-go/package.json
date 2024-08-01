@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "air",
     "build": "go build -o dist/ .",
-    "start": "go run main.go",
+    "start": "./dist/api-go",
     "deploy": "railway up"
   }
 }
