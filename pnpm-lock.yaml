@@ -52,6 +52,9 @@ importers:
       '@sentry/nextjs':
         specifier: ^8.21.0
         version: 8.21.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.25.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.52.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.25.1(@opentelemetry/api@1.9.0))(next@14.2.5(@babel/core@7.24.8)(@opentelemetry/api@1.9.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)(webpack@5.93.0(esbuild@0.19.12))
+      '@sentry/utils':
+        specifier: ^8.22.0
+        version: 8.22.0
       '@t3-oss/env-core':
         specifier: ^0.11.0
         version: 0.11.0(typescript@5.4.5)(zod@3.23.8)
@@ -1359,8 +1362,16 @@ packages:
     resolution: {integrity: sha512-2hF7lhDCGBN8VkIkHTuh9pL3QnJ3QBkIDAcKosFCS5tHGp68zGJgE0VWg2yQvqjZM06DnFT9CUKF9ZGv45FS3w==}
     engines: {node: '>=14.18'}
 
+  '@sentry/types@8.22.0':
+    resolution: {integrity: sha512-1MLK3xO+uF2oJaa+M98aLIrQsEHzV7xnVWPfE3MhejYLNQebj4rQnQKTut/xZNIF9W0Q+bRcakLarC3ce2a74g==}
+    engines: {node: '>=14.18'}
+
   '@sentry/utils@8.21.0':
     resolution: {integrity: sha512-Evq5goV8CKLISuULenqJm8VyIYaKa6wDAYIHfcDmSyCJIEDlEpRb8S7LcKdYsf6h0FdGy9ofv5ksgMPCqYq7eg==}
+    engines: {node: '>=14.18'}
+
+  '@sentry/utils@8.22.0':
+    resolution: {integrity: sha512-0ITG2+3EtyMtyc/nQG8aB9z9eIQ4L43nM/KuNgYSnM1vPl/zegbaLT0Ek/xkQB1OLIOLkEPQ6x9GWe+248/n3g==}
     engines: {node: '>=14.18'}
 
   '@sentry/vercel-edge@8.21.0':
@@ -4920,9 +4931,15 @@ snapshots:
 
   '@sentry/types@8.21.0': {}
 
+  '@sentry/types@8.22.0': {}
+
   '@sentry/utils@8.21.0':
     dependencies:
       '@sentry/types': 8.21.0
+
+  '@sentry/utils@8.22.0':
+    dependencies:
+      '@sentry/types': 8.22.0
 
   '@sentry/vercel-edge@8.21.0':
     dependencies:

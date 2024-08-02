@@ -1,0 +1,18 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-go
+    environment:
+      - API_URL=http://api-go:4000
+
+  api-go:
+    build:
+      context: .
+      dockerfile: ./apps/api-go/Dockerfile
+    ports:
+      - "4000:4000"

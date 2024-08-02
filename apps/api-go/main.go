@@ -393,6 +393,7 @@ func updateReleaseInDB(r *Release) error {
 }
 
 func checkhealth(c echo.Context) error {
+	fmt.Println("Checkhealth")
 	type Message struct {
 		Message string `json:"message"`
 	}
