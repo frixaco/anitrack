@@ -7,8 +7,10 @@
     "start": "turbo start",
     "web:dev": "turbo watch dev --filter=web",
     "api:dev": "turbo watch dev --filter=api-go",
-    "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "lint": "turbo lint --filter=web",
+    "lint-fix": "turbo lint-fix --filter=web",
+    "format-check": "turbo format-check --filter=web",
+    "format-fix": "turbo format-fix --filter=web"
   },
   "devDependencies": {
     "prettier": "^3",

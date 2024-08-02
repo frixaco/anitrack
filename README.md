@@ -12,3 +12,4 @@ TODO:
 - [ ] Pallelize nyaa.si and aniwave.to scraping for better performance
 - [ ] Improve overall UI
 - [ ] Add video demo
+- [ ] Setup autofix.yml for Golang API
