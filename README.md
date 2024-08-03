@@ -1,5 +1,7 @@
 # Anitrack - track new episodes anime releases on nyaa.si and aniwave.to
 
+## NOTICE: Aniwave.to is currently not scrapable (nyaa.si works though) which means there is no point in using this project.
+
 ## Setup
 
 1. Setup Railway CLI
