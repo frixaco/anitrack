@@ -13,3 +13,4 @@ TODO:
 - [ ] Improve overall UI
 - [ ] Add video demo
 - [ ] Setup autofix.yml for Golang API
+- [ ] Show deployment url in Deployments section in project's Github page

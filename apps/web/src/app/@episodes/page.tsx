@@ -49,9 +49,13 @@ export default async function Page() {
 
   return (
     <section className="grid grid-cols-none sm:grid-cols-4 overflow-scroll gap-2">
-      {newReleases.map((episode) => (
-        <ReleaseCard key={episode.releaseId} episode={episode} />
-      ))}
+      {newReleases.length === 0 ? (
+        <p className="p-4 col-span-full text-center">Nothing to see</p>
+      ) : (
+        newReleases.map((episode) => (
+          <ReleaseCard key={episode.releaseId} episode={episode} />
+        ))
+      )}
     </section>
   );
 }

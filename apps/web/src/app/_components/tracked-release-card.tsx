@@ -49,17 +49,24 @@ export default async function TrackedReleaseCard({
       <CardContent className="flex-1 flex flex-col justify-between p-0">
         <CardTitle className="text-lg text-balance pb-4">{title}</CardTitle>
 
-        <form className="w-full" action={handleRelease}>
+        {isTracking ? (
+          <form className="w-full" action={handleRelease}>
+            <Button variant="secondary" className="w-full rounded-xl">
+              <StopCircle />
+              <span className="pl-2 hidden sm:block">Stop tracking</span>
+            </Button>
+          </form>
+        ) : (
           <Button
-            disabled={!isTracking}
-            aria-disabled={!isTracking}
+            disabled
+            aria-disabled
             variant="secondary"
             className="w-full rounded-xl"
           >
             <StopCircle />
-            <span className="pl-2 hidden sm:block">Stop tracking</span>
+            <span className="pl-2 hidden sm:block">Not tracking</span>
           </Button>
-        </form>
+        )}
       </CardContent>
     </Card>
   );
