@@ -11,11 +11,12 @@ import (
 	"regexp"
 	"slices"
 	"strconv"
-	"sync"
 	"time"
 
+	cu "github.com/Davincible/chromedp-undetected"
+	"github.com/chromedp/chromedp"
+
 	"github.com/go-rod/rod"
-	"github.com/go-rod/stealth"
 	"github.com/gocolly/colly/v2"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
@@ -141,6 +142,51 @@ func scrapeNyaaForEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 	return nyaaEpisodes
 }
 
+func testChromdp(rp *ScrapePayload) {
+	// fmt.Println("TESTING CHROMDP")
+	//
+	// // create context
+	// ctx, cancel := chromedp.NewContext(context.Background())
+	// chromedp.Flag("enable-automation", false)
+	// chromedp.Flag("disable-blink-features", "AutomationControlled")
+	// defer cancel()
+	//
+	// // run task list
+	// var res string
+	// err := chromedp.Run(ctx,
+	// 	chromedp.Navigate(rp.AniwaveUrl),
+	// 	chromedp.Text(`h1.title.d-title`, &res, chromedp.NodeVisible),
+	// )
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	//
+	// log.Println(strings.TrimSpace(res))
+	// New creates a new context for use with chromedp. With this context
+	// you can use chromedp as you normally would.
+	ctx, cancel, err := cu.New(cu.NewConfig(
+		// Remove this if you want to see a browser window.
+		cu.WithHeadless(),
+
+		// If the webelement is not found within 10 seconds, timeout.
+		cu.WithTimeout(10*time.Second),
+	))
+	if err != nil {
+		panic(err)
+	}
+	defer cancel()
+
+	if err := chromedp.Run(ctx,
+		// Check if we pass anti-bot measures.
+		chromedp.Navigate("https://nowsecure.nl"),
+		chromedp.WaitVisible(`//div[@class="hystericalbg"]`),
+	); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Undetected!")
+}
+
 func getAniwaveEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 	fmt.Println("GETTING ANIWAVE EPISODES")
 	var aniwaveEpisodes []ScrapedEpisodeData
@@ -148,7 +194,8 @@ func getAniwaveEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 	browser := rod.New().MustConnect()
 	defer browser.MustClose()
 
-	page := stealth.MustPage(browser)
+	page := browser.MustPage(rp.AniwaveUrl)
+	// page := stealth.MustPage(browser)
 	page.MustNavigate(rp.AniwaveUrl).MustWaitStable()
 
 	// html := page.MustHTML()
@@ -224,6 +271,7 @@ func getAniwaveEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 }
 
 func saveReleaseInDB(r *Release) error {
+	return nil
 	DATABASE_URL := os.Getenv("DATABASE_URL")
 
 	conn, err := pgx.Connect(context.Background(), DATABASE_URL)
@@ -419,19 +467,20 @@ func scrapeSources(c echo.Context) error {
 	var nyaaEpisodes []ScrapedEpisodeData
 	var aniwaveEpisodes []ScrapedEpisodeData
 
-	var wg sync.WaitGroup
-	wg.Add(2)
+	// var wg sync.WaitGroup
+	// wg.Add(2)
 
-	go func() {
-		defer wg.Done()
-		nyaaEpisodes = scrapeNyaaForEpisodes(&releasePayload)
-	}()
-	go func() {
-		defer wg.Done()
-		aniwaveEpisodes = getAniwaveEpisodes(&releasePayload)
-	}()
+	// go func() {
+	// 	defer wg.Done()
+	// nyaaEpisodes = scrapeNyaaForEpisodes(&releasePayload)
+	// }()
+	// go func() {
+	// 	defer wg.Done()
+	// aniwaveEpisodes = getAniwaveEpisodes(&releasePayload)
+	testChromdp(&releasePayload)
+	// }()
 
-	wg.Wait()
+	// wg.Wait()
 
 	latestEpisode := len(aniwaveEpisodes)
 	if len(nyaaEpisodes) > len(aniwaveEpisodes) {
