@@ -37,14 +37,18 @@ export default async function Page() {
 
   return (
     <div className="flex overflow-scroll gap-2">
-      {newReleases.map((release) => (
-        <TrackedReleaseCard
-          key={release.releaseId}
-          release={release}
-          isTracking={release.isTracking}
-          asRelease
-        />
-      ))}
+      {newReleases.length === 0 ? (
+        <p className="p-4 flex-1 text-center">Nothing to see</p>
+      ) : (
+        newReleases.map((release) => (
+          <TrackedReleaseCard
+            key={release.releaseId}
+            release={release}
+            isTracking={release.isTracking}
+            asRelease
+          />
+        ))
+      )}
     </div>
   );
 }

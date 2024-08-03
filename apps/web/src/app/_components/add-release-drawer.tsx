@@ -89,26 +89,39 @@ export default function AddReleaseDrawer({
         <form action={action} className="grid grid-cols-1 pt-4">
           <DrawerHeader>
             <DrawerTitle>
-              Enter <u>nyaa.si</u> and <u>aniwave.to</u> URL
+              Enter <u>nyaa.si</u> and <u>aniwave.to</u> URLs
             </DrawerTitle>
             <DrawerDescription>
-              Anitrack will start tracking the release using the link
-            </DrawerDescription>
+              <p className="py-4">How to get the URLs:</p>
+              <strong className="pt-2">nyaa.si:</strong>
+              <ul className="py-2">
+                <li>1. Try to search for Ember's uploads</li>
 
-            <p className="pt-4">How to get the URLs:</p>
-            <ul className="pb-4">
-              <li>
-                Try to search for an uploader (like ember, judas, anime time)
-                who has consistent naming -{" "}
-                <strong>https://nyaa.si/?f=0&c=1_2&q=ember+frieren</strong>
-              </li>
-              <li>
-                Just copy the URL from the page and paste it here -
-                <strong>
-                  https://aniwave.to/watch/sousou-no-frieren.3rp2y
-                </strong>
-              </li>
-            </ul>
+                <li>
+                  2. Copy the page URL and paste it here - e.g.{" "}
+                  <a
+                    href="https://nyaa.si/?f=0&c=1_2&q=ember+frieren"
+                    target="_blank"
+                  >
+                    https://nyaa.si/?f=0&c=1_2&q=ember+frieren
+                  </a>
+                </li>
+              </ul>
+              <strong className="py-2">aniwave.to:</strong>
+              <ul className="py-2">
+                <li>1. Search and open the page of the anime</li>
+
+                <li>
+                  2. Copy the page URL and paste it here - e.g.{" "}
+                  <a
+                    href="https://aniwave.to/watch/sousou-no-frieren.1o76z/ep-1"
+                    target="_blank"
+                  >
+                    https://aniwave.to/watch/sousou-no-frieren.1o76z/ep-1
+                  </a>
+                </li>
+              </ul>
+            </DrawerDescription>
 
             <label className="pt-4 text-left text-xs">
               Aniwave URL
