@@ -1,8 +1,9 @@
-# Anitrack (WIP) - track new episodes anime releases on nyaa.si and aniwave.to
+# Anitrack - track new episodes anime releases on nyaa.si and aniwave.to
 
-## NOTICE: Aniwave.to is currently not scrapable (nyaa.si works though) therefore I'm abandoning this project
+## NOTICE: I'm abandoning this project because aniwave.to is currently requires too much effort to scrape (nyaa.si works though) which I'm not interested in. I may come back if I get into webscraping again.
 
-Also, because I already accomplished my main goals:
+The project was fully functional. However, after a few week break I noticed it doesn't work anymore. So, technically, I finished the project :)
+Also, I already accomplished my main goals:
 
 - Try out Golang and goroutines
 - Try out deploying a Golang API to Railway
