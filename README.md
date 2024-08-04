@@ -1,13 +1,4 @@
-# Anitrack - track new episodes anime releases on nyaa.si and aniwave.to
-
-## NOTICE: Ok, so, what if instead of trying to scrape aniwavet.to (mission impossible 8), i just use nyaa.si and add video player for it (wow, genius)
-
-The project was fully functional. However, after a few week break I noticed it doesn't work anymore. So, technically, I finished the project? :)
-Also, I already accomplished my main goals:
-
-- Try out Golang and goroutines
-- Try out deploying a Golang API to Railway
-- Try out frontend technologies: Next.js App Router and server actions, Sentry, PostHog, Clerk, Upstash (ratelimiting), Drizzle ORM, React Query with server actions, etc.
+# Anitrack - anime episode tracker for me by me: anitrack-sigma.vercel.app
 
 ## Setup
 
