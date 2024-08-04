@@ -12,16 +12,20 @@ import (
 	"slices"
 	"strconv"
 	"sync"
-	"time"
 
-	"github.com/go-rod/rod"
-	"github.com/go-rod/stealth"
 	"github.com/gocolly/colly/v2"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
 
 	"github.com/jackc/pgx/v5"
+
+	"time"
+
+	"github.com/chromedp/cdproto/cdp"
+	"github.com/chromedp/chromedp"
+
+	cu "github.com/Davincible/chromedp-undetected"
 )
 
 type DefaultResponse struct {
@@ -145,31 +149,33 @@ func getAniwaveEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 	fmt.Println("GETTING ANIWAVE EPISODES")
 	var aniwaveEpisodes []ScrapedEpisodeData
 
-	browser := rod.New().MustConnect()
-	defer browser.MustClose()
+	ctx, cancel, err := cu.New(cu.NewConfig(
+		cu.WithHeadless(),
+		cu.WithTimeout(60*time.Second),
+	))
+	if err != nil {
+		panic(err)
+	}
+	defer cancel()
 
-	// page := browser.MustPage(rp.AniwaveUrl)
-	page := stealth.MustPage(browser)
-	wait := page.MustWaitNavigation()
-	page.MustNavigate(rp.AniwaveUrl)
-	wait()
-	page.MustWaitStable()
+	var buf []byte
+	if err := chromedp.Run(ctx,
+		chromedp.Navigate(rp.AniwaveUrl),
+		chromedp.FullScreenshot(&buf, 90),
+	); err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile("screenshot.png", buf, 0o644); err != nil {
+		log.Fatal(err)
+	}
 
-	// html := page.MustHTML()
-	// file, err := os.Create("index.html")
-	// if err != nil {
-	// 	log.Fatal("Error creating file:", err)
-	// }
-	// defer file.Close()
-	//
-	// _, err = file.WriteString(html)
-	// if err != nil {
-	// 	log.Fatal("Error writing to file:", err)
-	// }
-
-	uploadInfoEl := page.MustElement("h1.title.d-title")
-	uploadInfo := uploadInfoEl.MustText()
-
+	uploadInfo := ""
+	if err := chromedp.Run(
+		ctx,
+		chromedp.Text("h1.title.d-title", &uploadInfo, chromedp.NodeVisible),
+	); err != nil {
+		panic(err)
+	}
 	seasonPattern := regexp.MustCompile(`Season (\d+)`)
 	matches := seasonPattern.FindStringSubmatch(uploadInfo)
 	var seasonNumber int
@@ -183,23 +189,21 @@ func getAniwaveEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 		seasonNumber, _ = strconv.Atoi(matches[1])
 	}
 
-	els := page.MustElements("ul.ep-range a")
-	for _, el := range els {
-		hrefAttr, err := el.Attribute("href")
-		if err != nil {
-			log.Fatal(err)
-		}
-		numberAttr, err := el.Attribute("data-num")
-		if err != nil {
-			log.Fatal(err)
-		}
-		number, err := strconv.Atoi(*numberAttr)
-		if err != nil {
-			log.Fatal(err)
-		}
+	var projects []*cdp.Node
+	chromedp.Run(ctx, chromedp.Nodes("ul.ep-range a", &projects))
+	projects[0].AttributeValue("href")
 
-		imgEl := page.MustElement(".binfo .poster img")
-		thumbnailUrl, err := imgEl.Attribute("src")
+	var imgNodes []*cdp.Node
+	chromedp.Run(ctx, chromedp.Nodes(".binfo .poster img", &imgNodes))
+	thumbnailUrl, exist := imgNodes[0].Attribute("src")
+	if !exist {
+		panic("thumbnailUrl not found")
+	}
+
+	for _, el := range projects {
+		hrefAttr := el.AttributeValue("href")
+		numberAttr := el.AttributeValue("data-num")
+		number, err := strconv.Atoi(numberAttr)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -208,8 +212,8 @@ func getAniwaveEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 			ReleaseTitle:   uploadInfo,
 			Season:         seasonNumber,
 			EpisodeNumber:  number,
-			AniwavePageUrl: *hrefAttr,
-			ThumbnailUrl:   *thumbnailUrl,
+			AniwavePageUrl: hrefAttr,
+			ThumbnailUrl:   thumbnailUrl,
 		}
 
 		aniwaveEpisodes = append(aniwaveEpisodes, episode)
@@ -228,7 +232,6 @@ func getAniwaveEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 }
 
 func saveReleaseInDB(r *Release) error {
-	return nil
 	DATABASE_URL := os.Getenv("DATABASE_URL")
 
 	conn, err := pgx.Connect(context.Background(), DATABASE_URL)
@@ -534,6 +537,8 @@ func main() {
 	e.GET("/checkhealth", checkhealth)
 
 	e.POST("/scrape", scrapeSources)
+
+	e.POST("/test", test)
 
 	// NOTE: I already do it on the frontend. This is just in case
 	e.POST("/sync", syncReleases)
