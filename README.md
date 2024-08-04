@@ -1,6 +1,6 @@
 # Anitrack - track new episodes anime releases on nyaa.si and aniwave.to
 
-## NOTICE: Ok, so, what if instead of trying to scrape aniwavet.to (mission impossible 8), i just use nyaa.si but instead add torrent player (wow, genius)
+## NOTICE: Ok, so, what if instead of trying to scrape aniwavet.to (mission impossible 8), i just use nyaa.si and add video player for it (wow, genius)
 
 The project was fully functional. However, after a few week break I noticed it doesn't work anymore. So, technically, I finished the project? :)
 Also, I already accomplished my main goals:
