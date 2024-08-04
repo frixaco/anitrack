@@ -95,7 +95,7 @@ export default function AddReleaseDrawer({
               <p className="py-4">How to get the URLs:</p>
               <strong className="pt-2">nyaa.si:</strong>
               <ul className="py-2">
-                <li>1. Search for Ember's uploads</li>
+                <li>1. Search for Ember&apos;s uploads</li>
 
                 <li>
                   2. Copy the page URL and paste it here - e.g.{" "}
