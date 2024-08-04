@@ -538,8 +538,6 @@ func main() {
 
 	e.POST("/scrape", scrapeSources)
 
-	e.POST("/test", test)
-
 	// NOTE: I already do it on the frontend. This is just in case
 	e.POST("/sync", syncReleases)
 

@@ -8,8 +8,6 @@ import { release, watchHistory } from "./db/schema";
 import { and, eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { env } from "@/env";
-import { ratelimit } from "./ratelimit";
-import postHogServerClient from "./analytics";
 
 // TODO:
 // 1. Register new user
@@ -110,22 +108,6 @@ export async function markEpisodeWatched(
 ) {
   const user = auth();
   if (!user.userId) throw new Error("Unauthorized");
-
-  const posthog = postHogServerClient();
-  posthog.capture({
-    distinctId: user.userId,
-    event: "episode watched",
-    properties: {
-      metadata: "metadata",
-    },
-  });
-  await posthog.shutdown();
-
-  const { success } = await ratelimit.limit(user.userId);
-
-  if (!success) {
-    throw new Error("Rate limit reached");
-  }
 
   try {
     await db
