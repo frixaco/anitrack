@@ -1,4 +1,4 @@
-# Anitrack - anime episode tracker for me by me: anitrack-sigma.vercel.app
+# Anitrack - anime episode tracker for me by me
 
 ## Setup
 

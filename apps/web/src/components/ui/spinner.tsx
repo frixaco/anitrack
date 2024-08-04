@@ -1,6 +1,6 @@
 "use client";
 
-export function Spinner({ className }: { className: string }) {
+export function Spinner({ className }: { className?: string }) {
   return (
     <div role="status" className={className}>
       <svg

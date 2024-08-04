@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 
 import { ClerkProvider } from "@clerk/nextjs";
-import { ClientPostHogProvider } from "./_providers/analytics";
 import { NextThemeProvider } from "./_providers/next-theme";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { TailwindIndicator } from "@/components/ui/tailwind-indicator";
@@ -40,33 +39,31 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <ClientPostHogProvider>
-          <body
-            className={cn(
-              "min-h-screen bg-background font-sans antialiased",
-              poppins.className,
-            )}
-          >
-            <NextThemeProvider>
-              <ReactQueryProvider>
-                <TooltipProvider>
-                  <Header />
+        <body
+          className={cn(
+            "min-h-screen bg-background font-sans antialiased",
+            poppins.className,
+          )}
+        >
+          <NextThemeProvider>
+            <ReactQueryProvider>
+              <TooltipProvider>
+                <Header />
 
-                  <main className="flex flex-col gap-6 p-4">
-                    {children}
-                    {drawer}
-                    {episodes}
-                    {history}
-                    {releases}
-                  </main>
+                <main className="flex flex-col gap-6 p-4">
+                  {children}
+                  {drawer}
+                  {episodes}
+                  {history}
+                  {releases}
+                </main>
 
-                  <TailwindIndicator />
-                  <Toaster />
-                </TooltipProvider>
-              </ReactQueryProvider>
-            </NextThemeProvider>
-          </body>
-        </ClientPostHogProvider>
+                <TailwindIndicator />
+                <Toaster />
+              </TooltipProvider>
+            </ReactQueryProvider>
+          </NextThemeProvider>
+        </body>
       </html>
     </ClerkProvider>
   );

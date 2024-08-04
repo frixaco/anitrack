@@ -4,7 +4,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Magnet, Video } from "lucide-react";
-import { WatchedEpisode } from "./watch-history";
+import { WatchedEpisode } from "../@history/page";
 
 export default async function WatchedEpisodeCard({
   episode,

@@ -37,22 +37,6 @@ export async function addRelease(_: any, formData: FormData) {
   const user = auth();
   if (!user.userId) throw new Error("Unauthorized");
 
-  const posthog = postHogServerClient();
-  posthog.capture({
-    distinctId: user.userId,
-    event: "release added",
-    properties: {
-      metadata: "metadata",
-    },
-  });
-  await posthog.shutdown();
-
-  const { success: rateLimited } = await ratelimit.limit(user.userId);
-
-  if (!rateLimited) {
-    throw new Error("Rate limit reached");
-  }
-
   const validatedFields = schema.safeParse({
     uuid: randomUUID(),
     nyaaUrl: formData.get("nyaaUrl"),
