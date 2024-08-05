@@ -92,13 +92,15 @@ func scrapeNyaaForEpisodes(rp *ScrapePayload) []ScrapedEpisodeData {
 
 	c.OnHTML("tr", func(e *colly.HTMLElement) {
 		uploadInfo := e.ChildAttr("a[href^='/view']:not([href$='#comments']):not([title*='Batch'])", "title")
-		fmt.Println(uploadInfo)
+		if uploadInfo == "" {
+			return
+		}
 
 		seasonEpisodePattern := regexp.MustCompile(`S(\d{2})E(\d{2})`)
 		matches := seasonEpisodePattern.FindStringSubmatch(uploadInfo)
 		fmt.Println(matches)
 		if len(matches) < 3 {
-			fmt.Println("Could not extract episode and season numbers")
+			fmt.Println("Could not extract episode and season numbers from: ", uploadInfo)
 			return
 		}
 
