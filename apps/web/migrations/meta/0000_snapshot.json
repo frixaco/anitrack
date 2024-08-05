@@ -1,10 +1,8 @@
 {
-  "id": "ced2febf-6647-4c7c-b9c7-41a9644e2ec9",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "5",
-  "dialect": "pg",
+  "version": "7",
+  "dialect": "postgresql",
   "tables": {
-    "anitrack_release": {
+    "public.anitrack_release": {
       "name": "anitrack_release",
       "schema": "",
       "columns": {
@@ -109,14 +107,14 @@
       "uniqueConstraints": {
         "anitrack_release_uuid_unique": {
           "name": "anitrack_release_uuid_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "uuid"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       }
     },
-    "anitrack_watch_history": {
+    "public.anitrack_watch_history": {
       "name": "anitrack_watch_history",
       "schema": "",
       "columns": {
@@ -168,25 +166,25 @@
         "anitrack_watch_history_release_id_anitrack_release_id_fk": {
           "name": "anitrack_watch_history_release_id_anitrack_release_id_fk",
           "tableFrom": "anitrack_watch_history",
-          "tableTo": "anitrack_release",
           "columnsFrom": [
             "release_id"
           ],
+          "tableTo": "anitrack_release",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "anitrack_watch_history_uuid_unique": {
           "name": "anitrack_watch_history_uuid_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "uuid"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       }
     }
@@ -194,8 +192,11 @@
   "enums": {},
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "ced2febf-6647-4c7c-b9c7-41a9644e2ec9",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "sequences": {}
 }
