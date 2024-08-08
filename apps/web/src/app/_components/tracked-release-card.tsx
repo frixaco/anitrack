@@ -1,19 +1,14 @@
-import Image from "next/image";
 import { StopCircle } from "lucide-react";
 import { continueTrackingRelease, untrackRelease } from "@/server/queries";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Release } from "../@episodes/page";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Release } from "../@main/episodes/page";
 
 export default async function TrackedReleaseCard({
   release,
-  asRelease,
   isTracking,
 }: {
   release: Release;
-  asRelease?: boolean;
   isTracking: boolean;
 }) {
   const { episodeNumber, releaseId, seasonNumber, title, thumbnailUrl } =
@@ -30,24 +25,11 @@ export default async function TrackedReleaseCard({
   }
 
   return (
-    <Card className="relative w-64 flex flex-col justify-between p-4 gap-4">
-      {!asRelease && (
-        <Badge className="absolute drop-shadow-lg z-10 left-2 top-2 text-xl">
-          E{episodeNumber} - S{seasonNumber}
-        </Badge>
-      )}
-
-      <AspectRatio ratio={2 / 3} className="relative p-0">
-        <Image
-          className="object-fit rounded-md"
-          fill
-          alt={title}
-          src={thumbnailUrl}
-        />
-      </AspectRatio>
-
+    <Card className="flex flex-col justify-between p-4 gap-4">
       <CardContent className="flex-1 flex flex-col justify-between p-0">
         <CardTitle className="text-lg text-balance pb-4">{title}</CardTitle>
+
+        <p className="font-bold text-lg pt-2">Season: {seasonNumber}</p>
 
         {isTracking ? (
           <form className="w-full" action={handleRelease}>

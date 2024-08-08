@@ -1,30 +1,18 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/server/db";
-import ReleaseCard from "../_components/release-card";
-
-export type Release = {
-  releaseId: string;
-  episodeNumber: number;
-  nyaaUrl: string;
-  aniwaveUrl: string;
-  seasonNumber: number;
-  thumbnailUrl: string;
-  title: string;
-  isTracking: boolean;
-};
+import { Release } from "../episodes/page";
+import TrackedReleaseCard from "@/app/_components/tracked-release-card";
 
 export default async function Page() {
-  await new Promise((r) => setTimeout(() => r("DONE"), 2000));
-
   const newReleases: Release[] = [];
 
   const user = auth();
   if (user.userId == null) {
     return null;
   }
+
   const releasesWithNewEpisodes = await db.query.release.findMany({
-    where: ({ userId, isTracking }, { eq, and }) =>
-      and(eq(userId, user.userId), eq(isTracking, true)),
+    where: ({ userId }, { eq, and }) => and(eq(userId, user.userId)),
   });
 
   if (releasesWithNewEpisodes == null) {
@@ -47,15 +35,28 @@ export default async function Page() {
     }
   }
 
+  // TODO: Remove
+  for (let i = 0; i < 10; i++) {
+    newReleases.push(newReleases[0]);
+  }
+
   return (
-    <section className="grid grid-cols-none sm:grid-cols-4 overflow-scroll gap-2">
-      {newReleases.length === 0 ? (
-        <p className="p-4 col-span-full text-center">Nothing to see</p>
-      ) : (
-        newReleases.map((episode) => (
-          <ReleaseCard key={episode.releaseId} episode={episode} />
-        ))
-      )}
+    <section>
+      <h2 className="font-semibold text-2xl">Tracking</h2>
+
+      <div className="grid grid-cols-none sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+        {newReleases.length === 0 ? (
+          <p className="p-4 flex-1 text-center">Nothing to see</p>
+        ) : (
+          newReleases.map((release) => (
+            <TrackedReleaseCard
+              key={release.releaseId}
+              release={release}
+              isTracking={release.isTracking}
+            />
+          ))
+        )}
+      </div>
     </section>
   );
 }

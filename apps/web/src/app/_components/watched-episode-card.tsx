@@ -1,10 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { Magnet, Video } from "lucide-react";
-import { WatchedEpisode } from "../@history/page";
+import { WatchedEpisode } from "../@main/history/page";
+import Link from "next/link";
 
 export default async function WatchedEpisodeCard({
   episode,
@@ -21,39 +19,27 @@ export default async function WatchedEpisodeCard({
   } = episode;
 
   return (
-    <Card className="relative">
-      <Badge className="absolute drop-shadow-lg z-10 right-2 top-2 text-xl">
-        E{episodeNumber} - S{seasonNumber}
-      </Badge>
+    <Card className="flex flex-col p-2">
+      <CardContent className="flex flex-row gap-2 justify-between p-0">
+        <div className="text-lg text-balance flex flex-col gap-2">
+          <span>{title}</span>
 
-      <CardHeader className="relative w-[280px] max-w-full pb-2">
-        <AspectRatio ratio={2 / 3}>
-          <Image className="rounded-md" fill alt={title} src={thumbnailUrl} />
-        </AspectRatio>
-      </CardHeader>
+          <p className="font-bold text-lg flex-1">Episode: {episodeNumber}</p>
 
-      <CardContent>
-        <CardTitle className="text-lg text-balance">{title}</CardTitle>
+          <p>Season: {seasonNumber}</p>
+        </div>
 
-        <div className="flex flex-col gap-4">
-          <div className="pt-2 flex flex-col gap-2 items-center justify-around">
-            <Button variant="secondary" className="w-full rounded-xl">
-              <a href={nyaaUrl}>
-                <Magnet />
-                <span className="pl-2 hidden sm:block">
-                  Download from nyaa.si
-                </span>
-              </a>
-            </Button>
-            <Button variant="secondary" className="w-full rounded-xl" asChild>
-              <a href={aniwaveUrl}>
-                <Video />
-                <span className="pl-2 hidden sm:block">
-                  Watch at aniwave.to
-                </span>
-              </a>
-            </Button>
-          </div>
+        <div className="flex flex-col gap-2 items-center justify-start">
+          <Button variant="secondary" className="w-full rounded-xl" asChild>
+            <Link target="_blank" href={nyaaUrl}>
+              <Magnet />
+            </Link>
+          </Button>
+          <Button variant="secondary" className="w-full rounded-xl" asChild>
+            <Link target="_blank" href={aniwaveUrl}>
+              <Video />
+            </Link>
+          </Button>
         </div>
       </CardContent>
     </Card>

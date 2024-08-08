@@ -20,25 +20,19 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "Anitrack by @frixaco",
-  description: "Track Anime releases through nyaa.si and 9animetv.to",
+  description: "Track Anime releases on nyaa.si and aniwave.to",
 };
 
 export default function RootLayout({
-  children,
-  drawer,
-  episodes,
-  history,
-  releases,
+  main,
 }: Readonly<{
   children: React.ReactNode;
   drawer: React.ReactNode;
-  episodes: React.ReactNode;
-  history: React.ReactNode;
-  releases: React.ReactNode;
+  main: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
+      <ClerkProvider>
         <body
           className={cn(
             "min-h-screen bg-background font-sans antialiased",
@@ -50,12 +44,9 @@ export default function RootLayout({
               <TooltipProvider>
                 <Header />
 
-                <main className="flex flex-col gap-6 p-4">
-                  {children}
-                  {drawer}
-                  {episodes}
-                  {history}
-                  {releases}
+                <main className="flex flex-col px-4 gap-8">
+                  {main}
+                  {/* {children} */}
                 </main>
 
                 <TailwindIndicator />
@@ -64,7 +55,7 @@ export default function RootLayout({
             </ReactQueryProvider>
           </NextThemeProvider>
         </body>
-      </html>
-    </ClerkProvider>
+      </ClerkProvider>
+    </html>
   );
 }

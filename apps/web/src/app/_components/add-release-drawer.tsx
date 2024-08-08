@@ -18,7 +18,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 
-// TODO: Add live search, auto search on nyaa.si and 9animetv.to
+// TODO: Add live search, auto search on nyaa.si and aniwave.to
 // TODO: Ideally, I should be able to add new release by its title only
 // TODO: Ideally, I should parse the subtitles from the video,
 //         summarize it and add it to release description.

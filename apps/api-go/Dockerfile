@@ -8,7 +8,7 @@ RUN go mod tidy
 
 RUN go build -o dist/api-go .
 
-FROM ubuntu:latest
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 

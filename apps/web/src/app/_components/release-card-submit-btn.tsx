@@ -10,7 +10,7 @@ export function SubmitButton() {
   return (
     <Button className="w-full rounded-xl">
       {pending ? <Spinner className="px-4" /> : <Eye />}
-      <span className="pl-2 hidden sm:block">Mark as watched</span>
+      <span className="pl-2 hidden lg:block">Mark as watched</span>
     </Button>
   );
 }

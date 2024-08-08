@@ -2,7 +2,7 @@ import { db } from "@/server/db";
 import { auth } from "@clerk/nextjs/server";
 import { release, watchHistory } from "@/server/db/schema";
 import { and, eq } from "drizzle-orm";
-import WatchedEpisodeCard from "../_components/watched-episode-card";
+import WatchedEpisodeCard from "@/app/_components/watched-episode-card";
 
 export type WatchedEpisode = {
   title: string;
@@ -52,5 +52,13 @@ export default async function Page() {
     result = <p className="p-4 text-center col-span-2">Nothing to see</p>;
   }
 
-  return <section className="grid grid-cols-2 gap-2">{result}</section>;
+  return (
+    <section>
+      <h2 className="font-semibold text-2xl">Watch History</h2>
+
+      <div className="grid grid-cols-none md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+        {result}
+      </div>
+    </section>
+  );
 }

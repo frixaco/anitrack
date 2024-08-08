@@ -2,15 +2,19 @@
 
 ## Setup
 
-1. Setup Railway CLI
+1. Install Railway CLI
 2. Run `pnpm install`
+
+# Deploy
+
+### API
 
 TODO:
 
+- [ ] Improve UI (+ mobile)
+- [ ] Still show new eps even if new ep is out only in one sourse. And update other source when ep is out.
+- [ ] Refactor Go API
 - [ ] Integrate ntfy.sh for notifications
-- [ ] Add UI for non-mobile screens
-- [ ] Pallelize nyaa.si and aniwave.to scraping for better performance
-- [ ] Improve overall UI
 - [ ] Add video demo
 - [ ] Setup autofix.yml for Golang API
 - [ ] Show deployment url in Deployments section in project's Github page
