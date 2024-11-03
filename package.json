@@ -1,23 +1,11 @@
 {
   "name": "anitrack",
   "private": true,
-  "scripts": {
-    "build": "turbo build",
-    "dev": "turbo watch dev",
-    "start": "turbo start",
-    "web:dev": "turbo watch dev --filter=web",
-    "api:dev": "turbo watch dev --filter=api-go",
-    "lint": "turbo lint --filter=web",
-    "lint-fix": "turbo lint-fix --filter=web",
-    "format-check": "turbo format-check --filter=web",
-    "format-fix": "turbo format-fix --filter=web"
-  },
+  "scripts": {},
+  "workspaces": [
+    "apps/*"
+  ],
   "devDependencies": {
-    "prettier": "^3",
-    "turbo": "^2.0.11"
-  },
-  "engines": {
-    "node": ">=20"
-  },
-  "packageManager": "pnpm@9.6.0"
+    "prettier": "^3"
+  }
 }
