@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus } from "lucide-react";
+import { ListPlus, Plus, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,64 +13,77 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useState } from "react";
+import { Input } from "./ui/input";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "./ui/scroll-area";
+
+export function AddAnimTabs() {
+  return (
+    <Tabs defaultValue="search" className="px-4">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="search" className="flex items-center gap-2">
+          <Search className="inline-flex" size={16} />
+          <span>search</span>
+        </TabsTrigger>
+        <TabsTrigger value="links" className="flex items-center gap-2">
+          <ListPlus className="inline-flex" size={16} />
+          <span>links</span>
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="search">
+        <Card>
+          <CardContent className="py-6">
+            <Input placeholder="enter anime title to search hianime.to" />
+            <ScrollArea className="h-[150px]"></ScrollArea>
+          </CardContent>
+        </Card>
+      </TabsContent>
+      <TabsContent value="links">
+        <Card>
+          <CardContent className="p-6">
+            <Label htmlFor="hianime-url">
+              hianime.to url (can point to episode or title page)
+            </Label>
+            <Input id="hianime-url" type="text" />
+
+            <Label htmlFor="nyaa-url">
+              nyaa.si url (when searching include title and uploader name)
+            </Label>
+            <Input id="nyaa-url" type="text" />
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
+  );
+}
 
 export function AddAnimeDrawer() {
-  const [goal, setGoal] = useState(350);
-
-  function onClick(adjustment: number) {
-    setGoal(Math.max(200, Math.min(400, goal + adjustment)));
-  }
-
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <Button className="rounded-lg py-10 px-16 w-min">
+        <Button className="relative rounded-md py-10 px-16 w-min">
           <Plus />
+          <span className="absolute border-r border-b border-dashed -z-20 size-24 bottom-1/2 left-1/2"></span>
         </Button>
       </DrawerTrigger>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-sm">
+        <div className="mx-auto w-full max-w-4xl">
           <DrawerHeader>
-            <DrawerTitle>Move Goal</DrawerTitle>
-            <DrawerDescription>Set your daily activity goal.</DrawerDescription>
+            <DrawerTitle>start tracking</DrawerTitle>
+            <DrawerDescription>
+              search for an anime or provide links to start tracking.
+            </DrawerDescription>
           </DrawerHeader>
-          <div className="p-4 pb-0">
-            <div className="flex items-center justify-center space-x-2">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 shrink-0 rounded-full"
-                onClick={() => onClick(-10)}
-                disabled={goal <= 200}
-              >
-                <Minus className="h-4 w-4" />
-                <span className="sr-only">Decrease</span>
-              </Button>
-              <div className="flex-1 text-center">
-                <div className="text-7xl font-bold tracking-tighter">
-                  {goal}
-                </div>
-                <div className="text-[0.70rem] uppercase text-muted-foreground">
-                  Calories/day
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 shrink-0 rounded-full"
-                onClick={() => onClick(10)}
-                disabled={goal >= 400}
-              >
-                <Plus className="h-4 w-4" />
-                <span className="sr-only">Increase</span>
-              </Button>
-            </div>
-          </div>
+
+          <AddAnimTabs />
+
           <DrawerFooter>
-            <Button>Submit</Button>
+            <Button>start tracking</Button>
             <DrawerClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline">cancel</Button>
             </DrawerClose>
           </DrawerFooter>
         </div>
