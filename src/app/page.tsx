@@ -3,6 +3,8 @@ import { EpisodeList } from "@/components/episode-list";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AddAnimeDrawer } from "@/components/add-anime-drawer";
+import { Suspense } from "react";
 
 export default function Home() {
   return (
@@ -40,7 +42,19 @@ export default function Home() {
         </div>
       </header>
 
-      <EpisodeList className="h-full" />
+      <div className="w-full flex flex-col gap-4 relative mx-auto h-[calc(100vh-80px)] md:h-[calc(100vh-120px)]">
+        <Suspense
+          fallback={
+            <div className="h-full bg-background rounded-md border border-dashed p-2 flex items-center justify-center">
+              <span className="text-sm">...loading</span>
+            </div>
+          }
+        >
+          <EpisodeList className="h-full" />
+        </Suspense>
+
+        <AddAnimeDrawer />
+      </div>
     </div>
   );
 }

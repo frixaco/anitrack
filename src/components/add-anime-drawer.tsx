@@ -1,5 +1,3 @@
-"use client";
-
 import { ListPlus, Plus, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -18,9 +16,9 @@ import { Input } from "./ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "./ui/scroll-area";
+import { SearchReleases } from "./search-results";
 
-export function AddAnimTabs() {
+export function AddAnimeTabs() {
   return (
     <Tabs defaultValue="search" className="px-4">
       <TabsList className="grid w-full grid-cols-2">
@@ -36,8 +34,7 @@ export function AddAnimTabs() {
       <TabsContent value="search">
         <Card>
           <CardContent className="py-6">
-            <Input placeholder="enter anime title to search hianime.to" />
-            <ScrollArea className="h-[150px]"></ScrollArea>
+            <SearchReleases />
           </CardContent>
         </Card>
       </TabsContent>
@@ -78,7 +75,7 @@ export function AddAnimeDrawer() {
             </DrawerDescription>
           </DrawerHeader>
 
-          <AddAnimTabs />
+          <AddAnimeTabs />
 
           <DrawerFooter>
             <Button>start tracking</Button>
