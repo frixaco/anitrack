@@ -1,5 +1,4 @@
 import { ModeToggle } from "@/components/theme-switcher";
-import { AddAnimeDrawer } from "@/components/add-anime-drawer";
 import { EpisodeList } from "@/components/episode-list";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { LogIn } from "lucide-react";
@@ -7,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <div className="flex flex-col gap-4 h-screen p-8">
+    <div className="flex-1 flex flex-col gap-2 md:gap-4 p-4 md:p-8">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold border rounded-md px-2 py-1 border-dashed hover:underline hover:decoration-dashed">
           anitrack
@@ -15,8 +14,9 @@ export default function Home() {
 
         <span className="border-b border-accent border-dashed flex-1"></span>
 
-        <div className="flex items-center justify-end gap-4">
+        <div className="flex items-center justify-between gap-4">
           <ModeToggle />
+
           <SignedOut>
             <SignInButton>
               <Button variant="outline" size="icon">
@@ -40,9 +40,7 @@ export default function Home() {
         </div>
       </header>
 
-      <EpisodeList className="flex-1" />
-
-      <AddAnimeDrawer />
+      <EpisodeList className="h-full" />
     </div>
   );
 }

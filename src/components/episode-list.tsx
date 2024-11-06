@@ -1,52 +1,83 @@
-"use client";
-
 import { cn } from "@/lib/utils";
+import { ExternalLink, Play } from "lucide-react";
+import { Button } from "./ui/button";
+import { Checkbox } from "./ui/checkbox";
+import Image from "next/image";
+import { AddAnimeDrawer } from "./add-anime-drawer";
+import { getUnwatchedEpisodes } from "@/app/actions";
 
 type Props = {
   className?: string;
 };
 
-export function EpisodeList({ className }: Props) {
+export async function EpisodeList({ className }: Props) {
+  const episodes = await getUnwatchedEpisodes();
+
   return (
-    <div
-      className={cn(
-        "grid p-4 gap-4 rounded-md border border-dashed overflow-hidden bg-background",
-        className
-      )}
-    >
-      <div className="rounded-md max-w-[210px] max-h-[280px] flex flex-col p-4 z-10 relative border border-dashed justify-between group hover:cursor-pointer">
-        <div
-          className="rounded-md absolute bg-cover inset-1 brightness-[60%] -z-10 transition-all duration-300 origin-center group-hover:scale-[1.03]"
-          style={{
-            backgroundImage:
-              "url(https://cdn.noitatnemucod.net/thumbnail/300x400/100/8ed3a4df2e8f22be9916959c96e5e3e2.jpg)",
-          }}
-        ></div>
-        <div className="flex flex-col gap-2 font-bold">
-          <h1 className="text-lg text-white [text-shadow:_0_2px_1px_rgb(0_0_0_/_100%)]">
-            Blue Lock Season 2
-          </h1>
+    <div className="w-full flex flex-col gap-4 relative mx-auto h-[calc(100vh-80px)] md:h-[calc(100vh-120px)]">
+      <div
+        className={cn(
+          "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 justify-around bg-background rounded-md border border-dashed p-2 overflow-auto",
+          className
+        )}
+      >
+        {episodes.map((episode) => (
+          <div
+            key={episode.id}
+            className={cn(
+              "rounded-md flex relative border border-dashed group justify-between hover:border-accent-foreground"
+            )}
+          >
+            <Image
+              className="h-full rounded-tl-md rounded-bl-md object-cover w-1/2"
+              width={150}
+              height={200}
+              src={episode.release.thumbnailUrl ?? ""}
+              alt={episode.release.title}
+            />
 
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex flex-col gap-1">
-              <span className="text-white text-xs [text-shadow:_0_2px_1px_rgb(0_0_0_/_100%)]">
-                {/* <Video className="inline-flex" size={24} /> 24 */}
-                24 episodes
-              </span>
-              <span className="text-white text-xs [text-shadow:_0_2px_1px_rgb(0_0_0_/_100%)]">
-                {/* <CalendarDays className="inline-flex" size={24} /> 2024 */}
-                2024, Spring
-              </span>
+            <div className="p-2 flex flex-col gap-2 justify-start font-bold flex-1">
+              <h1 className="font-bold text-lg line-clamp-2 overflow-hidden overflow-ellipsis">
+                {episode.release.title}
+              </h1>
+
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-thin text-secondary-foreground">
+                    {episode.release.totalEpisodes} episodes
+                  </span>
+                  <span className="text-xs font-thin text-secondary-foreground">
+                    {episode.release.year}, {episode.release.season}
+                  </span>
+                </div>
+              </div>
+
+              <div className="self-center flex-1 flex items-center gap-2">
+                <Checkbox className="size-8" />
+
+                <span className="text-4xl font-bold leading-none">
+                  {episode.episodeNumber}
+                </span>
+              </div>
+
+              <div className="flex gap-1 justify-between">
+                <Button className="bg-purple-400 font-bold flex-1">
+                  <ExternalLink className="inline-flex" size={16} />
+                </Button>
+
+                <Button className="bg-blue-400 font-bold flex-1">
+                  <Play className="inline-flex" size={16} />
+                </Button>
+              </div>
+
+              {/* links should have shortcuts */}
+              {/* <span className="self-end text-sm text-white font-semibold">[b]</span> */}
             </div>
-
-            <span className="text-6xl font-bold text-white [text-shadow:_0_2px_1px_rgb(0_0_0_/_100%)]">
-              4
-            </span>
           </div>
-        </div>
-
-        <span className="self-end text-sm text-white font-semibold">[b]</span>
+        ))}
       </div>
+
+      <AddAnimeDrawer />
     </div>
   );
 }

@@ -64,7 +64,7 @@ export function AddAnimeDrawer() {
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <Button className="relative rounded-md py-10 px-16 w-min">
+        <Button className="relative rounded-md md:py-10 md:px-16 py-6 px-12 w-min">
           <Plus />
           <span className="absolute border-r border-b border-dashed -z-20 size-24 bottom-1/2 left-1/2"></span>
         </Button>

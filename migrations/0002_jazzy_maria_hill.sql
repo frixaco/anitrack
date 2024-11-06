@@ -1,0 +1,1 @@
+ALTER TABLE "episode" ALTER COLUMN "release_id" SET NOT NULL;
