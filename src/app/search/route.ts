@@ -1,3 +1,4 @@
+import { writeFileSync } from "fs";
 import { JSDOM } from "jsdom";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -32,13 +33,16 @@ function extractAnimeInfo(document: Document) {
       ? (infoElement.querySelector(".fdi-item")?.textContent || "").trim()
       : "";
 
+    const id = titleElement?.getAttribute("href")?.split("-").pop() || "";
+    const url = (titleElement?.getAttribute("href") || "").split("?")[0] || "";
+
     const result = {
       title,
-      url: titleElement?.getAttribute("href") || "",
+      url,
       thumbnail,
       episodes,
       type,
-      id: titleElement?.getAttribute("href")?.split("-").pop() || "",
+      id,
       // TODO: Include year and season
     };
 
@@ -48,12 +52,26 @@ function extractAnimeInfo(document: Document) {
   return results;
 }
 
+const justInCaseBrowserHeaders = {
+  "User-Agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+  Accept:
+    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+  "Accept-Language": "en-US,en;q=0.5",
+  Connection: "keep-alive",
+};
+
 async function searchHianime(searchTerm: string) {
   const url = atob("aHR0cHM6Ly9oaWFuaW1lLnRvL3NlYXJjaD9rZXl3b3JkPQ==");
-  const response = await fetch(`${url}${searchTerm.replace(" ", "+")}`);
+  console.log(url);
+  const response = await fetch(`${url}${searchTerm.replace(" ", "+")}`, {
+    method: "GET",
+    headers: justInCaseBrowserHeaders,
+  });
   const html = await response.text();
   const dom = new JSDOM(html);
   const doc = dom.window.document;
+  writeFileSync("hianime.html", html);
 
   return extractAnimeInfo(doc);
 }

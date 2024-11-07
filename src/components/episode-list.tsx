@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
-import { ExternalLink, Play } from "lucide-react";
 import { Button } from "./ui/button";
-import { Checkbox } from "./ui/checkbox";
 import Image from "next/image";
-import { getUnwatchedEpisodes } from "@/app/actions";
+import { getUnwatchedEpisodes, markAsWatched } from "@/app/actions";
+import { StreamTorrentButton } from "./stream-torrent-button";
+import { OpenHianimeButton } from "./open-hianime-button";
 
 type Props = {
   className?: string;
@@ -15,7 +15,7 @@ export async function EpisodeList({ className }: Props) {
   return (
     <div
       className={cn(
-        "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 justify-around bg-background rounded-md border border-dashed p-2 overflow-auto",
+        "grid grid-cols-1 sm:grid-cols-2 gap-2 justify-around bg-background rounded-md border border-dashed p-2 overflow-auto",
         className
       )}
     >
@@ -51,21 +51,31 @@ export async function EpisodeList({ className }: Props) {
             </div>
 
             <div className="self-center flex-1 flex items-center gap-2">
-              <Checkbox className="size-8" />
-
               <span className="text-4xl font-bold leading-none">
                 {episode.episodeNumber}
               </span>
             </div>
 
-            <div className="flex gap-1 justify-between">
-              <Button className="bg-purple-400 font-bold flex-1">
-                <ExternalLink className="inline-flex" size={16} />
-              </Button>
+            <div className="flex flex-col gap-1">
+              <form action={markAsWatched.bind(null, episode.id)}>
+                <Button type="submit" variant="outline" className="w-full">
+                  mark as watched
+                </Button>
+              </form>
 
-              <Button className="bg-blue-400 font-bold flex-1">
-                <Play className="inline-flex" size={16} />
-              </Button>
+              <div className="flex gap-1 justify-between">
+                <OpenHianimeButton episodeUrl={episode.url} />
+
+                {/* remove any puctuation marks from episode.release.title */}
+                {/* sample title: "Re Zero kara Hajimeru Isekai Seikatsu 3rd Season" - remove "<number>rd/th/st" and number, also "Season" */}
+                <StreamTorrentButton
+                  defaultSearch={episode.release.title
+                    .replace(/[^\w\s]/g, " ")
+                    .replace(/\s+/g, " ")
+                    .replace(/\d+(?:st|nd|rd|th)\s+season/gi, "")
+                    .trim()}
+                />
+              </div>
             </div>
 
             {/* links should have shortcuts */}

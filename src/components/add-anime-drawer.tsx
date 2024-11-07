@@ -35,7 +35,6 @@ export function AddAnimeDrawer() {
           <SearchHianimeReleases />
 
           <DrawerFooter>
-            <Button>start tracking</Button>
             <DrawerClose asChild>
               <Button variant="outline">cancel</Button>
             </DrawerClose>

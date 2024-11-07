@@ -8,8 +8,12 @@ import { useDebounce } from "@/lib/use-debounce";
 import { Loader } from "./loader";
 import { Download } from "lucide-react";
 
-export function SearchNyaaReleases() {
-  const [searchTerm, setSearchTerm] = useState("");
+export function SearchNyaaReleases({
+  defaultSearch,
+}: {
+  defaultSearch: string;
+}) {
+  const [searchTerm, setSearchTerm] = useState(defaultSearch);
   const debouncedSearch = useDebounce(searchTerm, 500);
   const [results, setResults] = useState<
     {

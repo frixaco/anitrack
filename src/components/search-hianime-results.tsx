@@ -7,6 +7,19 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/lib/use-debounce";
 import { Loader } from "./loader";
+import { Button } from "./ui/button";
+import { trackRelease } from "@/app/actions";
+import { useFormStatus } from "react-dom";
+
+function StartTrackingButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button type="submit" disabled={pending} className="w-full">
+      {pending ? "tracking..." : "start tracking"}
+    </Button>
+  );
+}
 
 export function SearchHianimeReleases() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,6 +37,8 @@ export function SearchHianimeReleases() {
   const [selected, setSelected] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
+
+  const trackReleaseWithUrl = trackRelease.bind(null, selected ?? "");
 
   useEffect(() => {
     if (debouncedSearch.length < 3) {
@@ -45,7 +60,7 @@ export function SearchHianimeReleases() {
   }, [debouncedSearch]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 px-4">
       <div className="relative">
         <Input
           placeholder="enter anime title to search hianime.to"
@@ -99,6 +114,10 @@ export function SearchHianimeReleases() {
           <p className="text-xs text-secondary-foreground">no results</p>
         )}
       </ScrollArea>
+
+      <form action={trackReleaseWithUrl}>
+        <StartTrackingButton />
+      </form>
     </div>
   );
 }

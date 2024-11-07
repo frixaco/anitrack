@@ -14,8 +14,9 @@ export const release = pgTable("release", {
 export type Release = typeof release.$inferSelect;
 
 export const episode = pgTable("episode", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   hianimeId: text("hianime_id").notNull(),
+  url: text("url").notNull(),
   title: text("title").notNull(),
   episodeNumber: integer("episode_number").notNull(),
   isWatched: boolean("is_watched").default(false).notNull(),

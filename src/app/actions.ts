@@ -1,4 +1,5 @@
-"server-only";
+"use server";
+// "server-only";
 
 import { db } from "@/db";
 import { episode, release } from "@/db/schema";
@@ -34,6 +35,7 @@ export async function markAsWatched(episodeId: string) {
 
   revalidatePath("/");
 }
+
 const processHianimeUrl = async (
   hianimeUrl: string
 ): Promise<{
@@ -41,7 +43,7 @@ const processHianimeUrl = async (
     episodes: {
       url: string;
       title: string;
-      episodeNumber: string;
+      episodeNumber: number;
       episodeId: string;
     }[];
     title: string;
@@ -53,19 +55,13 @@ const processHianimeUrl = async (
   } | null;
   error: string | null;
 }> => {
-  /**
-   * Supported hianime URL formats:
-   * - https://hianime.to/watch/blue-lock-season-2-19318?ep=128447
-   * - https://hianime.to/watch/blue-lock-season-2-19318?ep=128447&ep=128447
-   * - https://hianime.to/blue-lock-season-2-19318
-   */
-  const getTitleId = (url: string) => {
-    const pathPart = url.split("?")[0];
-    const id = pathPart.split("-").pop();
+  console.log("processing hianime url", hianimeUrl);
 
+  const getTitleId = (url: string) => {
+    const id = url.split("-").pop();
     return id;
   };
-  const titleId = getTitleId(hianimeUrl);
+  const titleId = getTitleId(`https://hianime.to/watch${hianimeUrl}`);
   if (!titleId) {
     return {
       data: null,
@@ -80,6 +76,7 @@ const processHianimeUrl = async (
     }
   );
   if (!res.ok) {
+    console.log("failed to fetch episodes", res);
     return {
       data: null,
       error: "Failed to fetch episodes",
@@ -93,16 +90,21 @@ const processHianimeUrl = async (
   const episodes: {
     url: string;
     title: string;
-    episodeNumber: string;
+    episodeNumber: number;
     episodeId: string;
   }[] = [];
   const episodeElements = doc.querySelectorAll(".ssl-item.ep-item");
+  console.log("found", episodeElements.length, "episodes");
 
   episodeElements.forEach((element) => {
     const href = element.getAttribute("href");
+    console.log("found episode href", href);
     const title = element.getAttribute("title");
-    const episodeNumber = element.getAttribute("data-number");
+    console.log("found episode", title);
+    const episodeNumber = parseInt(element.getAttribute("data-number") || "0");
+    console.log("found episode number", episodeNumber);
     const episodeId = element.getAttribute("data-id");
+    console.log("found episode id", episodeId);
 
     if (!href || !title || !episodeNumber || !episodeId) {
       console.error(
@@ -123,7 +125,8 @@ const processHianimeUrl = async (
     });
   });
 
-  const detailsRes = await fetch(hianimeUrl, {
+  console.log("fetching details for", `https://hianime.to${hianimeUrl}`);
+  const detailsRes = await fetch(`https://hianime.to${hianimeUrl}`, {
     headers: justInCaseBrowserHeaders,
   });
   const detailsHTML = await detailsRes.text();
@@ -135,15 +138,19 @@ const processHianimeUrl = async (
     ?.getAttribute("style")
     ?.split("url(")[1]
     .split(")")[0];
+  console.log("found thumbnail url", thumbnailUrl);
 
-  const titleElement = detailsDoc.querySelector(".os-item.active");
+  const titleElement = detailsDoc.querySelector(".anisc-detail .film-name");
+  console.log("found title element", titleElement);
   if (!titleElement) {
     return {
       data: null,
       error: "No title element found",
     };
   }
-  const title = titleElement.getAttribute("title");
+  const title =
+    titleElement.getAttribute("data-jname") || titleElement.textContent!;
+  console.log("found title", title);
   if (!title) {
     return {
       data: null,
@@ -151,13 +158,12 @@ const processHianimeUrl = async (
     };
   }
 
-  const numbersRes = await fetch(hianimeUrl.replace("/watch", ""), {
+  const numbersRes = await fetch(`https://hianime.to${hianimeUrl}`, {
     headers: {
       ...justInCaseBrowserHeaders,
     },
   });
   const numbersHTML = await numbersRes.text();
-  // writeFile("numbers.html", numbersHTML);
   const numbersDom = new JSDOM(numbersHTML);
   const numbersDoc = numbersDom.window.document;
 
@@ -172,7 +178,7 @@ const processHianimeUrl = async (
   const season = seasonInfo?.[0] || "Unknown"; // "Fall"
   const premieredYear = parseInt(seasonInfo?.[1] || "0"); // "2024"
   const totalEpisodes = parseInt(
-    numbersDoc.querySelector(".tick-eps")?.textContent || "0"
+    numbersDoc.querySelector(".film-stats .tick-eps")?.textContent || "0"
   );
 
   return {
@@ -198,13 +204,7 @@ const justInCaseBrowserHeaders = {
   Connection: "keep-alive",
 };
 
-export async function trackRelease({
-  hianimeUrl,
-  nyaasiUrl,
-}: {
-  hianimeUrl: string;
-  nyaasiUrl: string;
-}) {
+export async function trackRelease(hianimeUrl: string) {
   const { userId } = await auth();
   if (!userId) {
     throw new Error("User not authenticated");
@@ -212,17 +212,33 @@ export async function trackRelease({
 
   const { data, error } = await processHianimeUrl(hianimeUrl);
   if (error || !data) {
+    console.log(error);
+    console.log(data);
     throw new Error("Failed to process hianime URL");
   }
 
-  await db.insert(release).values({
-    hianimeId: data.titleId,
-    title: data.title,
-    year: data.year,
-    season: data.season,
-    thumbnailUrl: data.thumbnailUrl,
-    totalEpisodes: data.totalEpisodes,
-  });
+  const newRelease = await db
+    .insert(release)
+    .values({
+      hianimeId: data.titleId,
+      title: data.title,
+      year: data.year,
+      season: data.season,
+      thumbnailUrl: data.thumbnailUrl,
+      totalEpisodes: data.totalEpisodes,
+    })
+    .returning({ id: release.id });
 
-  console.log(nyaasiUrl);
+  const newReleaseId = newRelease[0].id;
+
+  for (const item of data.episodes) {
+    await db.insert(episode).values({
+      hianimeId: item.episodeId,
+      url: item.url,
+      title: item.title,
+      isWatched: false,
+      episodeNumber: item.episodeNumber,
+      releaseId: newReleaseId,
+    });
+  }
 }
