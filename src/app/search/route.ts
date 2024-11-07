@@ -92,7 +92,7 @@ function extractTorrentInfo(document: Document) {
     return {
       title: title,
       magnetLink: magnetLink?.getAttribute("href") || "",
-      torrentLink: torrentLink?.getAttribute("href") || "",
+      torrentLink: "https://nyaa.si" + torrentLink?.getAttribute("href") || "",
       seeders: parseInt(
         row.querySelector("td:nth-last-child(3)")?.textContent || "0"
       ),

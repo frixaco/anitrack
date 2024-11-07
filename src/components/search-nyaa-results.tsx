@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { useDebounce } from "@/lib/use-debounce";
 import { Loader } from "./loader";
 import { Download } from "lucide-react";
+import Link from "next/link";
+import { Button } from "./ui/button";
 
 export function SearchNyaaReleases({
   defaultSearch,
@@ -68,7 +70,7 @@ export function SearchNyaaReleases({
             {results.map(
               ({
                 title,
-                magnetLink,
+                magnetLink: _,
                 torrentLink,
                 seeders,
                 leechers,
@@ -80,10 +82,10 @@ export function SearchNyaaReleases({
                     "flex items-stretch gap-2 border rounded-md hover:border-accent-foreground hover:border-dashed",
                     {
                       "border-accent-foreground hover:border-solid":
-                        selected === magnetLink,
+                        selected === torrentLink,
                     }
                   )}
-                  onClick={() => setSelected(magnetLink)}
+                  onClick={() => setSelected(torrentLink)}
                 >
                   {/* <Image
                     src={thumbnail}
@@ -126,6 +128,20 @@ export function SearchNyaaReleases({
           <p className="text-xs text-secondary-foreground">no results</p>
         )}
       </ScrollArea>
+
+      <div className="self-end flex gap-2">
+        <Link
+          href={`/player?url=${selected}`}
+          // TODO: remove pointer-events-none once the player is implemented
+          className="pointer-events-none leading-none bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 active:bg-primary/80"
+        >
+          Stream {">>>"}
+        </Link>
+
+        <Button onClick={() => selected && window.open(selected, "_blank")}>
+          Download torrent
+        </Button>
+      </div>
     </div>
   );
 }

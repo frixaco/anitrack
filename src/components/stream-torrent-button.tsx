@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -33,10 +32,6 @@ export function StreamTorrentButton({
         </DialogHeader>
 
         <SearchNyaaReleases defaultSearch={defaultSearch} />
-
-        <DialogFooter>
-          <Button type="submit">Stream {">>>"}</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
