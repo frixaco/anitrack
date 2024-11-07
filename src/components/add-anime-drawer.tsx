@@ -1,4 +1,4 @@
-import { Magnet, Play, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,51 +12,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
-import { Card, CardContent, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SearchHianimeReleases } from "./search-hianime-results";
-import { SearchNyaaReleases } from "./search-nyaa-results";
-
-export function AddAnimeTabs() {
-  return (
-    <Tabs defaultValue="hianime" className="px-4">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="hianime" className="flex items-center gap-2">
-          <Play className="inline-flex" size={16} />
-          <span>hianime.to</span>
-        </TabsTrigger>
-        <TabsTrigger value="nyaa.si" className="flex items-center gap-2">
-          <Magnet className="inline-flex" size={16} />
-          <span>nyaa.si</span>
-        </TabsTrigger>
-      </TabsList>
-      <TabsContent value="hianime">
-        <Card>
-          <CardContent className="py-6">
-            <SearchHianimeReleases />
-          </CardContent>
-        </Card>
-      </TabsContent>
-      <TabsContent value="nyaa.si">
-        <Card>
-          <CardDescription className="px-6 pt-4">
-            using{" "}
-            <a
-              href="https://subsplease.org/"
-              className="underline decoration-dotted"
-            >
-              SubsPlease
-            </a>{" "}
-            as the uploader (EMBER, Judas, Anime Time are coming)
-          </CardDescription>
-          <CardContent className="px-6 py-6 pt-3">
-            <SearchNyaaReleases />
-          </CardContent>
-        </Card>
-      </TabsContent>
-    </Tabs>
-  );
-}
 
 export function AddAnimeDrawer() {
   return (
@@ -76,7 +32,7 @@ export function AddAnimeDrawer() {
             </DrawerDescription>
           </DrawerHeader>
 
-          <AddAnimeTabs />
+          <SearchHianimeReleases />
 
           <DrawerFooter>
             <Button>start tracking</Button>

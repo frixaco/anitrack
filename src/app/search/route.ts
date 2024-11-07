@@ -62,14 +62,17 @@ function extractTorrentInfo(document: Document) {
   const rows = document.querySelectorAll("tr.success");
 
   return Array.from(rows).map((row) => {
-    const titleElement = row.querySelector("td a[title]");
+    // Find the title by selecting the link that doesn't have a comments class and isn't inside a comments link
+    const titleElement = row.querySelector("td:nth-child(2) a:not(.comments)");
     const magnetLink = row.querySelector('a[href^="magnet"]');
-    const torrentLink = row.querySelector('a[href$=".torrent"]');
+    const torrentLink = row.querySelector('a[href^="/download"]');
     const dateCell = row.querySelector("td[data-timestamp]");
-    // const [seeders, leechers] = row.querySelectorAll("td.text-center");
+
+    // Extract the text content directly from the title element
+    const title = titleElement ? titleElement.getAttribute("title") || "" : "";
 
     return {
-      title: titleElement?.getAttribute("title") || "",
+      title: title,
       magnetLink: magnetLink?.getAttribute("href") || "",
       torrentLink: torrentLink?.getAttribute("href") || "",
       seeders: parseInt(
@@ -89,7 +92,7 @@ async function searchNyaa(searchTerm: string) {
   const url = atob(
     "aHR0cHM6Ly9ueWFhLnNpL3VzZXIvc3Vic3BsZWFzZT9mPTAmYz0wXzAmcT0="
   );
-  const response = await fetch(`${url}${searchTerm.replace(" ", "+")}`);
+  const response = await fetch(`${url}${searchTerm.replace(" ", "+")}+1080p`);
   const html = await response.text();
   const dom = new JSDOM(html);
   const doc = dom.window.document;
