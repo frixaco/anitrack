@@ -1,4 +1,4 @@
-import { ListPlus, Plus, Search } from "lucide-react";
+import { Magnet, Play, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,45 +11,46 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Input } from "./ui/input";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SearchReleases } from "./search-results";
+import { SearchHianimeReleases } from "./search-hianime-results";
+import { SearchNyaaReleases } from "./search-nyaa-results";
 
 export function AddAnimeTabs() {
   return (
-    <Tabs defaultValue="search" className="px-4">
+    <Tabs defaultValue="hianime" className="px-4">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="search" className="flex items-center gap-2">
-          <Search className="inline-flex" size={16} />
-          <span>search</span>
+        <TabsTrigger value="hianime" className="flex items-center gap-2">
+          <Play className="inline-flex" size={16} />
+          <span>hianime.to</span>
         </TabsTrigger>
-        <TabsTrigger value="links" className="flex items-center gap-2">
-          <ListPlus className="inline-flex" size={16} />
-          <span>links</span>
+        <TabsTrigger value="nyaa.si" className="flex items-center gap-2">
+          <Magnet className="inline-flex" size={16} />
+          <span>nyaa.si</span>
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="search">
+      <TabsContent value="hianime">
         <Card>
           <CardContent className="py-6">
-            <SearchReleases />
+            <SearchHianimeReleases />
           </CardContent>
         </Card>
       </TabsContent>
-      <TabsContent value="links">
+      <TabsContent value="nyaa.si">
         <Card>
-          <CardContent className="p-6">
-            <Label htmlFor="hianime-url">
-              hianime.to url (can point to episode or title page)
-            </Label>
-            <Input id="hianime-url" type="text" />
-
-            <Label htmlFor="nyaa-url">
-              nyaa.si url (when searching include title and uploader name)
-            </Label>
-            <Input id="nyaa-url" type="text" />
+          <CardDescription className="px-6 pt-4">
+            using{" "}
+            <a
+              href="https://subsplease.org/"
+              className="underline decoration-dotted"
+            >
+              SubsPlease
+            </a>{" "}
+            as the uploader (EMBER, Judas, Anime Time are coming)
+          </CardDescription>
+          <CardContent className="px-6 py-6 pt-3">
+            <SearchNyaaReleases />
           </CardContent>
         </Card>
       </TabsContent>
@@ -71,7 +72,7 @@ export function AddAnimeDrawer() {
           <DrawerHeader>
             <DrawerTitle>start tracking</DrawerTitle>
             <DrawerDescription>
-              search for an anime or provide links to start tracking.
+              select the anime you want to track from hianime.to and/or nyaa.si
             </DrawerDescription>
           </DrawerHeader>
 

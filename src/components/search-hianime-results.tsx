@@ -6,8 +6,9 @@ import { Input } from "./ui/input";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/lib/use-debounce";
+import { Loader } from "./loader";
 
-export function SearchReleases() {
+export function SearchHianimeReleases() {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
   const [results, setResults] = useState<
@@ -34,7 +35,7 @@ export function SearchReleases() {
 
     setLoading(true);
     setResults([]);
-    fetch(`/search?q=${debouncedSearch}`)
+    fetch(`/search?q=${debouncedSearch}&s=hianime`)
       .then((res) => res.json())
       .then((data) => {
         setResults(data);
@@ -45,12 +46,17 @@ export function SearchReleases() {
 
   return (
     <div className="flex flex-col gap-2">
-      <Input
-        placeholder="enter anime title to search hianime.to"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <ScrollArea className="h-[150px] p-2 border rounded-md">
+      <div className="relative">
+        <Input
+          placeholder="enter anime title to search hianime.to"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <span className="absolute right-2 top-1/2 -translate-y-1/2">
+          {loading && <Loader className="w-4 h-4" />}
+        </span>
+      </div>
+      <ScrollArea className="h-[300px] p-2 border rounded-md">
         {loading ? (
           <p className="text-xs text-secondary-foreground">searching...</p>
         ) : results.length > 0 ? (
@@ -73,13 +79,18 @@ export function SearchReleases() {
                   className="rounded-tl-md rounded-bl-md"
                   width={100}
                   height={133}
+                  placeholder="data:image/svg+xml;base64,Cjxzdmcgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NzUiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImciPgogICAgICA8c3RvcCBzdG9wLWNvbG9yPSIjMzMzIiBvZmZzZXQ9IjIwJSIgLz4KICAgICAgPHN0b3Agc3RvcC1jb2xvcj0iIzIyMiIgb2Zmc2V0PSI1MCUiIC8+CiAgICAgIDxzdG9wIHN0b3AtY29sb3I9IiMzMzMiIG9mZnNldD0iNzAlIiAvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjcwMCIgaGVpZ2h0PSI0NzUiIGZpbGw9IiMzMzMiIC8+CiAgPHJlY3QgaWQ9InIiIHdpZHRoPSI3MDAiIGhlaWdodD0iNDc1IiBmaWxsPSJ1cmwoI2cpIiAvPgogIDxhbmltYXRlIHhsaW5rOmhyZWY9IiNyIiBhdHRyaWJ1dGVOYW1lPSJ4IiBmcm9tPSItNzAwIiB0bz0iNzAwIiBkdXI9IjFzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIgIC8+Cjwvc3ZnPg=="
                 />
                 <div className="flex flex-col w-1/2 gap-2">
                   <p className="line-clamp-2 overflow-hidden overflow-ellipsis">
                     {title}
                   </p>
-                  <p>{episodes}</p>
-                  <p>{type}</p>
+                  <p className="text-xs text-secondary-foreground">
+                    episodes: {episodes}
+                  </p>
+                  <p className="text-xs text-secondary-foreground">
+                    type: {type}
+                  </p>
                 </div>
               </div>
             ))}
