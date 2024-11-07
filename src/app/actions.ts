@@ -11,7 +11,7 @@ import { revalidatePath } from "next/cache";
 export async function getUnwatchedEpisodes() {
   const { userId } = await auth();
   if (!userId) {
-    throw new Error("User not authenticated");
+    return [];
   }
   const eps = await db.query.episode.findMany({
     where: eq(episode.isWatched, false),
@@ -55,8 +55,6 @@ const processHianimeUrl = async (
   } | null;
   error: string | null;
 }> => {
-  console.log("processing hianime url", hianimeUrl);
-
   const getTitleId = (url: string) => {
     const id = url.split("-").pop();
     return id;
@@ -69,14 +67,8 @@ const processHianimeUrl = async (
     };
   }
 
-  const res = await fetch(
-    `https://hianime.to/ajax/v2/episode/list/${titleId}`,
-    {
-      headers: justInCaseBrowserHeaders,
-    }
-  );
+  const res = await fetch(`https://hianime.to/ajax/v2/episode/list/${titleId}`);
   if (!res.ok) {
-    console.log("failed to fetch episodes", res);
     return {
       data: null,
       error: "Failed to fetch episodes",
@@ -94,23 +86,14 @@ const processHianimeUrl = async (
     episodeId: string;
   }[] = [];
   const episodeElements = doc.querySelectorAll(".ssl-item.ep-item");
-  console.log("found", episodeElements.length, "episodes");
 
   episodeElements.forEach((element) => {
     const href = element.getAttribute("href");
-    console.log("found episode href", href);
     const title = element.getAttribute("title");
-    console.log("found episode", title);
     const episodeNumber = parseInt(element.getAttribute("data-number") || "0");
-    console.log("found episode number", episodeNumber);
     const episodeId = element.getAttribute("data-id");
-    console.log("found episode id", episodeId);
 
     if (!href || !title || !episodeNumber || !episodeId) {
-      console.error(
-        "No href or title found for an episode: ",
-        element.outerHTML
-      );
       return {
         data: null,
         error: "Missing data for an episode",
@@ -125,10 +108,7 @@ const processHianimeUrl = async (
     });
   });
 
-  console.log("fetching details for", `https://hianime.to${hianimeUrl}`);
-  const detailsRes = await fetch(`https://hianime.to${hianimeUrl}`, {
-    headers: justInCaseBrowserHeaders,
-  });
+  const detailsRes = await fetch(`https://hianime.to${hianimeUrl}`);
   const detailsHTML = await detailsRes.text();
   const detailsDom = new JSDOM(detailsHTML);
   const detailsDoc = detailsDom.window.document;
@@ -138,10 +118,8 @@ const processHianimeUrl = async (
     ?.getAttribute("style")
     ?.split("url(")[1]
     .split(")")[0];
-  console.log("found thumbnail url", thumbnailUrl);
 
   const titleElement = detailsDoc.querySelector(".anisc-detail .film-name");
-  console.log("found title element", titleElement);
   if (!titleElement) {
     return {
       data: null,
@@ -150,7 +128,6 @@ const processHianimeUrl = async (
   }
   const title =
     titleElement.getAttribute("data-jname") || titleElement.textContent!;
-  console.log("found title", title);
   if (!title) {
     return {
       data: null,
@@ -158,11 +135,7 @@ const processHianimeUrl = async (
     };
   }
 
-  const numbersRes = await fetch(`https://hianime.to${hianimeUrl}`, {
-    headers: {
-      ...justInCaseBrowserHeaders,
-    },
-  });
+  const numbersRes = await fetch(`https://hianime.to${hianimeUrl}`);
   const numbersHTML = await numbersRes.text();
   const numbersDom = new JSDOM(numbersHTML);
   const numbersDoc = numbersDom.window.document;
@@ -195,50 +168,56 @@ const processHianimeUrl = async (
   };
 };
 
-const justInCaseBrowserHeaders = {
-  "User-Agent":
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-  Accept:
-    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-  "Accept-Language": "en-US,en;q=0.5",
-  Connection: "keep-alive",
-};
-
 export async function trackRelease(hianimeUrl: string) {
   const { userId } = await auth();
   if (!userId) {
     throw new Error("User not authenticated");
   }
 
-  const { data, error } = await processHianimeUrl(hianimeUrl);
-  if (error || !data) {
-    console.log(error);
-    console.log(data);
-    throw new Error("Failed to process hianime URL");
-  }
+  try {
+    const { data, error } = await processHianimeUrl(hianimeUrl);
+    if (error || !data) {
+      return {
+        success: false,
+        error: error || "Failed to process hianime URL",
+      };
+    }
 
-  const newRelease = await db
-    .insert(release)
-    .values({
-      hianimeId: data.titleId,
-      title: data.title,
-      year: data.year,
-      season: data.season,
-      thumbnailUrl: data.thumbnailUrl,
-      totalEpisodes: data.totalEpisodes,
-    })
-    .returning({ id: release.id });
+    const newRelease = await db
+      .insert(release)
+      .values({
+        hianimeId: data.titleId,
+        title: data.title,
+        year: data.year,
+        season: data.season,
+        thumbnailUrl: data.thumbnailUrl,
+        totalEpisodes: data.totalEpisodes,
+      })
+      .returning({ id: release.id });
 
-  const newReleaseId = newRelease[0].id;
+    const newReleaseId = newRelease[0].id;
 
-  for (const item of data.episodes) {
-    await db.insert(episode).values({
-      hianimeId: item.episodeId,
-      url: item.url,
-      title: item.title,
-      isWatched: false,
-      episodeNumber: item.episodeNumber,
-      releaseId: newReleaseId,
-    });
+    for (const item of data.episodes) {
+      await db.insert(episode).values({
+        hianimeId: item.episodeId,
+        url: item.url,
+        title: item.title,
+        isWatched: false,
+        episodeNumber: item.episodeNumber,
+        releaseId: newReleaseId,
+      });
+    }
+
+    revalidatePath("/");
+    return {
+      success: true,
+      message: "Release is now being tracked",
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      error: "An error occurred while tracking the release",
+    };
   }
 }

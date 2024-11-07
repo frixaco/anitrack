@@ -52,7 +52,7 @@ export function SearchNyaaReleases({
     <div className="flex flex-col gap-2">
       <div className="relative">
         <Input
-          placeholder="enter anime title to search SubsPlease releases on nyaa.si"
+          placeholder="enter anime title to search for torrent releases"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />

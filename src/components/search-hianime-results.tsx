@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { ScrollArea } from "./ui/scroll-area";
 import { Input } from "./ui/input";
-import { useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/lib/use-debounce";
 import { Loader } from "./loader";
@@ -11,17 +11,21 @@ import { Button } from "./ui/button";
 import { trackRelease } from "@/app/actions";
 import { useFormStatus } from "react-dom";
 
-function StartTrackingButton() {
+function StartTrackingButton({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" disabled={pending} className="w-full">
+    <Button type="submit" disabled={pending || disabled} className="w-full">
       {pending ? "tracking..." : "start tracking"}
     </Button>
   );
 }
 
-export function SearchHianimeReleases() {
+export function SearchHianimeReleases({
+  isAuthenticated,
+}: {
+  isAuthenticated: boolean;
+}) {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
   const [results, setResults] = useState<
@@ -39,6 +43,7 @@ export function SearchHianimeReleases() {
   const [loading, setLoading] = useState(false);
 
   const trackReleaseWithUrl = trackRelease.bind(null, selected ?? "");
+  const [, action] = useActionState(trackReleaseWithUrl, null);
 
   useEffect(() => {
     if (debouncedSearch.length < 3) {
@@ -115,8 +120,8 @@ export function SearchHianimeReleases() {
         )}
       </ScrollArea>
 
-      <form action={trackReleaseWithUrl}>
-        <StartTrackingButton />
+      <form action={action}>
+        <StartTrackingButton disabled={!isAuthenticated || !selected} />
       </form>
     </div>
   );

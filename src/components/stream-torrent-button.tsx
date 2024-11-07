@@ -26,31 +26,14 @@ export function StreamTorrentButton({
       <DialogContent className="max-w-6xl">
         <DialogHeader>
           <DialogTitle>Select the upload</DialogTitle>
-          <DialogDescription>Sorted by seeders</DialogDescription>
+          <DialogDescription>
+            Try searching with different titles if you don&apos;t find the right
+            release, sorted by seeders
+          </DialogDescription>
         </DialogHeader>
-        {/* <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input
-              id="name"
-              defaultValue="Pedro Duarte"
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="username" className="text-right">
-              Username
-            </Label>
-            <Input
-              id="username"
-              defaultValue="@peduarte"
-              className="col-span-3"
-            />
-          </div>
-        </div> */}
+
         <SearchNyaaReleases defaultSearch={defaultSearch} />
+
         <DialogFooter>
           <Button type="submit">Stream {">>>"}</Button>
         </DialogFooter>

@@ -14,13 +14,17 @@ import {
 
 import { SearchHianimeReleases } from "./search-hianime-results";
 
-export function AddAnimeDrawer() {
+import { auth } from "@clerk/nextjs/server";
+
+export async function AddAnimeDrawer() {
+  const { userId } = await auth();
+
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <Button className="relative rounded-md md:py-10 md:px-16 py-6 px-12 w-min">
+        <Button className="relative rounded-md md:py-10 w-full md:px-16 py-6 px-12 md:w-min">
           <Plus />
-          <span className="absolute border-r border-b border-dashed -z-20 size-24 bottom-1/2 left-1/2"></span>
+          <span className="size-[120px] hidden md:block absolute border-r border-b border-dotted border-accent-foreground -z-20 bottom-1/2 left-36"></span>
         </Button>
       </DrawerTrigger>
       <DrawerContent>
@@ -32,7 +36,7 @@ export function AddAnimeDrawer() {
             </DrawerDescription>
           </DrawerHeader>
 
-          <SearchHianimeReleases />
+          <SearchHianimeReleases isAuthenticated={!!userId} />
 
           <DrawerFooter>
             <DrawerClose asChild>
