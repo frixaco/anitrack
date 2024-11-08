@@ -1,4 +1,3 @@
-import { writeFileSync } from "fs";
 import { JSDOM } from "jsdom";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -52,26 +51,13 @@ function extractAnimeInfo(document: Document) {
   return results;
 }
 
-// const justInCaseBrowserHeaders = {
-//   "User-Agent":
-//     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-//   Accept:
-//     "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-//   "Accept-Language": "en-US,en;q=0.5",
-//   Connection: "keep-alive",
-// };
-
 async function searchHianime(searchTerm: string) {
   const url = atob("aHR0cHM6Ly9oaWFuaW1lLnRvL3NlYXJjaD9rZXl3b3JkPQ==");
   console.log(url);
-  const response = await fetch(`${url}${searchTerm.replace(" ", "+")}`, {
-    // method: "GET",
-    // headers: justInCaseBrowserHeaders,
-  });
+  const response = await fetch(`${url}${searchTerm.replace(" ", "+")}`);
   const html = await response.text();
   const dom = new JSDOM(html);
   const doc = dom.window.document;
-  writeFileSync("hianime.html", html);
 
   return extractAnimeInfo(doc);
 }
@@ -80,13 +66,11 @@ function extractTorrentInfo(document: Document) {
   const rows = document.querySelectorAll("tr.success");
 
   return Array.from(rows).map((row) => {
-    // Find the title by selecting the link that doesn't have a comments class and isn't inside a comments link
     const titleElement = row.querySelector("td:nth-child(2) a:not(.comments)");
     const magnetLink = row.querySelector('a[href^="magnet"]');
     const torrentLink = row.querySelector('a[href^="/download"]');
     const dateCell = row.querySelector("td[data-timestamp]");
 
-    // Extract the text content directly from the title element
     const title = titleElement ? titleElement.getAttribute("title") || "" : "";
 
     return {

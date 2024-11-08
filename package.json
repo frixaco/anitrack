@@ -11,7 +11,7 @@
     "migrate": "drizzle-kit migrate",
     "generate": "drizzle-kit generate",
     "push": "drizzle-kit push",
-    "update-deps": "pnpm dlx npm-check-updates --root --format group -i"
+    "update-deps": "npm-check-updates --root --format group -i"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.2.1",
@@ -33,14 +33,15 @@
     "lucide-react": "^0.454.0",
     "next": "15.0.3",
     "next-themes": "^0.4.3",
+    "npm-check-updates": "^17.1.10",
     "pg": "^8.13.1",
     "react": "19.0.0-rc-02c0e824-20241028",
     "react-dom": "19.0.0-rc-02c0e824-20241028",
+    "react-player": "^2.16.0",
     "recharts": "^2.13.3",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
-    "vaul": "^1.1.1",
-    "video.js": "^8.19.1"
+    "vaul": "^1.1.1"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -55,7 +56,14 @@
     "typescript": "^5"
   },
   "trustedDependencies": [
-    "@clerk/shared"
+    "@clerk/shared",
+    "bufferutil",
+    "esbuild",
+    "node-datachannel",
+    "protobufjs",
+    "sharp",
+    "utf-8-validate",
+    "utp-native"
   ],
   "packageManager": "pnpm@9.12.3"
 }
