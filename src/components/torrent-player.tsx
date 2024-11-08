@@ -8,16 +8,41 @@ interface TorrentPlayerProps {
 
 export default function TorrentPlayer({ magnetLink }: TorrentPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (!videoRef.current || !magnetLink) return;
 
+    // Cleanup previous stream if exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this stream
+    abortControllerRef.current = new AbortController();
+
     const streamUrl = `https://api.anitrack.frixaco.com/stream?magnet=${encodeURIComponent(
       magnetLink
     )}`;
-    videoRef.current.src = streamUrl;
 
-    videoRef.current.load();
+    // Set video source directly
+    if (videoRef.current) {
+      videoRef.current.src = streamUrl;
+      videoRef.current.load();
+    }
+
+    // Cleanup function
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+
+      if (videoRef.current) {
+        videoRef.current.src = "";
+        videoRef.current.load();
+      }
+    };
   }, [magnetLink]);
 
   return (

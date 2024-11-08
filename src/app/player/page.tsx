@@ -16,7 +16,7 @@ const AnnoyingWrapper = () => {
   }
 
   return (
-    <div>
+    <div className="h-screen w-full flex items-center justify-center">
       <TorrentPlayer magnetLink={url} />
     </div>
   );

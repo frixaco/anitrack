@@ -129,15 +129,12 @@ func (ts *TorrentServer) streamHandler(c *gin.Context) {
 		return
 	}
 
-	// Configure piece prioritization
 	videoFile.Download()
 
-	// Set priorities for pieces
 	pieceSize := tor.Info().PieceLength
 	startPiece := videoFile.Offset() / pieceSize
 	endPiece := (videoFile.Offset() + videoFile.Length() + pieceSize - 1) / pieceSize
 
-	// Prioritize first pieces for faster start
 	for i := startPiece; i < endPiece && i < startPiece+10; i++ {
 		tor.Piece(int(i)).SetPriority(torrent.PiecePriorityNow)
 	}
@@ -145,20 +142,39 @@ func (ts *TorrentServer) streamHandler(c *gin.Context) {
 	reader := videoFile.NewReader()
 	defer reader.Close()
 
-	// Configure reader for streaming
 	reader.SetResponsive()
 	reader.SetReadahead(2 * 1024 * 1024) // 2MB readahead
 
 	bufferedReader := bufio.NewReaderSize(reader, 16*1024)
 
+	// Setup cleanup first
+	done := make(chan struct{})
+	go func() {
+		<-c.Request.Context().Done()
+		reader.Close()
+		tor.Drop()
+		close(done)
+	}()
+
+	defer func() {
+		select {
+		case <-done:
+			return
+		default:
+			reader.Close()
+			tor.Drop()
+		}
+	}()
+
+	// Set headers
 	c.Header("Content-Type", "video/mp4")
 	c.Header("Accept-Ranges", "bytes")
-	c.Header("Content-Length", strconv.FormatInt(videoFile.Length(), 10))
-	c.Header("Transfer-Encoding", "chunked")
 
 	rangeHeader := c.GetHeader("Range")
+	fileSize := videoFile.Length()
+
 	if rangeHeader != "" {
-		start, end := parseRange(rangeHeader, videoFile.Length())
+		start, end := parseRange(rangeHeader, fileSize)
 
 		_, err := reader.Seek(start, io.SeekStart)
 		if err != nil {
@@ -166,69 +182,25 @@ func (ts *TorrentServer) streamHandler(c *gin.Context) {
 			return
 		}
 
-		c.Status(206)
-		c.Header("Content-Range", fmt.Sprintf("bytes %d-%d/%d", start, end, videoFile.Length()))
+		c.Header("Content-Range", fmt.Sprintf("bytes %d-%d/%d", start, end, fileSize))
 		c.Header("Content-Length", strconv.FormatInt(end-start+1, 10))
+		c.Status(206)
 
-		remaining := end - start + 1
-		buf := make([]byte, 16*1024)
-
-		var bytesStreamed int64 = 0
-		startTime := time.Now()
-
-		for remaining > 0 {
-			// Only read what we need
-			readSize := min(int64(len(buf)), remaining)
-			n, err := bufferedReader.Read(buf[:readSize])
-
-			if n > 0 {
-				bytesStreamed += int64(n)
-				elapsed := time.Since(startTime).Seconds()
-				speed := float64(bytesStreamed) / (1024 * 1024 * elapsed) // MB/s
-
-				fmt.Printf("\rStreamed: %.2f MB, Speed: %.2f MB/s",
-					float64(bytesStreamed)/(1024*1024),
-					speed)
-
-				_, writeErr := c.Writer.Write(buf[:n])
-				if writeErr != nil {
-					fmt.Printf("Write error: %v\n", writeErr)
-					return
-				}
-				c.Writer.Flush()
-				remaining -= int64(n)
-			}
-
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				fmt.Printf("Read error: %v\n", err)
-				break
-			}
+		// Stream the range
+		written, err := io.CopyN(c.Writer, bufferedReader, end-start+1)
+		if err != nil && err != io.EOF {
+			fmt.Printf("Streaming error: %v, written: %d bytes\n", err, written)
+			return
 		}
 	} else {
+		c.Header("Content-Length", strconv.FormatInt(fileSize, 10))
 		c.Status(200)
-		buf := make([]byte, 16*1024)
 
-		for {
-			n, err := bufferedReader.Read(buf)
-			if n > 0 {
-				_, writeErr := c.Writer.Write(buf[:n])
-				if writeErr != nil {
-					fmt.Printf("Write error: %v\n", writeErr)
-					return
-				}
-				c.Writer.Flush()
-			}
-
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				fmt.Printf("Read error: %v\n", err)
-				break
-			}
+		// Stream the entire file
+		written, err := io.Copy(c.Writer, bufferedReader)
+		if err != nil && err != io.EOF {
+			fmt.Printf("Streaming error: %v, written: %d bytes\n", err, written)
+			return
 		}
 	}
 }
