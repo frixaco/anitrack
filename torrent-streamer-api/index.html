@@ -32,17 +32,18 @@
         const infoHash = torrentInfo.details.info_hash;
         const fileIdx = torrentInfo.id;
 
-        if (infoHash !== "64c2d63e1b465e91318f0df17b830566efb2ac2b") {
+        if (typeof infoHash !== "string") {
           throw new Error("Invalid infohash");
         }
-        if (fileIdx !== 0) {
-          throw new Error("Invalid file id");
+        if (Number.isFinite(fileIdx)) {
+          throw new Error("Invalid file index");
         }
 
+        const streamUrl = `https://api.anitrack.frixaco.com/torrents/${infoHash}/stream/${fileIdx}`;
+
         const videoEl = document.getElementById("stream");
-        videoEl.src = `https://api.anitrack.frixaco.com/torrents/${infoHash}/stream/${fileIdx}`;
+        videoEl.src = streamUrl;
       });
     </script>
   </body>
 </html>
-
