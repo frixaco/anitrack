@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Torrent Stream Test</title>
+  </head>
+  <body>
+    <input id="magneturl" type="text" placeholder="enter magnet url" />
+    <button id="startstreambtn">start stream</button>
+
+    <video id="stream" controls width="800"></video>
+
+    <script>
+      const inputEl = document.getElementById("magneturl");
+
+      let torrentInfo = null;
+
+      const buttonEl = document.getElementById("startstreambtn");
+      buttonEl.addEventListener("click", async () => {
+        const magnetUrl = inputEl.value;
+        console.log(magnetUrl);
+        if (!magnetUrl.startsWith("magnet")) {
+          throw new Error("Invalid magnet URL");
+        }
+
+        const res = await fetch("https://api.anitrack.frixaco.com/torrents", {
+          method: "POST",
+          body: magnetUrl,
+        });
+        torrentInfo = await res.json();
+        console.log(torrentInfo);
+
+        const infoHash = torrentInfo.details.info_hash;
+        const fileIdx = torrentInfo.id;
+
+        if (infoHash !== "64c2d63e1b465e91318f0df17b830566efb2ac2b") {
+          throw new Error("Invalid infohash");
+        }
+        if (fileIdx !== 0) {
+          throw new Error("Invalid file id");
+        }
+
+        const videoEl = document.getElementById("stream");
+        videoEl.src = `https://api.anitrack.frixaco.com/torrents/${infoHash}/stream/${fileIdx}`;
+      });
+    </script>
+  </body>
+</html>
+
