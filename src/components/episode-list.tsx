@@ -65,8 +65,6 @@ export async function EpisodeList({ className }: Props) {
                 <div className="flex gap-1 justify-between">
                   <OpenHianimeButton episodeUrl={episode.url} />
 
-                  {/* remove any puctuation marks from episode.release.title */}
-                  {/* sample title: "Re Zero kara Hajimeru Isekai Seikatsu 3rd Season" - remove "<number>rd/th/st" and number, also "Season" */}
                   <StreamTorrentButton
                     defaultSearch={episode.release.title
                       .replace(/[^\w\s]/g, " ")
@@ -76,9 +74,6 @@ export async function EpisodeList({ className }: Props) {
                   />
                 </div>
               </div>
-
-              {/* links should have shortcuts */}
-              {/* <span className="self-end text-sm text-white font-semibold">[b]</span> */}
             </div>
           </div>
         ))

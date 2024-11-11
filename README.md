@@ -20,5 +20,3 @@ What I want to be able to do?
 - Show a button to start streaming from nyaa.si magnet link (SubsPlease, webtorrent)
 - See total number of episodes
 - Watched and unwatched episodes
-
-https://hianime.to/search?keyword=blue+lock
