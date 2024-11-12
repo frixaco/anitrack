@@ -27,7 +27,12 @@ export function SearchNyaaReleases({
       uploadDate: string;
     }[]
   >([]);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selectedMagnetLink, setSelectedMagnetLink] = useState<string | null>(
+    null
+  );
+  const [selectedTorrentLink, setSelectedTorrentLink] = useState<string | null>(
+    null
+  );
 
   const [loading, setLoading] = useState(false);
 
@@ -35,7 +40,7 @@ export function SearchNyaaReleases({
     if (debouncedSearch.length < 3) {
       setResults([]);
       setLoading(false);
-      setSelected(null);
+      setSelectedMagnetLink(null);
       return;
     }
 
@@ -82,10 +87,13 @@ export function SearchNyaaReleases({
                     "flex items-stretch gap-2 border rounded-md hover:border-accent-foreground hover:border-dashed",
                     {
                       "border-accent-foreground hover:border-solid":
-                        selected === magnetLink,
+                        selectedMagnetLink === magnetLink,
                     }
                   )}
-                  onClick={() => setSelected(magnetLink)}
+                  onClick={() => {
+                    setSelectedMagnetLink(magnetLink);
+                    setSelectedTorrentLink(torrentLink);
+                  }}
                 >
                   <div className="flex flex-col gap-2 p-2">
                     <p className="text-xs overflow-hidden overflow-ellipsis">
@@ -122,16 +130,20 @@ export function SearchNyaaReleases({
       </ScrollArea>
 
       <div className="self-end flex gap-2">
-        {selected && (
+        {selectedMagnetLink && (
           <Link
-            href={`/player?url=${encodeURIComponent(selected)}`}
+            href={`/player?url=${encodeURIComponent(selectedMagnetLink)}`}
             className="leading-none bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 active:bg-primary/80"
           >
             Stream {">>>"}
           </Link>
         )}
 
-        <Button onClick={() => selected && window.open(selected, "_blank")}>
+        <Button
+          onClick={() =>
+            selectedTorrentLink && window.open(selectedTorrentLink, "_blank")
+          }
+        >
           Download torrent
         </Button>
       </div>
