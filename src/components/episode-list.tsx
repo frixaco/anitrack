@@ -36,7 +36,7 @@ export async function EpisodeList({ className }: Props) {
             />
 
             <div className="p-2 flex flex-col gap-2 justify-start font-bold flex-1">
-              <h1 className="font-bold text-lg line-clamp-2 overflow-hidden overflow-ellipsis">
+              <h1 className="font-bold text-lg line-clamp-2 overflow-hidden text-ellipsis">
                 {episode.release.title}
               </h1>
 

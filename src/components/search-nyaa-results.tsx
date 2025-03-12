@@ -96,7 +96,7 @@ export function SearchNyaaReleases({
                   }}
                 >
                   <div className="flex flex-col gap-2 p-2">
-                    <p className="text-xs overflow-hidden overflow-ellipsis">
+                    <p className="text-xs overflow-hidden text-ellipsis">
                       {title}
 
                       <a
