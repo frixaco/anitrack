@@ -18,10 +18,22 @@ jobs:
       - name: Build
         run: |
           mkdir -p build
-          GOOS=windows GOARCH=amd64 go build -o build/anitrack-cli-windows-amd64.exe
-          GOOS=linux GOARCH=amd64 go build -o build/anitrack-cli-linux-amd64
-          GOOS=darwin GOARCH=amd64 go build -o build/anitrack-cli-macos-amd64
-          GOOS=darwin GOARCH=arm64 go build -o build/anitrack-cli-macos-arm64
+          # -ldflags="-s -w" removes debug information and symbol tables
+          # -trimpath removes file system paths from the binary
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o build/anitrack-cli-windows-amd64.exe
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o build/anitrack-cli-linux-amd64
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o build/anitrack-cli-macos-arm64
+
+      - name: Install UPX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y upx
+
+      - name: Compress binaries
+        run: |
+          upx --best --lzma build/anitrack-cli-windows-amd64.exe
+          upx --best --lzma build/anitrack-cli-linux-amd64
+          # Skip macOS binaries as UPX can cause issues with code signing
 
       - name: Create Release
         id: create_release
@@ -30,7 +42,6 @@ jobs:
           files: |
             build/anitrack-cli-windows-amd64.exe
             build/anitrack-cli-linux-amd64
-            build/anitrack-cli-macos-amd64
             build/anitrack-cli-macos-arm64
           tag_name: v0.1.${{ github.run_number }}
           name: Release v0.1.${{ github.run_number }}
