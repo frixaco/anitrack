@@ -2,6 +2,11 @@
 
 It's a CLI app written in Go using [Bubbletea](https://github.com/charmbracelet/bubbletea) framework
 
+## INSTALL
+
+1. Install Go. I use 1.23
+2. `go install github.com/frixaco/anitrack`
+
 ## TODO
 
 - [x] Add text input and a table with navigation support
