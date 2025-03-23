@@ -1,11 +1,13 @@
 # Anitrack - Simple anime release tracker for myself
 
-It's a CLI app written in Go using [Bubbletea](https://github.com/charmbracelet/bubbletea) framework
+CLI app written in Go using [Bubbletea](https://github.com/charmbracelet/bubbletea) framework. Let's me search, watch/stream, download and track anime from a torrent source.
 
-## INSTALL
+## Setup
 
-1. Install Go. I use 1.23
-2. `go install github.com/frixaco/anitrack`
+1. Install Go. I use 1.23.
+2. Install [mpv](github.com/mpv-player/mpv) player.
+3. (Optional) I recommend setting up **Anime4K** anime upscaler for **mpv**: https://github.com/bloc97/anime4k
+4. Run `go install github.com/frixaco/anitrack` or download the binary from releases
 
 ## TODO
 
@@ -24,8 +26,5 @@ It's a CLI app written in Go using [Bubbletea](https://github.com/charmbracelet/
 
 ```bash
 bun install
-bun dev -->
-
-```
-
-```
+bun dev
+``` -->
