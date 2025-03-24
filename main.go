@@ -10,17 +10,14 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-)
-
-var (
-	defaultModelStyle = lipgloss.NewStyle().Border(lipgloss.NormalBorder()).BorderForeground(lipgloss.Color("238"))
-	focusedModelStyle = lipgloss.NewStyle().Border(lipgloss.NormalBorder()).BorderForeground(lipgloss.Color("99"))
 )
 
 type model struct {
@@ -30,6 +27,7 @@ type model struct {
 	results        []torrent
 	selectedResult int
 	selectedModel  int
+	watchHistory   list.Model
 }
 
 type torrent struct {
@@ -40,51 +38,52 @@ type torrent struct {
 }
 
 func main() {
+	// if len(os.Getenv("DEBUG")) > 0 {
+	f, err := tea.LogToFile("debug.log", "debug")
+	if err != nil {
+		log.Println("fatal:", err)
+		os.Exit(1)
+	}
+	defer f.Close()
+	// }
+
 	re := lipgloss.NewRenderer(os.Stdout)
 
-	headers := []table.Column{
+	resultsTableHeaders := []table.Column{
 		{Title: "#", Width: 4},
 		{Title: "Title", Width: 20},
 		{Title: "Size", Width: 15},
 		{Title: "Date", Width: 20},
-		// {Title: "Magnet URL", Width: 10},
 	}
-	rows := []table.Row{}
+	resultsTableRows := []table.Row{}
 
-	ta := table.New(
-		table.WithColumns(headers),
-		table.WithRows(rows),
+	resultsTable := table.New(
+		table.WithColumns(resultsTableHeaders),
+		table.WithRows(resultsTableRows),
 		table.WithWidth(lipgloss.Width(re.NewStyle().Render(""))),
 		table.WithHeight(50),
 	)
-	ta.SetStyles(table.Styles{
+	resultsTable.SetStyles(table.Styles{
 		Header:   re.NewStyle().Bold(true),
 		Selected: re.NewStyle().Foreground(lipgloss.Color("99")).Bold(true),
 	})
 
-	ti := textinput.New()
-	ti.Placeholder = "Title"
-	ti.CharLimit = 156
-	ti.Width = lipgloss.Width(re.NewStyle().Render(""))
-	ti.TextStyle = re.NewStyle().Foreground(lipgloss.Color("99"))
-	ti.Prompt = re.NewStyle().Render(" Search: ")
-	ti.Focus()
+	searchBox := textinput.New()
+	searchBox.Placeholder = "Title"
+	searchBox.CharLimit = 156
+	searchBox.Width = lipgloss.Width(re.NewStyle().Render(""))
+	searchBox.TextStyle = re.NewStyle().Foreground(lipgloss.Color("99"))
+	searchBox.Prompt = re.NewStyle().Render(" Search: ")
+	searchBox.Focus()
 
 	m := model{
 		index:          0,
-		searchBox:      ti,
-		resultsTable:   ta,
+		searchBox:      searchBox,
+		resultsTable:   resultsTable,
 		results:        []torrent{},
 		selectedResult: 0,
 		selectedModel:  0,
 	}
-
-	f, err := tea.LogToFile("debug.log", "debug")
-	if err != nil {
-		log.Println("Failed to start logging:", err)
-		os.Exit(1)
-	}
-	defer f.Close()
 
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
@@ -95,6 +94,135 @@ func main() {
 
 func (m model) Init() tea.Cmd {
 	return nil
+}
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		log.Println("Size info:", lipgloss.Width(m.searchBox.View()))
+		m.searchBox.Width = msg.Width - 15
+
+		widthToFill := msg.Width - 5
+		iW := 5
+		sW := 15
+		dW := 20
+		tW := widthToFill - iW - sW - dW
+
+		m.resultsTable.SetColumns([]table.Column{
+			{Title: "#", Width: iW},
+			{Title: "Title", Width: tW},
+			{Title: "Size", Width: sW},
+			{Title: "Date", Width: dW},
+		})
+		m.resultsTable.SetWidth(widthToFill)
+
+		heightToFill := msg.Height - 6
+		m.resultsTable.SetHeight(heightToFill)
+
+		return m, tea.Batch(tea.ClearScreen)
+	case searchResultMsg:
+		if msg.err != nil {
+			log.Println("Error searching:", msg.err)
+			return m, nil
+		}
+		m.results = msg.torrents
+
+		rows := []table.Row{}
+		for i, result := range m.results {
+			rows = append(rows, table.Row{
+				strconv.Itoa(i),
+				result.title,
+				result.size,
+				result.date,
+				// result.magnetUrl,
+			})
+		}
+		m.resultsTable.SetRows(rows)
+
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "tab":
+			re := lipgloss.NewRenderer(os.Stdout)
+			if m.selectedModel == 0 {
+				m.selectedModel = 1
+				m.resultsTable.Focus()
+				m.resultsTable.SetCursor(0)
+				m.searchBox.TextStyle = re.NewStyle().Foreground(lipgloss.Color("238"))
+			} else if m.selectedModel == 1 {
+				m.selectedModel = 0
+				m.searchBox.Focus()
+				m.searchBox.TextStyle = re.NewStyle().Foreground(lipgloss.Color("99"))
+			}
+		case "q", "ctrl+c":
+			return m, tea.Quit
+		case "enter":
+			if m.selectedModel == 0 {
+				return m, search(m.searchBox.Value())
+			} else {
+				streamUrl, err := getStreamUrl(m.results[m.selectedResult].magnetUrl)
+				if err != nil {
+					log.Println("Error getting stream URL:", err)
+					return m, nil
+				}
+				launchMpv(streamUrl)
+
+				updateHistory(HistoryItem{
+					Title:       m.results[m.selectedResult].title,
+					MagnetUrl:   m.results[m.selectedResult].magnetUrl,
+					Size:        m.results[m.selectedResult].size,
+					UploadDate:  m.results[m.selectedResult].date,
+					WatchedDate: time.Now().Format(time.RFC3339),
+				})
+			}
+		case "j", "down":
+			if m.selectedModel == 1 {
+				m.resultsTable.MoveDown(0)
+				m.selectedResult = m.resultsTable.Cursor()
+			}
+		case "k", "up":
+			if m.selectedModel == 1 {
+				m.resultsTable.MoveUp(0)
+				m.selectedResult = m.resultsTable.Cursor()
+			}
+		case "h":
+			// TODO
+			return m, nil
+		}
+
+		switch m.selectedModel {
+		case 0:
+			m.searchBox, _ = m.searchBox.Update(msg)
+		case 1:
+			m.resultsTable, _ = m.resultsTable.Update(msg)
+		case 2:
+			m.watchHistory, _ = m.watchHistory.Update(msg)
+		}
+	}
+	return m, nil
+}
+
+var (
+	defaultModelStyle = lipgloss.NewStyle().Border(lipgloss.NormalBorder()).BorderForeground(lipgloss.Color("238"))
+	focusedModelStyle = lipgloss.NewStyle().Border(lipgloss.NormalBorder()).BorderForeground(lipgloss.Color("99"))
+)
+
+func (m model) View() string {
+	var s string
+
+	if m.selectedModel == 0 {
+		s += lipgloss.JoinVertical(lipgloss.Center,
+			focusedModelStyle.Render(fmt.Sprintf("%4s", m.searchBox.View())),
+			defaultModelStyle.Render(fmt.Sprintf("%4s", m.resultsTable.View())),
+		)
+	} else if m.selectedModel == 1 {
+		s += lipgloss.JoinVertical(lipgloss.Center,
+			defaultModelStyle.Render(fmt.Sprintf("%4s", m.searchBox.View())),
+			focusedModelStyle.Render(fmt.Sprintf("%4s", m.resultsTable.View())),
+		)
+	} else if m.selectedModel == 2 {
+		s = focusedModelStyle.Render(m.watchHistory.View())
+	}
+	return s
 }
 
 type searchResultMsg struct {
@@ -165,16 +293,16 @@ func search(searchTerm string) tea.Cmd {
 	}
 }
 
-type TorrentInfo struct {
-	Details TorrentDetails `json:"details"`
-}
+type TorrentFile struct{}
 
 type TorrentDetails struct {
 	InfoHash string        `json:"info_hash"`
 	Files    []TorrentFile `json:"files"`
 }
 
-type TorrentFile struct{}
+type TorrentInfo struct {
+	Details TorrentDetails `json:"details"`
+}
 
 func getStreamUrl(magnetUrl string) (string, error) {
 	var streamUrl string
@@ -186,10 +314,49 @@ func getStreamUrl(magnetUrl string) (string, error) {
 	}
 	defer res.Body.Close()
 
+	log.Println("Torrent status", res.StatusCode, res.Status)
+
 	switch res.StatusCode {
-	case 409:
-		// duplicate torrent
+	// For some reason, I'm not getting 409s anymore
+	// case 409:
+	// 	log.Println("Torrent already exists", magnetUrl)
+	// 	et := ExistingTorrents{}
+	// 	err := json.NewDecoder(res.Body).Decode(&et)
+	// 	if err != nil {
+	// 		log.Println("Error extracting JSON:", err)
+	// 		return "", err
+	// 	}
+
+	// 	var torrent ExistingTorrent
+	// 	for _, t := range et.Torrents {
+	// 		if strings.Contains(magnetUrl, t.Details.InfoHash) {
+	// 			torrent = t
+	// 			break
+	// 		}
+	// 	}
+
+	// 	res, err := http.Get("https://api.anitrack.frixaco.com/torrents/" + torrent.ID)
+	// 	if err != nil {
+	// 		log.Println("Error getting stream URL:", err)
+	// 		return "", err
+	// 	}
+	// 	defer res.Body.Close()
+
+	// 	torrentInfo := TorrentInfo{}
+	// 	err = json.NewDecoder(res.Body).Decode(&torrentInfo)
+	// 	if err != nil {
+	// 		log.Println("Error extracting JSON:", err)
+	// 		return "", err
+	// 	}
+
+	// 	infoHash := torrentInfo.Details.InfoHash
+	// 	fileIdx := len(torrentInfo.Details.Files) - 1
+
+	// 	streamUrl = "https://api.anitrack.frixaco.com/torrents/" + infoHash + "/stream/" + strconv.Itoa(fileIdx)
+
 	case 200:
+		log.Println("Torrent added", magnetUrl)
+
 		torrentInfo := TorrentInfo{}
 		err := json.NewDecoder(res.Body).Decode(&torrentInfo)
 		if err != nil {
@@ -208,120 +375,49 @@ func launchMpv(magnetUrl string) {
 	cmd.Run()
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		log.Println("Size info:", lipgloss.Width(m.searchBox.View()))
-		m.searchBox.Width = msg.Width - 15
-
-		widthToFill := msg.Width - 5
-		iW := 5
-		sW := 15
-		// mW := 20
-		dW := 20
-		tW := widthToFill - iW - sW - dW
-
-		m.resultsTable.SetColumns([]table.Column{
-			{Title: "#", Width: iW},
-			{Title: "Title", Width: tW},
-			{Title: "Size", Width: sW},
-			{Title: "Date", Width: dW},
-			// {Title: "Magnet URL", Width: mW},
-		})
-		m.resultsTable.SetWidth(widthToFill)
-
-		heightToFill := msg.Height - 6
-		m.resultsTable.SetHeight(heightToFill)
-
-		return m, tea.Batch(tea.ClearScreen)
-	case searchResultMsg:
-		if msg.err != nil {
-			log.Println("Error searching:", msg.err)
-			return m, nil
-		}
-		m.results = msg.torrents
-
-		rows := []table.Row{}
-		for i, result := range m.results {
-			rows = append(rows, table.Row{
-				strconv.Itoa(i),
-				result.title,
-				result.size,
-				result.date,
-				// result.magnetUrl,
-			})
-		}
-		m.resultsTable.SetRows(rows)
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "tab":
-			re := lipgloss.NewRenderer(os.Stdout)
-			if m.selectedModel == 0 {
-				m.selectedModel = 1
-				m.resultsTable.Focus()
-				m.resultsTable.SetCursor(0)
-				m.searchBox.TextStyle = re.NewStyle().Foreground(lipgloss.Color("238"))
-			} else {
-				m.selectedModel = 0
-				m.searchBox.Focus()
-				m.searchBox.TextStyle = re.NewStyle().Foreground(lipgloss.Color("99"))
-			}
-		case "q", "ctrl+c":
-			return m, tea.Quit
-		case "enter":
-			if m.selectedModel == 0 {
-				return m, search(m.searchBox.Value())
-			} else {
-				streamUrl, err := getStreamUrl(m.results[m.selectedResult].magnetUrl)
-				if err != nil {
-					log.Println("Error getting stream URL:", err)
-					return m, nil
-				}
-				launchMpv(streamUrl)
-			}
-		case "j", "down":
-			if m.selectedModel == 1 {
-				m.resultsTable.MoveDown(0)
-				m.selectedResult = m.resultsTable.Cursor()
-			}
-		case "k", "up":
-			if m.selectedModel == 1 {
-				m.resultsTable.MoveUp(0)
-				m.selectedResult = m.resultsTable.Cursor()
-			}
-		}
-
-		switch m.selectedModel {
-		case 0:
-			m.searchBox, _ = m.searchBox.Update(msg)
-		case 1:
-			m.resultsTable, _ = m.resultsTable.Update(msg)
-		}
-	}
-	return m, nil
+type DB struct {
+	Data []HistoryItem `json:"data"`
 }
 
-func (m model) currentFocusedModel() string {
-	if m.selectedModel == 0 {
-		return "searchBox"
-	}
-	return "resultsTable"
+type HistoryItem struct {
+	Title       string `json:"title"`
+	MagnetUrl   string `json:"magnet_url"`
+	Size        string `json:"size"`
+	UploadDate  string `json:"upload_date"`
+	WatchedDate string `json:"watched_date"`
 }
 
-func (m model) View() string {
-	var s string
+func getHistory() ([]HistoryItem, error) {
+	var db DB
 
-	model := m.currentFocusedModel()
-	if model == "searchBox" {
-		s += lipgloss.JoinVertical(lipgloss.Center,
-			focusedModelStyle.Render(fmt.Sprintf("%4s", m.searchBox.View())),
-			defaultModelStyle.Render(fmt.Sprintf("%4s", m.resultsTable.View())),
-		)
-	} else if model == "resultsTable" {
-		s += lipgloss.JoinVertical(lipgloss.Center,
-			defaultModelStyle.Render(fmt.Sprintf("%4s", m.searchBox.View())),
-			focusedModelStyle.Render(fmt.Sprintf("%4s", m.resultsTable.View())),
-		)
+	if _, err := os.Stat("db.json"); os.IsNotExist(err) {
+		os.Create("db.json")
 	}
-	return s
+
+	file, err := os.ReadFile("db.json")
+	if err != nil {
+		log.Println("Error reading history:", err)
+		return []HistoryItem{}, err
+	}
+
+	json.Unmarshal(file, &db)
+
+	return db.Data, nil
+}
+
+func updateHistory(item HistoryItem) error {
+	history, err := getHistory()
+	if err != nil {
+		log.Println("Error updating history:", err)
+		return err
+	}
+
+	history = append(history, item)
+
+	db := DB{
+		Data: history,
+	}
+
+	file, _ := json.MarshalIndent(db, "", "  ")
+	return os.WriteFile("db.json", file, 0644)
 }

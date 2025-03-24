@@ -16,6 +16,11 @@ CLI app written in Go using [Bubbletea](https://github.com/charmbracelet/bubblet
 - [ ] Save watched episodes
 - [ ] Save search keywords (since they are basically anime titles) and add autocomplete
 
+### Why I stopped working on the web app?
+
+- The amount of work required to get subtitles working is too much for the scope of the After trying bunch of video player libraries and [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), I decided to stop making a browser app.
+- Non-browser app lets me use [Anime4K](https://github.com/bloc97/anime4k) upscaler for better quality
+
 <!-- ## TODO
 
 - [ ] Add support for subtitles (MKV are not natively supported, but with ffmpeg+webassembly it might be possible)
