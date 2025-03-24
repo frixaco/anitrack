@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -42,11 +43,11 @@ func main() {
 	re := lipgloss.NewRenderer(os.Stdout)
 
 	headers := []table.Column{
-		{Title: "#", Width: 10},
-		{Title: "Title", Width: 10},
-		{Title: "Size", Width: 10},
-		{Title: "Date", Width: 10},
-		{Title: "Magnet URL", Width: 10},
+		{Title: "#", Width: 4},
+		{Title: "Title", Width: 20},
+		{Title: "Size", Width: 15},
+		{Title: "Date", Width: 20},
+		// {Title: "Magnet URL", Width: 10},
 	}
 	rows := []table.Row{}
 
@@ -54,6 +55,7 @@ func main() {
 		table.WithColumns(headers),
 		table.WithRows(rows),
 		table.WithWidth(lipgloss.Width(re.NewStyle().Render(""))),
+		table.WithHeight(50),
 	)
 	ta.SetStyles(table.Styles{
 		Header:   re.NewStyle().Bold(true),
@@ -65,6 +67,7 @@ func main() {
 	ti.CharLimit = 156
 	ti.Width = lipgloss.Width(re.NewStyle().Render(""))
 	ti.TextStyle = re.NewStyle().Foreground(lipgloss.Color("99"))
+	ti.Prompt = re.NewStyle().Render(" Search: ")
 	ti.Focus()
 
 	m := model{
@@ -75,9 +78,17 @@ func main() {
 		selectedResult: 0,
 		selectedModel:  0,
 	}
+
+	f, err := tea.LogToFile("debug.log", "debug")
+	if err != nil {
+		log.Println("Failed to start logging:", err)
+		os.Exit(1)
+	}
+	defer f.Close()
+
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
-		fmt.Println("Alas, there's been an error:", err)
+		log.Println("Failed to start:", err)
 		os.Exit(1)
 	}
 }
@@ -94,12 +105,12 @@ type searchResultMsg struct {
 func search(searchTerm string) tea.Cmd {
 	searchTerm = strings.ReplaceAll(searchTerm, " ", "+")
 
-	fmt.Println("Searching for:", searchTerm)
+	log.Println("Searching for:", searchTerm)
 
 	url := "https://nyaa.si/user/subsplease?f=0&c=0_0&q="
 	res, err := http.Get(url + searchTerm + "+1080p")
 	if err != nil {
-		fmt.Println("Error fetching search results:", err)
+		log.Println("Error fetching search results:", err)
 		return func() tea.Msg {
 			return searchResultMsg{
 				torrents: []torrent{},
@@ -110,7 +121,7 @@ func search(searchTerm string) tea.Cmd {
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		fmt.Println("Error fetching search results:", res.StatusCode)
+		log.Println("Error fetching search results:", res.StatusCode)
 		return func() tea.Msg {
 			return searchResultMsg{
 				torrents: []torrent{},
@@ -121,7 +132,7 @@ func search(searchTerm string) tea.Cmd {
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		fmt.Println("Error parsing search results:", err)
+		log.Println("Error parsing search results:", err)
 		return func() tea.Msg {
 			return searchResultMsg{
 				torrents: []torrent{},
@@ -140,9 +151,9 @@ func search(searchTerm string) tea.Cmd {
 
 		ts = append(ts, torrent{
 			title:     title,
-			magnetUrl: magnet,
 			size:      size,
 			date:      date,
+			magnetUrl: magnet,
 		})
 	})
 
@@ -170,7 +181,7 @@ func getStreamUrl(magnetUrl string) (string, error) {
 
 	res, err := http.Post("https://api.anitrack.frixaco.com/torrents", "application/json", strings.NewReader(magnetUrl))
 	if err != nil {
-		fmt.Println("Error preparing for stream:", err)
+		log.Println("Error getting stream URL:", err)
 		return "", err
 	}
 	defer res.Body.Close()
@@ -182,7 +193,7 @@ func getStreamUrl(magnetUrl string) (string, error) {
 		torrentInfo := TorrentInfo{}
 		err := json.NewDecoder(res.Body).Decode(&torrentInfo)
 		if err != nil {
-			fmt.Println("Error decoding torrent info:", err)
+			log.Println("Error extracting JSON:", err)
 			return "", err
 		}
 
@@ -200,29 +211,32 @@ func launchMpv(magnetUrl string) {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.searchBox.Width = msg.Width - 8
+		log.Println("Size info:", lipgloss.Width(m.searchBox.View()))
+		m.searchBox.Width = msg.Width - 15
 
 		widthToFill := msg.Width - 5
-		iW := 4
-		sW := 10
-		mW := 20
-		dW := 10
-		tW := widthToFill - iW - sW - mW - dW
+		iW := 5
+		sW := 15
+		// mW := 20
+		dW := 20
+		tW := widthToFill - iW - sW - dW
 
 		m.resultsTable.SetColumns([]table.Column{
 			{Title: "#", Width: iW},
 			{Title: "Title", Width: tW},
 			{Title: "Size", Width: sW},
 			{Title: "Date", Width: dW},
-			{Title: "Magnet URL", Width: mW},
+			// {Title: "Magnet URL", Width: mW},
 		})
-
 		m.resultsTable.SetWidth(widthToFill)
 
-		return m, nil
+		heightToFill := msg.Height - 6
+		m.resultsTable.SetHeight(heightToFill)
+
+		return m, tea.Batch(tea.ClearScreen)
 	case searchResultMsg:
 		if msg.err != nil {
-			fmt.Println("Error searching:", msg.err)
+			log.Println("Error searching:", msg.err)
 			return m, nil
 		}
 		m.results = msg.torrents
@@ -234,7 +248,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				result.title,
 				result.size,
 				result.date,
-				result.magnetUrl,
+				// result.magnetUrl,
 			})
 		}
 		m.resultsTable.SetRows(rows)
@@ -260,7 +274,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				streamUrl, err := getStreamUrl(m.results[m.selectedResult].magnetUrl)
 				if err != nil {
-					fmt.Println("Error getting stream URL:", err)
+					log.Println("Error getting stream URL:", err)
 					return m, nil
 				}
 				launchMpv(streamUrl)
