@@ -86,8 +86,12 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func (m *model) search() ([]torrent, error) {
-	searchTerm := m.searchBox.Value()
+type searchResultMsg struct {
+	torrents []torrent
+	err      error
+}
+
+func search(searchTerm string) tea.Cmd {
 	searchTerm = strings.ReplaceAll(searchTerm, " ", "+")
 
 	fmt.Println("Searching for:", searchTerm)
@@ -96,19 +100,34 @@ func (m *model) search() ([]torrent, error) {
 	res, err := http.Get(url + searchTerm + "+1080p")
 	if err != nil {
 		fmt.Println("Error fetching search results:", err)
-		return []torrent{}, err
+		return func() tea.Msg {
+			return searchResultMsg{
+				torrents: []torrent{},
+				err:      err,
+			}
+		}
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
 		fmt.Println("Error fetching search results:", res.StatusCode)
-		return []torrent{}, errors.New("error fetching search results")
+		return func() tea.Msg {
+			return searchResultMsg{
+				torrents: []torrent{},
+				err:      errors.New("error fetching search results"),
+			}
+		}
 	}
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
 		fmt.Println("Error parsing search results:", err)
-		return []torrent{}, err
+		return func() tea.Msg {
+			return searchResultMsg{
+				torrents: []torrent{},
+				err:      err,
+			}
+		}
 	}
 
 	ts := []torrent{}
@@ -127,7 +146,12 @@ func (m *model) search() ([]torrent, error) {
 		})
 	})
 
-	return ts, nil
+	return func() tea.Msg {
+		return searchResultMsg{
+			torrents: ts,
+			err:      nil,
+		}
+	}
 }
 
 type TorrentInfo struct {
@@ -196,6 +220,24 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.resultsTable.SetWidth(widthToFill)
 
 		return m, nil
+	case searchResultMsg:
+		if msg.err != nil {
+			fmt.Println("Error searching:", msg.err)
+			return m, nil
+		}
+		m.results = msg.torrents
+
+		rows := []table.Row{}
+		for i, result := range m.results {
+			rows = append(rows, table.Row{
+				strconv.Itoa(i),
+				result.title,
+				result.size,
+				result.date,
+				result.magnetUrl,
+			})
+		}
+		m.resultsTable.SetRows(rows)
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "tab":
@@ -214,24 +256,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "enter":
 			if m.selectedModel == 0 {
-				results, err := m.search()
-				if err != nil {
-					fmt.Println("Error searching:", err)
-					return m, nil
-				}
-				m.results = results
-
-				rows := []table.Row{}
-				for i, result := range m.results {
-					rows = append(rows, table.Row{
-						strconv.Itoa(i),
-						result.title,
-						result.size,
-						result.date,
-						result.magnetUrl,
-					})
-				}
-				m.resultsTable.SetRows(rows)
+				return m, search(m.searchBox.Value())
 			} else {
 				streamUrl, err := getStreamUrl(m.results[m.selectedResult].magnetUrl)
 				if err != nil {
