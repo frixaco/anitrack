@@ -37,6 +37,14 @@ type torrent struct {
 	magnetUrl string
 }
 
+type historyItem struct {
+	item HistoryItem
+}
+
+func (i historyItem) Title() string       { return i.item.Title }
+func (i historyItem) Description() string { return i.item.WatchedDate }
+func (i historyItem) FilterValue() string { return i.item.Title }
+
 func main() {
 	// if len(os.Getenv("DEBUG")) > 0 {
 	f, err := tea.LogToFile("debug.log", "debug")
@@ -72,9 +80,14 @@ func main() {
 	searchBox.Placeholder = "Title"
 	searchBox.CharLimit = 156
 	searchBox.Width = lipgloss.Width(re.NewStyle().Render(""))
-	searchBox.TextStyle = re.NewStyle().Foreground(lipgloss.Color("99"))
+	searchBox.TextStyle = re.NewStyle().Foreground(lipgloss.Color("201"))
 	searchBox.Prompt = re.NewStyle().Render(" Search: ")
 	searchBox.Focus()
+
+	defaultList := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
+	defaultList.SetShowHelp(true)
+	defaultList.Title = "Watch History"
+	defaultList.Styles.Title = lipgloss.NewStyle().Foreground(lipgloss.Color("99")).Bold(true)
 
 	m := model{
 		index:          0,
@@ -83,8 +96,8 @@ func main() {
 		results:        []torrent{},
 		selectedResult: 0,
 		selectedModel:  0,
+		watchHistory:   defaultList,
 	}
-
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		log.Println("Failed to start:", err)
@@ -99,7 +112,6 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		log.Println("Size info:", lipgloss.Width(m.searchBox.View()))
 		m.searchBox.Width = msg.Width - 15
 
 		widthToFill := msg.Width - 5
@@ -118,6 +130,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		heightToFill := msg.Height - 6
 		m.resultsTable.SetHeight(heightToFill)
+
+		m.watchHistory.SetHeight(heightToFill)
+		m.watchHistory.SetWidth(widthToFill)
 
 		return m, tea.Batch(tea.ClearScreen)
 	case searchResultMsg:
@@ -158,7 +173,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			if m.selectedModel == 0 {
 				return m, search(m.searchBox.Value())
-			} else {
+			}
+			if m.selectedModel == 1 {
 				streamUrl, err := getStreamUrl(m.results[m.selectedResult].magnetUrl)
 				if err != nil {
 					log.Println("Error getting stream URL:", err)
@@ -174,6 +190,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					WatchedDate: time.Now().Format(time.RFC3339),
 				})
 			}
+			if m.selectedModel == 2 {
+				magnetUrl := m.watchHistory.SelectedItem().(historyItem).item.MagnetUrl
+
+				streamUrl, err := getStreamUrl(magnetUrl)
+				if err != nil {
+					log.Println("Error getting stream URL:", err)
+					return m, nil
+				}
+				launchMpv(streamUrl)
+			}
 		case "j", "down":
 			if m.selectedModel == 1 {
 				m.resultsTable.MoveDown(0)
@@ -185,7 +211,24 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.selectedResult = m.resultsTable.Cursor()
 			}
 		case "h":
-			// TODO
+			if m.selectedModel != 2 {
+				m.watchHistory.FilterInput.Focus()
+				history, err := getHistory()
+				if err != nil {
+					return m, nil
+				}
+
+				items := []list.Item{}
+				for _, h := range history {
+					items = append(items, historyItem{item: h})
+				}
+
+				m.selectedModel = 2
+				m.watchHistory.SetItems(items)
+				log.Println("List width:", m.watchHistory.Width())
+			} else {
+				m.selectedModel = 0
+			}
 			return m, nil
 		}
 
@@ -220,7 +263,7 @@ func (m model) View() string {
 			focusedModelStyle.Render(fmt.Sprintf("%4s", m.resultsTable.View())),
 		)
 	} else if m.selectedModel == 2 {
-		s = focusedModelStyle.Render(m.watchHistory.View())
+		s = fmt.Sprintf("%4s", m.watchHistory.View())
 	}
 	return s
 }
@@ -372,7 +415,10 @@ func getStreamUrl(magnetUrl string) (string, error) {
 
 func launchMpv(magnetUrl string) {
 	cmd := exec.Command("mpv", magnetUrl)
-	cmd.Run()
+	err := cmd.Start()
+	if err != nil {
+		log.Printf("Error starting mpv: %v\n", err)
+	}
 }
 
 type DB struct {

@@ -13,7 +13,7 @@ CLI app written in Go using [Bubbletea](https://github.com/charmbracelet/bubblet
 
 - [x] Add text input and a table with navigation support
 - [x] Implement searching logic and populate results table with option to launch selected episode in [mpv](https://github.com/mpv-player/mpv/)
-- [ ] Save watched episodes
+- [x] Keep history of watched episodes and allow streaming them
 - [ ] Save search keywords (since they are basically anime titles) and add autocomplete
 
 ### Why I stopped working on the web app?
