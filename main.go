@@ -28,6 +28,7 @@ type model struct {
 	selectedResult int
 	selectedModel  int
 	watchHistory   list.Model
+	watchedItems   []HistoryItem
 }
 
 type torrent struct {
@@ -82,7 +83,19 @@ func main() {
 	searchBox.Width = lipgloss.Width(re.NewStyle().Render(""))
 	searchBox.TextStyle = re.NewStyle().Foreground(lipgloss.Color("201"))
 	searchBox.Prompt = re.NewStyle().Render(" Search: ")
+	searchBox.ShowSuggestions = true
 	searchBox.Focus()
+
+	history, err := getHistory()
+	if err != nil {
+		log.Println("Failed to load history")
+	}
+
+	var suggestions []string
+	for _, item := range history {
+		suggestions = append(suggestions, item.Title)
+	}
+	searchBox.SetSuggestions(suggestions)
 
 	defaultList := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
 	defaultList.SetShowHelp(true)
@@ -97,6 +110,7 @@ func main() {
 		selectedResult: 0,
 		selectedModel:  0,
 		watchHistory:   defaultList,
+		watchedItems:   history,
 	}
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
@@ -180,15 +194,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					log.Println("Error getting stream URL:", err)
 					return m, nil
 				}
-				launchMpv(streamUrl)
 
-				updateHistory(HistoryItem{
+				item := HistoryItem{
 					Title:       m.results[m.selectedResult].title,
 					MagnetUrl:   m.results[m.selectedResult].magnetUrl,
 					Size:        m.results[m.selectedResult].size,
 					UploadDate:  m.results[m.selectedResult].date,
 					WatchedDate: time.Now().Format(time.RFC3339),
-				})
+				}
+
+				m.watchedItems = append(m.watchedItems, item)
+				updateHistory(item)
+
+				launchMpv(streamUrl)
 			}
 			if m.selectedModel == 2 {
 				magnetUrl := m.watchHistory.SelectedItem().(historyItem).item.MagnetUrl
@@ -198,28 +216,27 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					log.Println("Error getting stream URL:", err)
 					return m, nil
 				}
+
 				launchMpv(streamUrl)
 			}
 		case "j", "down":
 			if m.selectedModel == 1 {
-				m.resultsTable.MoveDown(0)
+				m.resultsTable.MoveDown(1)
 				m.selectedResult = m.resultsTable.Cursor()
+				return m, nil
 			}
 		case "k", "up":
 			if m.selectedModel == 1 {
-				m.resultsTable.MoveUp(0)
+				m.resultsTable.MoveUp(1)
 				m.selectedResult = m.resultsTable.Cursor()
+				return m, nil
 			}
 		case "h":
 			if m.selectedModel != 2 {
 				m.watchHistory.FilterInput.Focus()
-				history, err := getHistory()
-				if err != nil {
-					return m, nil
-				}
 
 				items := []list.Item{}
-				for _, h := range history {
+				for _, h := range m.watchedItems {
 					items = append(items, historyItem{item: h})
 				}
 
