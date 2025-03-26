@@ -2,6 +2,8 @@
 
 CLI app written in Go using [Bubbletea](https://github.com/charmbracelet/bubbletea) framework. Let's me search, watch/stream, download and track anime from a torrent source.
 
+https://github.com/user-attachments/assets/dcac759d-70d0-4af1-876d-fd4bd2e54dda
+
 ## Setup
 
 1. Install Go. I use 1.23.
