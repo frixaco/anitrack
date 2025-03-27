@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -206,7 +205,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.watchedItems = append(m.watchedItems, item)
 				updateHistory(item)
 
-				launchMpv(streamUrl)
+				LaunchMpv(streamUrl)
 			}
 			if m.selectedModel == 2 {
 				magnetUrl := m.watchHistory.SelectedItem().(historyItem).item.MagnetUrl
@@ -217,7 +216,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, nil
 				}
 
-				launchMpv(streamUrl)
+				LaunchMpv(streamUrl)
 			}
 		case "j", "down":
 			if m.selectedModel == 1 {
@@ -428,14 +427,6 @@ func getStreamUrl(magnetUrl string) (string, error) {
 	}
 
 	return streamUrl, nil
-}
-
-func launchMpv(magnetUrl string) {
-	cmd := exec.Command("mpv", magnetUrl)
-	err := cmd.Start()
-	if err != nil {
-		log.Printf("Error starting mpv: %v\n", err)
-	}
 }
 
 type DB struct {
