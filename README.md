@@ -9,7 +9,7 @@ https://github.com/user-attachments/assets/dcac759d-70d0-4af1-876d-fd4bd2e54dda
 1. Install Go. I use 1.23.
 2. Install [mpv](github.com/mpv-player/mpv) player.
 3. (Optional) I recommend setting up **Anime4K** anime upscaler for **mpv**: https://github.com/bloc97/anime4k
-4. Run `go install github.com/frixaco/anitrack` or download the binary from releases
+4. Run `go install github.com/frixaco/anitrack@latest` or download the binary from releases
 
 ## TODO
 

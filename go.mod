@@ -1,4 +1,4 @@
-module anitrack
+module github.com/frixaco/anitrack
 
 go 1.23.1
 
