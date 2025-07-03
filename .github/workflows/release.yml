@@ -24,6 +24,7 @@ jobs:
 
       - name: Build
         run: |
+          cd go-tui
           mkdir -p build
           # -ldflags="-s -w" removes debug information and symbol tables
           # -trimpath removes file system paths from the binary
