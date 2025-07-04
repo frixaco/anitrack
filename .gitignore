@@ -3,3 +3,5 @@ debug.log
 db.json
 
 .DS_Store
+
+target/
