@@ -137,7 +137,11 @@ class AnitrackApp(App[str]):
         pass
 
 
-if __name__ == "__main__":
+def main():
     app = AnitrackApp()
     exit_msg = app.run()
     print(exit_msg)
+
+
+if __name__ == "__main__":
+    main()

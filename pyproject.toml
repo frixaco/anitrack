@@ -12,3 +12,6 @@ dependencies = [
     "textual-dev>=1.7.0",
     "textual[syntax]>=3.5.0",
 ]
+
+[project.scripts]
+anitrack = "anitrack.main:main"
