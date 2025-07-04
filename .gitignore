@@ -5,3 +5,6 @@ db.json
 .DS_Store
 
 target/
+
+build/
+dist/
