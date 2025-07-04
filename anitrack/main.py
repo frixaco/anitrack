@@ -6,6 +6,7 @@ from textual.containers import Horizontal, VerticalScroll
 from textual.widgets import Button, Input, Static
 from textual import events
 from selectolax.parser import HTMLParser
+from pathlib import Path
 
 
 class TorrentItem(TypedDict):
@@ -121,7 +122,7 @@ class AnitrackApp(App[str]):
         ("ctrl+q", "quit", "Quit"),
     ]
 
-    CSS_PATH = "styles.tcss"
+    CSS_PATH = str(Path(__file__).parent / "styles.tcss")
 
     def compose(self) -> ComposeResult:
         yield SearchBox(id="searchBox")

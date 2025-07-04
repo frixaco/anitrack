@@ -13,5 +13,12 @@ dependencies = [
     "textual[syntax]>=3.5.0",
 ]
 
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project.scripts]
 anitrack = "anitrack.main:main"
+
+[tool.setuptools.package-data]
+anitrack = ["*.tcss"]
