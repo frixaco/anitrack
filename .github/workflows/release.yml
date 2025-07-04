@@ -1,15 +1,16 @@
 name: Build and Release
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "**.go" # Only run on changes to Go files
-      - "go.mod" # Or changes to dependencies
-      - "go.sum"
-      # Excludes changes to docs, workflows, etc.
-    tags-ignore:
-      - "v*" # Avoid running this workflow when tagging (prevents circular triggers)
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - "**.go" # Only run on changes to Go files
+  #     - "go.mod" # Or changes to dependencies
+  #     - "go.sum"
+  #     # Excludes changes to docs, workflows, etc.
+  #   tags-ignore:
+  #     - "v*" # Avoid running this workflow when tagging (prevents circular triggers)
+  workflow_dispatch: # Manual trigger
 
 jobs:
   build:
