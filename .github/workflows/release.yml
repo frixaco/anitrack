@@ -1,60 +1,35 @@
-name: Build and Release
+name: Release
 
 on:
-  # push:
-  #   branches: [main]
-  #   paths:
-  #     - "**.go" # Only run on changes to Go files
-  #     - "go.mod" # Or changes to dependencies
-  #     - "go.sum"
-  #     # Excludes changes to docs, workflows, etc.
-  #   tags-ignore:
-  #     - "v*" # Avoid running this workflow when tagging (prevents circular triggers)
-  workflow_dispatch: # Manual trigger
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v0.1.9)'
+        required: true
+        default: 'v0.1.9'
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: "1.23"
-
-      - name: Build
-        run: |
-          cd go-tui
-          mkdir -p build
-          # -ldflags="-s -w" removes debug information and symbol tables
-          # -trimpath removes file system paths from the binary
-          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o build/anitrack-cli-windows-amd64.exe
-          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o build/anitrack-cli-linux-amd64
-          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o build/anitrack-cli-macos-arm64
-
-      - name: Install UPX
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y upx
-
-      - name: Compress binaries
-        run: |
-          upx --best --lzma build/anitrack-cli-windows-amd64.exe
-          upx --best --lzma build/anitrack-cli-linux-amd64
-          # Skip macOS binaries as UPX can cause issues with code signing
-
+      - uses: actions/checkout@v4
+      
       - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            build/anitrack-cli-windows-amd64.exe
-            build/anitrack-cli-linux-amd64
-            build/anitrack-cli-macos-arm64
-          tag_name: v0.1.${{ github.run_number }}
-          name: Release v0.1.${{ github.run_number }}
-          draft: false
-          prerelease: false
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          release_name: Release ${{ github.event.inputs.version }}
+          body: |
+            ## Python TUI Installation Instructions
+
+            1. Install `uv` (https://docs.astral.sh/uv/getting-started/installation/)
+            2. Install [mpv](github.com/mpv-player/mpv) player.
+            3. (Optional) On desktop, set up **Anime4K** anime upscaler for **mpv**: https://github.com/bloc97/anime4k
+            4. Run `uv tool install frixa-anitrack`
+            5. Run `anitrack`
+
+            NOTE: to try without installing, run `uv tool run --from frixa-anitrack anitrack` or `uvx --from frixa-anitrack anitrack`
+          draft: false
+          prerelease: false
