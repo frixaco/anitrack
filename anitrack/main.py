@@ -1,5 +1,6 @@
 from subprocess import Popen, DEVNULL
 import aiohttp
+import asyncio
 from typing import TypedDict, Optional, Any
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, VerticalScroll
@@ -54,41 +55,73 @@ class WatchButton(Button):
 
 
 class SearchBox(Horizontal):
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.current_search_task: Optional[asyncio.Task[None]] = None
+
     def compose(self) -> ComposeResult:
         yield Input(classes="input")
         yield Static("[bold]ANITRACK[/bold]", classes="logo")
 
     async def on_input_submitted(self):
         input = self.query_one(Input)
-        await self.scrape_nyaa_subsplease(input.value)
+
+        # Cancel any existing search
+        if self.current_search_task and not self.current_search_task.done():
+            self.current_search_task.cancel()
+
+        # Start new search in background
+        self.current_search_task = asyncio.create_task(
+            self.scrape_nyaa_subsplease(input.value)
+        )
 
     async def scrape_nyaa_subsplease(self, query: str):
         url = f"https://nyaa.si/user/subsplease?f=0&c=0_0&q={query}+1080p"
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                html = await response.text()
-                tree = HTMLParser(html)
-                results: list[TorrentItem] = []
-                results_table = self.screen.query_one("#results", Results)
-                for node in tree.css("tr.success"):
-                    title_node = node.css_first("td:nth-child(2) a:not(.comments)")
-                    magnet_node = node.css_first('a[href^="magnet"]')
-                    size_node = node.css_first("td:nth-child(4)")
-                    date_node = node.css_first("td[data-timestamp]")
+        timeout = aiohttp.ClientTimeout(total=2)
+        results_table = self.screen.query_one("#results", Results)
 
-                    if title_node and magnet_node and size_node and date_node:
-                        title = title_node.text() or ""
-                        magnet = magnet_node.attributes.get("href") or ""
-                        size = size_node.text() or ""
-                        date = date_node.text() or ""
-                        results.append(
-                            TorrentItem(
-                                title=title, size=size, date=date, magnet=magnet
+        # Clear previous results and show loading
+        results_table.remove_children()
+        loading_msg = Static("Searching...", classes="loading-msg")
+        results_table.mount(loading_msg)
+
+        try:
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.get(url) as response:
+                    # Remove loading message
+                    results_table.remove_children()
+
+                    html = await response.text()
+                    tree = HTMLParser(html)
+                    results: list[TorrentItem] = []
+                    for node in tree.css("tr.success"):
+                        title_node = node.css_first("td:nth-child(2) a:not(.comments)")
+                        magnet_node = node.css_first('a[href^="magnet"]')
+                        size_node = node.css_first("td:nth-child(4)")
+                        date_node = node.css_first("td[data-timestamp]")
+
+                        if title_node and magnet_node and size_node and date_node:
+                            title = title_node.text() or ""
+                            magnet = magnet_node.attributes.get("href") or ""
+                            size = size_node.text() or ""
+                            date = date_node.text() or ""
+                            results.append(
+                                TorrentItem(
+                                    title=title, size=size, date=date, magnet=magnet
+                                )
                             )
-                        )
 
-                        watch_btn = WatchButton(magnet)
-                        results_table.add_result(watch_btn, title, size, date)
+                            watch_btn = WatchButton(magnet)
+                            results_table.add_result(watch_btn, title, size, date)
+        except (aiohttp.ClientError, asyncio.TimeoutError):
+            results_table.remove_children()
+            error_msg = Static(
+                "Connection failed. Check VPN connection.", classes="error-msg"
+            )
+            results_table.mount(error_msg)
+        except asyncio.CancelledError:
+            # Search was cancelled by new search, do nothing
+            pass
 
 
 class Results(VerticalScroll, can_focus=True):
@@ -108,13 +141,25 @@ class Results(VerticalScroll, can_focus=True):
         if not isinstance(event.button, WatchButton):
             return
 
-        url = "https://api.anitrack.frixaco.com/torrents"
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, data=event.button.magnet) as response:
-                torrent_info: TorrentResponse = await response.json()
-                stream_url = f"https://api.anitrack.frixaco.com/torrents/{torrent_info['details']['info_hash']}/stream/{len(torrent_info['details']['files']) - 1}"
+        # Start streaming in background task
+        asyncio.create_task(self._start_stream(event.button.magnet))
 
-                _ = Popen(["mpv", stream_url], stdout=DEVNULL, stderr=DEVNULL)
+    async def _start_stream(self, magnet: str):
+        url = "https://api.anitrack.frixaco.com/torrents"
+        timeout = aiohttp.ClientTimeout(total=2)
+
+        try:
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.post(url, data=magnet) as response:
+                    torrent_info: TorrentResponse = await response.json()
+                    stream_url = f"https://api.anitrack.frixaco.com/torrents/{torrent_info['details']['info_hash']}/stream/{len(torrent_info['details']['files']) - 1}"
+
+                    _ = Popen(["mpv", stream_url], stdout=DEVNULL, stderr=DEVNULL)
+        except (aiohttp.ClientError, asyncio.TimeoutError):
+            error_msg = Static(
+                "Streaming failed. Check VPN connection.", classes="error-msg"
+            )
+            self.mount(error_msg)
 
 
 class AnitrackApp(App[str]):
