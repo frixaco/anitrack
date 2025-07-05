@@ -1,5 +1,5 @@
 [project]
-name = "anitrack"
+name = "anitracky"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -12,13 +12,3 @@ dependencies = [
     "textual-dev>=1.7.0",
     "textual[syntax]>=3.5.0",
 ]
-
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project.scripts]
-anitrack = "anitrack.main:main"
-
-[tool.setuptools.package-data]
-anitrack = ["*.tcss"]
