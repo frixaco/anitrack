@@ -1,37 +1,42 @@
-# Anitrack - Simple anime release tracker for myself
+# Anitrack - Simple TUI to stream anime
 
-CLI app written in Go using [Bubbletea](https://github.com/charmbracelet/bubbletea) framework. Let's me search, watch/stream, download and track anime from a torrent source.
+The project has been ported multiple times as I kept exploring different technologies for fun:
 
-https://github.com/user-attachments/assets/dcac759d-70d0-4af1-876d-fd4bd2e54dda
+- Next.js app (auth, search, tracker, stream, etc.)
+- Go TUI using Bubbletea
+- (final) Python TUI using Textual
 
-## Setup
+The last (and hopefully) final version is the Python TUI version.
 
-1. Install Go. I use 1.23.
+## Usage
+
+1. Install `uv` (https://docs.astral.sh/uv/getting-started/installation/)
 2. Install [mpv](github.com/mpv-player/mpv) player.
-3. (Optional) I recommend setting up **Anime4K** anime upscaler for **mpv**: https://github.com/bloc97/anime4k
+3. (Optional) On desktop, set up **Anime4K** anime upscaler for **mpv**: https://github.com/bloc97/anime4k
+4. Run `uv tool install frixa-anitrack`
+5. Run `anitrack`
+
+NOTE: to try without installing, run `uv tool run --from frixa-anitrack anitrack` or `uvx --from frixa-anitrack anitrack`
+
+Status: finished.
+
+### Go TUI
+
+1. Install Go. I used +1.23.
+2. Install [mpv](github.com/mpv-player/mpv) player.
+3. (Optional) On desktop, set up **Anime4K** anime upscaler for **mpv**: https://github.com/bloc97/anime4k
 4. Run `go install github.com/frixaco/anitrack@latest` or download the binary from releases
 
-## TODO
+Status: finished.
 
-- [x] Add text input and a table with navigation support
-- [x] Implement searching logic and populate results table with option to launch selected episode in [mpv](https://github.com/mpv-player/mpv/)
-- [x] Keep history of watched episodes and allow streaming them
-- [ ] Save search keywords (since they are basically anime titles) and add autocomplete
+### Next.js
 
-### Why I stopped working on the web app?
+Fully functional, but requires setting up environment variables and services.
 
-- The amount of work required to get subtitles working is too much for the scope of the After trying bunch of video player libraries and [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm), I decided to stop making a browser app.
-- Non-browser app lets me use [Anime4K](https://github.com/bloc97/anime4k) upscaler for better quality
+Status: abandoned.
 
-<!-- ## TODO
+### Rust TUI
 
-- [ ] Add support for subtitles (MKV are not natively supported, but with ffmpeg+webassembly it might be possible)
+Explored scraping HTML pages a bit. Don't plan to continue for the time being.
 
-## Setup
-
-- Install Bun
-
-```bash
-bun install
-bun dev
-``` -->
+Status: dormant.

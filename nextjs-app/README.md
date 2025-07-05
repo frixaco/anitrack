@@ -1,3 +1,4 @@
 ## Next.js app for Anitrack
 
-Currently I'm working on the Go CLI app version but all core features are implemented and working except subtitles.
+Fully functional but is abandoned due to lack of subtitles support in MKV files in browsers.
+I have some ideas which I might explore in the future like using ffmpeg and WASM

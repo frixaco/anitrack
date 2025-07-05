@@ -6,7 +6,6 @@ from textual.app import App, ComposeResult
 from textual.containers import Horizontal, VerticalScroll
 from textual.widgets import Button, Input, Static
 from textual import events
-from selectolax.parser import HTMLParser
 from pathlib import Path
 
 
@@ -76,8 +75,9 @@ class SearchBox(Horizontal):
         )
 
     async def scrape_nyaa_subsplease(self, query: str):
-        url = f"https://nyaa.si/user/subsplease?f=0&c=0_0&q={query}+1080p"
-        timeout = aiohttp.ClientTimeout(total=2)
+        # Use the Go API instead of scraping directly
+        api_url = f"https://scrape.anitrack.frixaco.com/scrape?q={query}"
+        timeout = aiohttp.ClientTimeout(total=5)
         results_table = self.screen.query_one("#results", Results)
 
         # Clear previous results and show loading
@@ -87,36 +87,37 @@ class SearchBox(Horizontal):
 
         try:
             async with aiohttp.ClientSession(timeout=timeout) as session:
-                async with session.get(url) as response:
+                async with session.get(api_url) as response:
                     # Remove loading message
                     results_table.remove_children()
 
-                    html = await response.text()
-                    tree = HTMLParser(html)
-                    results: list[TorrentItem] = []
-                    for node in tree.css("tr.success"):
-                        title_node = node.css_first("td:nth-child(2) a:not(.comments)")
-                        magnet_node = node.css_first('a[href^="magnet"]')
-                        size_node = node.css_first("td:nth-child(4)")
-                        date_node = node.css_first("td[data-timestamp]")
-
-                        if title_node and magnet_node and size_node and date_node:
-                            title = title_node.text() or ""
-                            magnet = magnet_node.attributes.get("href") or ""
-                            size = size_node.text() or ""
-                            date = date_node.text() or ""
-                            results.append(
-                                TorrentItem(
-                                    title=title, size=size, date=date, magnet=magnet
-                                )
+                    if response.status == 200:
+                        data = await response.json()
+                        if "error" in data:
+                            error_msg = Static(
+                                f"API Error: {data['error']}", classes="error-msg"
                             )
-
-                            watch_btn = WatchButton(magnet)
-                            results_table.add_result(watch_btn, title, size, date)
+                            results_table.mount(error_msg)
+                        else:
+                            results = data.get("results", [])
+                            for result in results:
+                                watch_btn = WatchButton(result["magnet"])
+                                results_table.add_result(
+                                    watch_btn,
+                                    result["title"],
+                                    result["size"],
+                                    result["date"],
+                                )
+                    else:
+                        error_msg = Static(
+                            f"API request failed with status {response.status}",
+                            classes="error-msg",
+                        )
+                        results_table.mount(error_msg)
         except (aiohttp.ClientError, asyncio.TimeoutError):
             results_table.remove_children()
             error_msg = Static(
-                "Connection failed. Check VPN connection.", classes="error-msg"
+                "Connection failed. Check API connection.", classes="error-msg"
             )
             results_table.mount(error_msg)
         except asyncio.CancelledError:

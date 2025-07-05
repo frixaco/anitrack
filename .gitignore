@@ -2,6 +2,8 @@
 debug.log
 db.json
 
+anitrack
+
 .DS_Store
 
 target/

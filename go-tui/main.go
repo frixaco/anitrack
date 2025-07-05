@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -20,14 +19,15 @@ import (
 )
 
 type model struct {
-	index          int
-	searchBox      textinput.Model
-	resultsTable   table.Model
-	results        []torrent
-	selectedResult int
-	selectedModel  int
-	watchHistory   list.Model
-	watchedItems   []HistoryItem
+	index           int
+	searchBox       textinput.Model
+	resultsTable    table.Model
+	results         []torrent
+	selectedResult  int
+	selectedModel   int
+	watchHistory    list.Model
+	watchedItems    []HistoryItem
+	currentSearchID int
 }
 
 type torrent struct {
@@ -102,14 +102,15 @@ func main() {
 	defaultList.Styles.Title = lipgloss.NewStyle().Foreground(lipgloss.Color("99")).Bold(true)
 
 	m := model{
-		index:          0,
-		searchBox:      searchBox,
-		resultsTable:   resultsTable,
-		results:        []torrent{},
-		selectedResult: 0,
-		selectedModel:  0,
-		watchHistory:   defaultList,
-		watchedItems:   history,
+		index:           0,
+		searchBox:       searchBox,
+		resultsTable:    resultsTable,
+		results:         []torrent{},
+		selectedResult:  0,
+		selectedModel:   0,
+		watchHistory:    defaultList,
+		watchedItems:    history,
+		currentSearchID: 0,
 	}
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
@@ -149,8 +150,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, tea.Batch(tea.ClearScreen)
 	case searchResultMsg:
+		// Ignore stale search results
+		if msg.id != m.currentSearchID {
+			log.Println("Ignoring stale search result with ID:", msg.id, "current ID:", m.currentSearchID)
+			return m, nil
+		}
+		
 		if msg.err != nil {
 			log.Println("Error searching:", msg.err)
+			// Ensure search box stays focused after failed search
+			m.selectedModel = 0
+			m.searchBox.Focus()
 			return m, nil
 		}
 		m.results = msg.torrents
@@ -173,19 +183,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			re := lipgloss.NewRenderer(os.Stdout)
 			if m.selectedModel == 0 {
 				m.selectedModel = 1
+				m.searchBox.Blur()
 				m.resultsTable.Focus()
 				m.resultsTable.SetCursor(0)
 				m.searchBox.TextStyle = re.NewStyle().Foreground(lipgloss.Color("238"))
 			} else if m.selectedModel == 1 {
 				m.selectedModel = 0
+				m.resultsTable.Blur()
 				m.searchBox.Focus()
 				m.searchBox.TextStyle = re.NewStyle().Foreground(lipgloss.Color("99"))
 			}
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "enter":
+			log.Println("Enter pressed, selectedModel:", m.selectedModel)
 			if m.selectedModel == 0 {
-				return m, search(m.searchBox.Value())
+				searchTerm := m.searchBox.Value()
+				m.currentSearchID++
+				log.Println("Initiating search for:", searchTerm, "with ID:", m.currentSearchID)
+				return m, search(searchTerm, m.currentSearchID)
 			}
 			if m.selectedModel == 1 {
 				streamUrl, err := getStreamUrl(m.results[m.selectedResult].magnetUrl)
@@ -232,6 +248,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "h":
 			if m.selectedModel != 2 {
+				// Blur current focus
+				if m.selectedModel == 0 {
+					m.searchBox.Blur()
+				} else if m.selectedModel == 1 {
+					m.resultsTable.Blur()
+				}
+
 				m.watchHistory.FilterInput.Focus()
 
 				items := []list.Item{}
@@ -243,7 +266,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.watchHistory.SetItems(items)
 				log.Println("List width:", m.watchHistory.Width())
 			} else {
+				// Return to search box
 				m.selectedModel = 0
+				m.searchBox.Focus()
 			}
 			return m, nil
 		}
@@ -285,71 +310,88 @@ func (m model) View() string {
 }
 
 type searchResultMsg struct {
+	id       int
 	torrents []torrent
 	err      error
 }
 
-func search(searchTerm string) tea.Cmd {
-	searchTerm = strings.ReplaceAll(searchTerm, " ", "+")
+func search(searchTerm string, searchID int) tea.Cmd {
+	return tea.Cmd(func() tea.Msg {
+		log.Println("Searching for:", searchTerm)
 
-	log.Println("Searching for:", searchTerm)
+		// Use the scrape API instead of scraping directly
+		apiUrl := fmt.Sprintf("https://scrape.anitrack.frixaco.com/scrape?q=%s", searchTerm)
+		
+		// Create HTTP client with timeout to prevent hanging
+		client := &http.Client{
+			Timeout: 5 * time.Second,
+		}
 
-	url := "https://nyaa.si/user/subsplease?f=0&c=0_0&q="
-	res, err := http.Get(url + searchTerm + "+1080p")
-	if err != nil {
-		log.Println("Error fetching search results:", err)
-		return func() tea.Msg {
+		res, err := client.Get(apiUrl)
+		if err != nil {
+			log.Println("Error fetching search results:", err)
 			return searchResultMsg{
+				id:       searchID,
 				torrents: []torrent{},
 				err:      err,
 			}
 		}
-	}
-	defer res.Body.Close()
+		defer res.Body.Close()
 
-	if res.StatusCode != 200 {
-		log.Println("Error fetching search results:", res.StatusCode)
-		return func() tea.Msg {
+		if res.StatusCode != 200 {
+			log.Println("Error fetching search results:", res.StatusCode)
 			return searchResultMsg{
+				id:       searchID,
 				torrents: []torrent{},
 				err:      errors.New("error fetching search results"),
 			}
 		}
-	}
 
-	doc, err := goquery.NewDocumentFromReader(res.Body)
-	if err != nil {
-		log.Println("Error parsing search results:", err)
-		return func() tea.Msg {
+		var apiResponse struct {
+			Results []struct {
+				Title  string `json:"title"`
+				Size   string `json:"size"`
+				Date   string `json:"date"`
+				Magnet string `json:"magnet"`
+			} `json:"results"`
+			Error string `json:"error"`
+		}
+
+		err = json.NewDecoder(res.Body).Decode(&apiResponse)
+		if err != nil {
+			log.Println("Error parsing API response:", err)
 			return searchResultMsg{
+				id:       searchID,
 				torrents: []torrent{},
 				err:      err,
 			}
 		}
-	}
 
-	ts := []torrent{}
+		if apiResponse.Error != "" {
+			log.Println("API error:", apiResponse.Error)
+			return searchResultMsg{
+				id:       searchID,
+				torrents: []torrent{},
+				err:      errors.New(apiResponse.Error),
+			}
+		}
 
-	doc.Find("tr.success").Each(func(index int, s *goquery.Selection) {
-		title := s.Find("td:nth-child(2) a:not(.comments)").Text()
-		magnet := s.Find("a[href^=\"magnet\"]").AttrOr("href", "")
-		size := s.Find("td:nth-child(4)").Text()
-		date := s.Find("td[data-timestamp]").Text()
+		ts := []torrent{}
+		for _, result := range apiResponse.Results {
+			ts = append(ts, torrent{
+				title:     result.Title,
+				size:      result.Size,
+				date:      result.Date,
+				magnetUrl: result.Magnet,
+			})
+		}
 
-		ts = append(ts, torrent{
-			title:     title,
-			size:      size,
-			date:      date,
-			magnetUrl: magnet,
-		})
-	})
-
-	return func() tea.Msg {
 		return searchResultMsg{
+			id:       searchID,
 			torrents: ts,
 			err:      nil,
 		}
-	}
+	})
 }
 
 type TorrentFile struct{}
@@ -366,7 +408,12 @@ type TorrentInfo struct {
 func getStreamUrl(magnetUrl string) (string, error) {
 	var streamUrl string
 
-	res, err := http.Post("https://api.anitrack.frixaco.com/torrents", "application/json", strings.NewReader(magnetUrl))
+	// Create HTTP client with timeout to prevent hanging
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	res, err := client.Post("https://api.anitrack.frixaco.com/torrents", "application/json", strings.NewReader(magnetUrl))
 	if err != nil {
 		log.Println("Error getting stream URL:", err)
 		return "", err
