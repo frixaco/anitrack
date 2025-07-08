@@ -2,25 +2,56 @@ name: Release
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release (e.g., v0.1.9)'
-        required: true
-        default: 'v0.1.9'
+  push:
+    branches:
+      - main
+    paths:
+      - 'py-tui/pyproject.toml'
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      
+      - name: Check if version changed
+        id: version_check
+        run: |
+          # Get current version
+          CURRENT_VERSION=$(grep '^version = ' py-tui/pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          
+          # Get previous version (if push event)
+          if [ "${{ github.event_name }}" = "push" ]; then
+            PREVIOUS_VERSION=$(git show HEAD~1:py-tui/pyproject.toml | grep '^version = ' | sed 's/version = "\(.*\)"/\1/' || echo "")
+            if [ "$CURRENT_VERSION" = "$PREVIOUS_VERSION" ]; then
+              echo "Version unchanged, skipping release"
+              echo "changed=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          fi
+          
+          # Check if tag already exists
+          if git tag --list | grep -q "^v$CURRENT_VERSION$"; then
+            echo "Tag v$CURRENT_VERSION already exists, skipping release"
+            echo "changed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Version changed to $CURRENT_VERSION"
+          echo "changed=true" >> $GITHUB_OUTPUT
+          echo "version=v$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "raw_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
       
       - name: Create Release
+        if: steps.version_check.outputs.changed == 'true'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event.inputs.version }}
-          release_name: Release ${{ github.event.inputs.version }}
+          tag_name: ${{ steps.version_check.outputs.version }}
+          release_name: Release ${{ steps.version_check.outputs.version }}
           body: |
             ## Python TUI Installation Instructions
 
