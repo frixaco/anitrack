@@ -48,13 +48,13 @@ class TorrentResponse(TypedDict):
 
 class WatchButton(Button):
     def __init__(self, magnet: str):
-        super().__init__("PLAY", classes="watch-btn")
+        super().__init__("▶", classes="watch-btn")
         self.magnet = magnet
-        self.compact = False
+        self.compact = True
 
 
 class SearchBox(Horizontal):
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.current_search_task: Optional[asyncio.Task[None]] = None
 
