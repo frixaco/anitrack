@@ -146,14 +146,14 @@ class Results(VerticalScroll, can_focus=True):
         asyncio.create_task(self._start_stream(event.button.magnet))
 
     async def _start_stream(self, magnet: str):
-        url = "https://api.anitrack.frixaco.com/torrents"
+        url = "https://rqbit.anitrack.frixaco.com/torrents"
         timeout = aiohttp.ClientTimeout(total=2)
 
         try:
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 async with session.post(url, data=magnet) as response:
                     torrent_info: TorrentResponse = await response.json()
-                    stream_url = f"https://api.anitrack.frixaco.com/torrents/{torrent_info['details']['info_hash']}/stream/{len(torrent_info['details']['files']) - 1}"
+                    stream_url = f"https://rqbit.anitrack.frixaco.com/torrents/{torrent_info['details']['info_hash']}/stream/{len(torrent_info['details']['files']) - 1}"
 
                     _ = Popen(["mpv", stream_url], stdout=DEVNULL, stderr=DEVNULL)
         except (aiohttp.ClientError, asyncio.TimeoutError):

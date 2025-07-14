@@ -22,7 +22,7 @@
           throw new Error("Invalid magnet URL");
         }
 
-        const res = await fetch("https://api.anitrack.frixaco.com/torrents", {
+        const res = await fetch("https://rqbit.anitrack.frixaco.com/torrents", {
           method: "POST",
           body: magnetUrl,
         });
@@ -39,7 +39,7 @@
           throw new Error("Invalid file index");
         }
 
-        const streamUrl = `https://api.anitrack.frixaco.com/torrents/${infoHash}/stream/${fileIdx}`;
+        const streamUrl = `https://rqbit.anitrack.frixaco.com/torrents/${infoHash}/stream/${fileIdx}`;
 
         const videoEl = document.getElementById("stream");
         videoEl.src = streamUrl;

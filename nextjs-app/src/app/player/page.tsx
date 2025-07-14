@@ -8,20 +8,20 @@ export default async function Page({
   const magnetLink = (await searchParams).url as string;
   let streamUrl: string | null = null;
 
-  let res = await fetch("https://api.anitrack.frixaco.com/torrents", {
+  let res = await fetch("https://rqbit.anitrack.frixaco.com/torrents", {
     method: "POST",
     body: magnetLink,
   });
 
   if (res.status === 409) {
     console.log("torrent already exists...");
-    res = await fetch(`https://api.anitrack.frixaco.com/torrents`);
+    res = await fetch(`https://rqbit.anitrack.frixaco.com/torrents`);
     const torrents = (await res.json()).torrents;
     const torrent = torrents.find((t: { info_hash: string }) =>
       magnetLink.includes(t.info_hash)
     );
     res = await fetch(
-      `https://api.anitrack.frixaco.com/torrents/${torrent.id}`
+      `https://rqbit.anitrack.frixaco.com/torrents/${torrent.id}`
     );
     const torrentInfo = await res.json();
     console.log("fetched existing torrent...", torrentInfo);
@@ -29,7 +29,7 @@ export default async function Page({
     const infoHash = torrentInfo.info_hash;
     const fileIdx = torrentInfo.files.length - 1; // always one file
 
-    streamUrl = `https://api.anitrack.frixaco.com/torrents/${infoHash}/stream/${fileIdx}`;
+    streamUrl = `https://rqbit.anitrack.frixaco.com/torrents/${infoHash}/stream/${fileIdx}`;
   } else {
     const torrentInfo = await res.json();
     console.log("added new torrent...", torrentInfo);
@@ -44,7 +44,7 @@ export default async function Page({
       throw new Error("Invalid file index");
     }
 
-    streamUrl = `https://api.anitrack.frixaco.com/torrents/${infoHash}/stream/${fileIdx}`;
+    streamUrl = `https://rqbit.anitrack.frixaco.com/torrents/${infoHash}/stream/${fileIdx}`;
   }
 
   return (

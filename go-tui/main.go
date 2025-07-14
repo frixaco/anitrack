@@ -155,7 +155,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			log.Println("Ignoring stale search result with ID:", msg.id, "current ID:", m.currentSearchID)
 			return m, nil
 		}
-		
+
 		if msg.err != nil {
 			log.Println("Error searching:", msg.err)
 			// Ensure search box stays focused after failed search
@@ -321,7 +321,7 @@ func search(searchTerm string, searchID int) tea.Cmd {
 
 		// Use the scrape API instead of scraping directly
 		apiUrl := fmt.Sprintf("https://scrape.anitrack.frixaco.com/scrape?q=%s", searchTerm)
-		
+
 		// Create HTTP client with timeout to prevent hanging
 		client := &http.Client{
 			Timeout: 5 * time.Second,
@@ -413,7 +413,7 @@ func getStreamUrl(magnetUrl string) (string, error) {
 		Timeout: 5 * time.Second,
 	}
 
-	res, err := client.Post("https://api.anitrack.frixaco.com/torrents", "application/json", strings.NewReader(magnetUrl))
+	res, err := client.Post("https://rqbit.anitrack.frixaco.com/torrents", "application/json", strings.NewReader(magnetUrl))
 	if err != nil {
 		log.Println("Error getting stream URL:", err)
 		return "", err
@@ -441,7 +441,7 @@ func getStreamUrl(magnetUrl string) (string, error) {
 	// 		}
 	// 	}
 
-	// 	res, err := http.Get("https://api.anitrack.frixaco.com/torrents/" + torrent.ID)
+	// 	res, err := http.Get("https://rqbit.anitrack.frixaco.com/torrents/" + torrent.ID)
 	// 	if err != nil {
 	// 		log.Println("Error getting stream URL:", err)
 	// 		return "", err
@@ -458,7 +458,7 @@ func getStreamUrl(magnetUrl string) (string, error) {
 	// 	infoHash := torrentInfo.Details.InfoHash
 	// 	fileIdx := len(torrentInfo.Details.Files) - 1
 
-	// 	streamUrl = "https://api.anitrack.frixaco.com/torrents/" + infoHash + "/stream/" + strconv.Itoa(fileIdx)
+	// 	streamUrl = "https://rqbit.anitrack.frixaco.com/torrents/" + infoHash + "/stream/" + strconv.Itoa(fileIdx)
 
 	case 200:
 		log.Println("Torrent added", magnetUrl)
@@ -470,7 +470,7 @@ func getStreamUrl(magnetUrl string) (string, error) {
 			return "", err
 		}
 
-		streamUrl = "https://api.anitrack.frixaco.com/torrents/" + torrentInfo.Details.InfoHash + "/stream/" + strconv.Itoa(len(torrentInfo.Details.Files)-1)
+		streamUrl = "https://rqbit.anitrack.frixaco.com/torrents/" + torrentInfo.Details.InfoHash + "/stream/" + strconv.Itoa(len(torrentInfo.Details.Files)-1)
 	}
 
 	return streamUrl, nil
