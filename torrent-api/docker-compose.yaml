@@ -16,6 +16,7 @@ services:
 
       # Replace this if you want to change the HTTP/Web UI port
       # RQBIT_HTTP_API_LISTEN_ADDR: 0.0.0.0:3030
+      RQBIT_DHT_DISABLE: "true"
     volumes:
       - db:/home/rqbit/db
       - cache:/home/rqbit/cache
