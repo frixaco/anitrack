@@ -82,12 +82,39 @@ func scrapeNyaaSubsplease(query string) ([]TorrentItem, error) {
 	fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 
 	client := &http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 10 * time.Second,
 	}
 
-	resp, err := client.Get(fullURL)
+	var resp *http.Response
+	var err error
+	maxRetries := 3
+	
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		if attempt > 0 {
+			backoff := time.Duration(1<<uint(attempt-1)) * time.Second
+			log.Printf("Retry attempt %d after %v", attempt+1, backoff)
+			time.Sleep(backoff)
+		}
+
+		req, err := http.NewRequest("GET", fullURL, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create request: %v", err)
+		}
+		
+		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
+		resp, err = client.Do(req)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			break
+		}
+		
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch page: %v", err)
+		return nil, fmt.Errorf("failed to fetch page after %d attempts: %v", maxRetries, err)
 	}
 	defer resp.Body.Close()
 
