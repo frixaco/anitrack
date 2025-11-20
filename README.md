@@ -4,11 +4,15 @@ The project has been ported multiple times as I kept exploring different technol
 
 - Next.js app (auth, search, tracker, stream, etc.)
 - Go TUI using Bubbletea
-- (final) Python TUI using Textual
+- Python TUI using Textual
+- `letui` TUI - my own TUI library written from scratch using TypeScript (Bun) and Rust
 
-The last (and hopefully) final version is the Python TUI version.
+### Bun+Rust TUI
 
-## Usage
+1. Install Bun (recommended) or Node
+2. bunx @frixaco/anitrack
+
+### Python TUI
 
 1. Install `uv` (https://docs.astral.sh/uv/getting-started/installation/)
 2. Install [mpv](github.com/mpv-player/mpv) player.

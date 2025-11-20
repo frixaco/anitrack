@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { COLORS } from "./colors";
 import {
   Button,

@@ -1,4 +1,15 @@
 {
+  "name": "@frixaco/anitrack",
+  "version": "0.0.1",
+  "module": "index.ts",
+  "type": "module",
+  "bin": {
+    "anitrack": "./index.ts"
+  },
+  "files": [
+    "index.ts",
+    "colors.ts"
+  ],
   "scripts": {
     "dev": "bun run index.ts"
   },
@@ -8,10 +19,6 @@
   "devDependencies": {
     "@types/bun": "latest"
   },
-  "name": "anitrack",
-  "module": "index.ts",
-  "type": "module",
-  "private": true,
   "peerDependencies": {
     "typescript": "^5"
   }
