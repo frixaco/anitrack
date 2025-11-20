@@ -12,3 +12,7 @@ build/
 dist/
 *.egg-info/
 __pycache__/
+
+node_modules
+tree.json
+logs.txt

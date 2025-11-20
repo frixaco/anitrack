@@ -1,0 +1,18 @@
+{
+  "scripts": {
+    "dev": "bun run index.ts"
+  },
+  "dependencies": {
+    "@frixaco/letui": "^0.0.4"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "name": "anitrack",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
