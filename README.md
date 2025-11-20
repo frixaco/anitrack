@@ -10,7 +10,11 @@ The project has been ported multiple times as I kept exploring different technol
 ### Bun+Rust TUI
 
 1. Install Bun (recommended) or Node
-2. bunx @frixaco/anitrack
+2. Install [mpv](github.com/mpv-player/mpv) player.
+3. (Optional) On desktop, set up **Anime4K** anime upscaler for **mpv**: https://github.com/bloc97/anime4k
+4. `bunx @frixaco/anitrack`
+
+Status: almost finished
 
 ### Python TUI
 
