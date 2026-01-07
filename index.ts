@@ -1,30 +1,16 @@
 #!/usr/bin/env bun
+// TORRENT SEARCH APP
+// - Search input with loading bar
+// - Virtual windowing results list
+// - Keyboard navigation (j/k/h/l)
+
+import { existsSync } from "fs";
 import { COLORS } from "./colors";
-import {
-  Button,
-  Column,
-  InputBox,
-  Row,
-  run,
-  type InputBoxProps,
-  $,
-} from "@frixaco/letui";
+import { Button, Column, Input, Row, run, onKey } from "@frixaco/letui";
+import { LoadingBar } from "@frixaco/letui/progress-bar";
+import { $, ff, whenSettled } from "@frixaco/letui/signals";
 
-let searchText = $("");
-let focusId = $("search-input");
-// let buttonText = $("Search");
-let results = $<ScrapeResultItem[]>([]);
-let maxItems = $(1);
-let page = $(0);
-
-let inputStyles: Partial<InputBoxProps> = {
-  border: {
-    color: COLORS.default.fg,
-    style: "square",
-  },
-  padding: "1 0",
-};
-
+// --- Types ---
 type ScrapeResultItem = {
   title: string;
   size: string;
@@ -36,13 +22,11 @@ type ScrapeResult = {
   results: ScrapeResultItem[];
 };
 
-type TorrentFile = {};
-
 type TorrentDetails = {
   id: number;
   info_hash: string;
   name: string;
-  files: TorrentFile[];
+  files: unknown[];
 };
 
 type TorrentResponse = {
@@ -50,196 +34,179 @@ type TorrentResponse = {
   details: TorrentDetails;
 };
 
-let logFile = Bun.file("logs.txt");
+// --- State ---
+const results = $<ScrapeResultItem[]>([]);
+const loading = $(false);
+const selectedIndex = $(0);
 
-export function log(txt: string, ...args: string[]) {
-  logFile.write(txt + " " + args.join(" "));
-}
+// --- Loading Bars ---
+const loadingBar = LoadingBar({
+  dotColor: COLORS.default.green,
+  trackColor: COLORS.default.bg_alt,
+});
 
+// --- API ---
 async function fetchResults(query: string) {
+  loading(true);
+  loadingBar.start();
+
   const response = await fetch(
     `https://scrape.anitrack.frixaco.com/scrape?q=${query}`,
   );
   const data = (await response.json()) as ScrapeResult;
 
-  log(JSON.stringify(data.results, null, 2));
   results(data.results);
-  page(0);
-  if (data.results.length > 0) {
-    focusId("result-button-0");
-  }
+  selectedIndex(0);
+  loading(false);
+  loadingBar.stop();
 }
 
 async function streamResult(magnet: string) {
+  loadingBar.start();
+
   const response = await fetch("https://rqbit.anitrack.frixaco.com/torrents", {
     method: "post",
     body: magnet,
   });
   const data = (await response.json()) as TorrentResponse;
-  let streamUrl = `https://rqbit.anitrack.frixaco.com/torrents/${data.details.info_hash}/stream/${
+  const streamUrl = `https://rqbit.anitrack.frixaco.com/torrents/${data.details.info_hash}/stream/${
     data.details.files.length - 1
   }`;
+
+  const ipcPath = `/tmp/mpv-socket-${Date.now()}`;
   Bun.spawn({
-    cmd: ["mpv", streamUrl],
+    cmd: ["mpv", `--input-ipc-server=${ipcPath}`, streamUrl],
     stdout: "ignore",
     stderr: "ignore",
   });
+
+  // Poll until socket exists (mpv fully initialized)
+  while (!existsSync(ipcPath)) {
+    await Bun.sleep(50);
+  }
+
+  loadingBar.stop();
 }
 
-run(
-  (terminalWidth: number, termianlHeight: number) =>
-    Column(
-      {
-        border: {
-          color: COLORS.default.fg,
-          style: "square",
-        },
-        gap: 1,
-        padding: "1 0",
-      },
-      [
-        Row(
-          {
-            border: "none",
-            gap: 1,
-            padding: "1 0",
-          },
-          [
-            InputBox({
-              ...inputStyles,
-              id: "search-input",
-              focus: true,
-              text: searchText,
-              border: {
-                color:
-                  focusId() === "search-input"
-                    ? COLORS.default.green
-                    : COLORS.default.fg,
-                style: "square",
-              },
-              onType: (v) => {
-                searchText(v);
-              },
-              onBlur: () => {},
-              onFocus: () => {},
-              onSubmit: (v) => {
-                log("onSubmit +" + v);
-                fetchResults(v);
-              },
-            }),
+// --- Styles ---
+const borderStyle = {
+  color: COLORS.default.fg,
+  style: "square" as const,
+};
 
-            // Button({
-            //   ...inputStyles,
-            //   id: "search-button",
-            //   text: buttonText,
-            //   onClick: () => {
-            //     log("onSubmit +" + searchText());
-            //     fetchResults(searchText());
-            //   },
-            // }),
-          ],
-        ),
+const focusedBorderStyle = {
+  color: COLORS.default.green,
+  style: "square" as const,
+};
 
-        Column(
-          {
-            border: "none",
-            gap: 1,
-            padding: "1 0",
-            onLayout: (node) => {
-              const h = node.frame.height;
-              const child = node.children[0];
-              if (!child) return;
+// --- Nodes ---
+const searchInput = Input({
+  placeholder: "Search torrents...",
+  border: borderStyle,
+  padding: "1 0",
+  onSubmit: (val) => fetchResults(val),
+  onFocus: (self) => self.setStyle({ border: focusedBorderStyle }),
+  onBlur: (self) => self.setStyle({ border: borderStyle }),
+});
+whenSettled(() => searchInput.focus());
 
-              const childH = child.frame.height;
-              if (h && childH) {
-                // Calculate available height by subtracting vertical padding and border
-                let paddingY = 0;
-                const { padding } = node.props;
-                if (typeof padding === "number") {
-                  paddingY = padding;
-                } else if (typeof padding === "string") {
-                  const parts = padding.split(" ").map(Number);
-                  paddingY = parts.length === 2 ? parts[0]! : parts[0]!;
-                }
+const loadingBars = Row({ flexGrow: 1 }, [loadingBar.node]);
 
-                let borderY = 0;
-                const { border } = node.props;
-                if (border && border !== "none") {
-                  borderY = 1;
-                }
+const resultsList = Column({ gap: 1, padding: "1 0", flexGrow: 1 }, []);
 
-                const availableH = h - paddingY * 2 - borderY * 2;
+const root = Column({ border: borderStyle, gap: 1, padding: "1 0" }, [
+  Column({ padding: "1 0" }, [searchInput, loadingBars]),
+  resultsList,
+]);
 
-                const gap = (node.props as any).gap || 0;
-                log(
-                  JSON.stringify({
-                    childH,
-                    availableH,
-                    gap,
-                  }),
-                );
-                const capacity = Math.ceil(availableH / childH);
+// --- Keep track of result buttons for focus management ---
+let resultButtons: ReturnType<typeof Button>[] = [];
 
-                if (maxItems() !== capacity && capacity > 0) {
-                  maxItems(capacity);
-                }
-              }
-            },
-          },
-          results()
-            .slice(page() * maxItems(), (page() + 1) * maxItems())
-            .map((s, i) => {
-              let text = $(s.title);
-              let id = `result-button-${i}`;
+// --- Reactive effects ---
 
-              return Button({
-                ...inputStyles,
-                id,
-                text: text,
-                border: {
-                  color:
-                    focusId() === id ? COLORS.default.green : COLORS.default.fg,
-                  style: "square",
-                },
-                onClick: () => {
-                  streamResult(s.magnet);
-                  log(`Clicked: ${s.title}`);
-                },
-                onKeyDown: (key) => {
-                  const totalPages = Math.ceil(results().length / maxItems());
-                  const currentPageSize = results().slice(
-                    page() * maxItems(),
-                    (page() + 1) * maxItems(),
-                  ).length;
-                  const currentIndex = i;
+// Update results list with virtual windowing
+ff(() => {
+  const all = results();
+  const selected = selectedIndex();
 
-                  if (key === "l" || key === "\u001b[C") {
-                    if (page() < totalPages - 1) {
-                      page(page() + 1);
-                      focusId("result-button-0");
-                    }
-                  } else if (key === "h" || key === "\u001b[D") {
-                    if (page() > 0) {
-                      page(page() - 1);
-                      focusId("result-button-0");
-                    }
-                  } else if (key === "j" || key === "\u001b[B") {
-                    if (currentIndex < currentPageSize - 1) {
-                      focusId(`result-button-${currentIndex + 1}`);
-                    }
-                  } else if (key === "k" || key === "\u001b[A") {
-                    if (currentIndex > 0) {
-                      focusId(`result-button-${currentIndex - 1}`);
-                    } else {
-                      focusId("search-input");
-                    }
-                  }
-                },
-              });
-            }),
-        ),
-      ],
-    ),
-  [results, focusId, maxItems, page],
-  focusId,
-);
+  if (all.length === 0) {
+    resultsList.setChildren?.([]);
+    return;
+  }
+
+  // Use actual computed frame height from Taffy
+  const availableHeight = resultsList.frameHeight();
+
+  // Each item: border(2) + text(1) = 3, plus gap(1) between items
+  const itemHeight = 3;
+  const visibleCount = Math.max(1, Math.floor(availableHeight / itemHeight));
+
+  // Calculate window with selection at bottom (scroll only when needed)
+  let start = selected - visibleCount + 1;
+  start = Math.max(0, Math.min(start, all.length - visibleCount));
+  const end = Math.min(start + visibleCount, all.length);
+  const visible = all.slice(start, end);
+
+  resultButtons = visible.map((item, i) => {
+    const globalIdx = start + i;
+    const isActive = globalIdx === selected;
+    return Button({
+      text: `${isActive ? "▶ " : "  "}${item.title}`,
+      border: isActive ? focusedBorderStyle : borderStyle,
+      padding: "1 0",
+      onClick: () => streamResult(item.magnet),
+    });
+  });
+
+  resultsList.setChildren?.(resultButtons);
+
+  // Focus the selected button
+  const selectedVisibleIndex = selected - start;
+  if (resultButtons[selectedVisibleIndex]) {
+    resultButtons[selectedVisibleIndex].focus();
+  }
+});
+
+// --- Keyboard navigation ---
+onKey("/", () => searchInput.focus());
+
+onKey("j", () => selectNext());
+onKey("\x1b[B", () => selectNext()); // Arrow Down
+
+onKey("k", () => selectPrev());
+onKey("\x1b[A", () => selectPrev()); // Arrow Up
+
+onKey("l", () => selectLast());
+onKey("\x1b[C", () => selectLast()); // Arrow Right - jump to end
+
+onKey("h", () => selectFirst());
+onKey("\x1b[D", () => selectFirst()); // Arrow Left - jump to start
+
+onKey("q", () => app.quit());
+
+function selectNext() {
+  const max = results().length - 1;
+  if (selectedIndex() < max) {
+    selectedIndex(selectedIndex() + 1);
+  }
+}
+
+function selectPrev() {
+  if (selectedIndex() > 0) {
+    selectedIndex(selectedIndex() - 1);
+  }
+}
+
+function selectFirst() {
+  selectedIndex(0);
+}
+
+function selectLast() {
+  const max = results().length - 1;
+  if (max >= 0) {
+    selectedIndex(max);
+  }
+}
+
+// --- Start app ---
+const app = run(root, { debug: true });
