@@ -5,10 +5,10 @@
     "": {
       "name": "@frixaco/anitrack",
       "dependencies": {
-        "@frixaco/letui": "^0.0.10",
+        "@frixaco/letui": "^0.0.11",
       },
       "devDependencies": {
-        "@types/bun": "1.3.5",
+        "@types/bun": "1.3.9",
       },
       "peerDependencies": {
         "typescript": "^5",
@@ -16,26 +16,24 @@
     },
   },
   "packages": {
-    "@frixaco/letui": ["@frixaco/letui@0.0.10", "", { "dependencies": { "bun-ffi-structs": "^0.1.2", "bun-types": "^1.3.6" }, "optionalDependencies": { "@frixaco/letui-darwin-arm64": "0.0.10", "@frixaco/letui-linux-x64": "0.0.10", "@frixaco/letui-win32-x64": "0.0.10" }, "peerDependencies": { "typescript": "^5.9.3" } }, "sha512-CrvnHcKuMGUwJtzgrzIaHNXYR8zvNvlauLfBTZvVd/dnQ85MKuzPU85MLoWAMhzuUPkikOBqzV4RWGRAJfQR5g=="],
+    "@frixaco/letui": ["@frixaco/letui@0.0.11", "", { "dependencies": { "bun-ffi-structs": "^0.1.2", "bun-types": "^1.3.6" }, "optionalDependencies": { "@frixaco/letui-darwin-arm64": "0.0.11", "@frixaco/letui-linux-x64": "0.0.11", "@frixaco/letui-win32-x64": "0.0.11" }, "peerDependencies": { "typescript": "^5.9.3" } }, "sha512-+meLKlGAkz/VQLPaxECVl07Lej6NtZeyxosIrXRkQKcyduu+QEXzInxcraDYSziimMuyq+Ycawo5o+G+r41Yiw=="],
 
-    "@frixaco/letui-darwin-arm64": ["@frixaco/letui-darwin-arm64@0.0.10", "", { "os": "darwin", "cpu": "arm64" }, "sha512-ccrDdEvaXYXA1IH6ZBG2/MlaiDvtyjdUY5B02zEFlTdFRTRfpTEaTOueEEu9m2dzAZAYArsPDWqbE37MXuLySg=="],
+    "@frixaco/letui-darwin-arm64": ["@frixaco/letui-darwin-arm64@0.0.11", "", { "os": "darwin", "cpu": "arm64" }, "sha512-cNrbx2B4lWHObT0wW9I3CkOKeU56Ni4nEChj/tPEYOPntLwoc7JzWd5WK8gaVrGsWBB7KJQSN1pRY/K2fXcgUg=="],
 
-    "@frixaco/letui-linux-x64": ["@frixaco/letui-linux-x64@0.0.10", "", { "os": "linux", "cpu": "x64" }, "sha512-6JKDCPH31oIeoDiDo+2auWf9s/xVyvq4BesLdhGiVPOCw60uDzfSnPUKlSYSF5qVDZScMSUamIktGbLUKRjfiQ=="],
+    "@frixaco/letui-linux-x64": ["@frixaco/letui-linux-x64@0.0.11", "", { "os": "linux", "cpu": "x64" }, "sha512-BekqU/OrKPDMcaW2JsRz9hE8OF4qiMyDx2ssWtSw/jTZQjf/5r62lk3v4K8wF1gdbs8ZW5ZJDqKWHwXi08uCPw=="],
 
-    "@frixaco/letui-win32-x64": ["@frixaco/letui-win32-x64@0.0.10", "", { "os": "win32", "cpu": "x64" }, "sha512-tLrjW0lMPWkeNkHct9iT/hvferbByFR0IYp338XrKzVm4C1diTt5+ad9uZr3jTiMb1LfuYLgjX3GXjIm+hBtsg=="],
+    "@frixaco/letui-win32-x64": ["@frixaco/letui-win32-x64@0.0.11", "", { "os": "win32", "cpu": "x64" }, "sha512-l14O0dspnp/8lJ3zyqjvI9CBEMsVlZMXoA8QdpJ6Xfw47UwwooXZHXb2ydy4c+wrkMBl2Qy9KAya0tzK5PNzag=="],
 
-    "@types/bun": ["@types/bun@1.3.5", "", { "dependencies": { "bun-types": "1.3.5" } }, "sha512-RnygCqNrd3srIPEWBd5LFeUYG7plCoH2Yw9WaZGyNmdTEei+gWaHqydbaIRkIkcbXwhBT94q78QljxN0Sk838w=="],
+    "@types/bun": ["@types/bun@1.3.9", "", { "dependencies": { "bun-types": "1.3.9" } }, "sha512-KQ571yULOdWJiMH+RIWIOZ7B2RXQGpL1YQrBtLIV3FqDcCu6FsbFUBwhdKUlCKUpS3PJDsHlJ1QKlpxoVR+xtw=="],
 
-    "@types/node": ["@types/node@25.0.3", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-W609buLVRVmeW693xKfzHeIV6nJGGz98uCPfeXI1ELMLXVeKYZ9m15fAMSaUPBHYLGFsVRcMmSCksQOrZV9BYA=="],
+    "@types/node": ["@types/node@25.2.3", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-m0jEgYlYz+mDJZ2+F4v8D1AyQb+QzsNqRuI7xg1VQX/KlKS0qT9r1Mo16yo5F/MtifXFgaofIFsdFMox2SxIbQ=="],
 
     "bun-ffi-structs": ["bun-ffi-structs@0.1.2", "", { "peerDependencies": { "typescript": "^5" } }, "sha512-Lh1oQAYHDcnesJauieA4UNkWGXY9hYck7OA5IaRwE3Bp6K2F2pJSNYqq+hIy7P3uOvo3km3oxS8304g5gDMl/w=="],
 
-    "bun-types": ["bun-types@1.3.5", "", { "dependencies": { "@types/node": "*" } }, "sha512-inmAYe2PFLs0SUbFOWSVD24sg1jFlMPxOjOSSCYqUgn4Hsc3rDc7dFvfVYjFPNHtov6kgUeulV4SxbuIV/stPw=="],
+    "bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
 
     "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
     "undici-types": ["undici-types@7.16.0", "", {}, "sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw=="],
-
-    "@frixaco/letui/bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
   }
 }
