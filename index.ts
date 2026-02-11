@@ -7,8 +7,8 @@
 import { existsSync } from "fs";
 import { COLORS } from "./colors";
 import { Button, Column, Input, Row, run, onKey } from "@frixaco/letui";
-import { LoadingBar } from "@frixaco/letui/progress-bar";
-import { $, ff, whenSettled } from "@frixaco/letui/signals";
+import { $, ff, whenSettled } from "@frixaco/letui";
+import { LoadingBar } from "./progress-bar";
 
 // --- Types ---
 type ScrapeResultItem = {
