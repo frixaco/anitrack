@@ -1,1 +1,0 @@
-180fps | 2.4ms avg (1.2-10.3) | 3MB heap | 31 frames | 0.1ms avg (0-0.8) | 1.8ms avg (1.1-5.4)

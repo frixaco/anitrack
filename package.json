@@ -1,15 +1,22 @@
 {
   "name": "@frixaco/anitrack",
-  "version": "0.0.7",
-  "module": "index.ts",
+  "version": "0.0.8",
   "type": "module",
   "bin": {
     "anitrack": "./index.ts"
   },
   "files": [
     "index.ts",
-    "colors.ts"
+    "colors.ts",
+    "progress-bar.ts",
+    "README.md"
   ],
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "bun run index.ts"
   },
@@ -18,8 +25,5 @@
   },
   "devDependencies": {
     "@types/bun": "1.3.9"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
   }
 }
