@@ -5,7 +5,7 @@
     "": {
       "name": "@frixaco/anitrack",
       "dependencies": {
-        "@frixaco/letui": "^0.0.9",
+        "@frixaco/letui": "^0.0.10",
       },
       "devDependencies": {
         "@types/bun": "1.3.5",
@@ -16,22 +16,26 @@
     },
   },
   "packages": {
-    "@frixaco/letui": ["@frixaco/letui@0.0.9", "", { "dependencies": { "bun-types": "^1.3.5" }, "optionalDependencies": { "@frixaco/letui-darwin-arm64": "0.0.9", "@frixaco/letui-linux-x64": "0.0.9", "@frixaco/letui-win32-x64": "0.0.9" }, "peerDependencies": { "typescript": "^5" } }, "sha512-8Owrtap9DCnvsRFZOMXAHwb3OEHzAN9Ob20wgsyDfl06oCbtyAiD9QrGFVw8EEVMJ9278v2cWS2/3sY97snW7w=="],
+    "@frixaco/letui": ["@frixaco/letui@0.0.10", "", { "dependencies": { "bun-ffi-structs": "^0.1.2", "bun-types": "^1.3.6" }, "optionalDependencies": { "@frixaco/letui-darwin-arm64": "0.0.10", "@frixaco/letui-linux-x64": "0.0.10", "@frixaco/letui-win32-x64": "0.0.10" }, "peerDependencies": { "typescript": "^5.9.3" } }, "sha512-CrvnHcKuMGUwJtzgrzIaHNXYR8zvNvlauLfBTZvVd/dnQ85MKuzPU85MLoWAMhzuUPkikOBqzV4RWGRAJfQR5g=="],
 
-    "@frixaco/letui-darwin-arm64": ["@frixaco/letui-darwin-arm64@0.0.9", "", { "os": "darwin", "cpu": "arm64" }, "sha512-RfaD+IZLOiMvRgn+91EcubZafSSeMQocNWA+ZUR6xY/u+7/0v08U9E79Y7E/PdS/ua9xBCmsw4dUkkP25+IW9Q=="],
+    "@frixaco/letui-darwin-arm64": ["@frixaco/letui-darwin-arm64@0.0.10", "", { "os": "darwin", "cpu": "arm64" }, "sha512-ccrDdEvaXYXA1IH6ZBG2/MlaiDvtyjdUY5B02zEFlTdFRTRfpTEaTOueEEu9m2dzAZAYArsPDWqbE37MXuLySg=="],
 
-    "@frixaco/letui-linux-x64": ["@frixaco/letui-linux-x64@0.0.9", "", { "os": "linux", "cpu": "x64" }, "sha512-z4ndN/6G9Cknak1HziwZIx6fHJqBFvHpXbvlfiZPhkFk3dyNKK/j12k1STS5WNcjaB3WsrPRHfX7yxTHXCtDgQ=="],
+    "@frixaco/letui-linux-x64": ["@frixaco/letui-linux-x64@0.0.10", "", { "os": "linux", "cpu": "x64" }, "sha512-6JKDCPH31oIeoDiDo+2auWf9s/xVyvq4BesLdhGiVPOCw60uDzfSnPUKlSYSF5qVDZScMSUamIktGbLUKRjfiQ=="],
 
-    "@frixaco/letui-win32-x64": ["@frixaco/letui-win32-x64@0.0.9", "", { "os": "win32", "cpu": "x64" }, "sha512-Dumo7z5ZHdBxNEWcxK4LZGzsQCQatCPIl+v7P0k8CQ+Ao0N86F9EuqM2w3X3ixWa3wfEulY6uL/UOw9jxOq2qw=="],
+    "@frixaco/letui-win32-x64": ["@frixaco/letui-win32-x64@0.0.10", "", { "os": "win32", "cpu": "x64" }, "sha512-tLrjW0lMPWkeNkHct9iT/hvferbByFR0IYp338XrKzVm4C1diTt5+ad9uZr3jTiMb1LfuYLgjX3GXjIm+hBtsg=="],
 
     "@types/bun": ["@types/bun@1.3.5", "", { "dependencies": { "bun-types": "1.3.5" } }, "sha512-RnygCqNrd3srIPEWBd5LFeUYG7plCoH2Yw9WaZGyNmdTEei+gWaHqydbaIRkIkcbXwhBT94q78QljxN0Sk838w=="],
 
     "@types/node": ["@types/node@25.0.3", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-W609buLVRVmeW693xKfzHeIV6nJGGz98uCPfeXI1ELMLXVeKYZ9m15fAMSaUPBHYLGFsVRcMmSCksQOrZV9BYA=="],
+
+    "bun-ffi-structs": ["bun-ffi-structs@0.1.2", "", { "peerDependencies": { "typescript": "^5" } }, "sha512-Lh1oQAYHDcnesJauieA4UNkWGXY9hYck7OA5IaRwE3Bp6K2F2pJSNYqq+hIy7P3uOvo3km3oxS8304g5gDMl/w=="],
 
     "bun-types": ["bun-types@1.3.5", "", { "dependencies": { "@types/node": "*" } }, "sha512-inmAYe2PFLs0SUbFOWSVD24sg1jFlMPxOjOSSCYqUgn4Hsc3rDc7dFvfVYjFPNHtov6kgUeulV4SxbuIV/stPw=="],
 
     "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
     "undici-types": ["undici-types@7.16.0", "", {}, "sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw=="],
+
+    "@frixaco/letui/bun-types": ["bun-types@1.3.9", "", { "dependencies": { "@types/node": "*" } }, "sha512-+UBWWOakIP4Tswh0Bt0QD0alpTY8cb5hvgiYeWCMet9YukHbzuruIEeXC2D7nMJPB12kbh8C7XJykSexEqGKJg=="],
   }
 }
