@@ -46,9 +46,9 @@ export function LoadingBar(props: LoadingBarProps): LoadingBarController {
     const maxPos = width - 1;
     const clampedPos = Math.max(0, Math.min(pos, maxPos));
 
-    leftTrack.setStyle?.({ text: " ".repeat(clampedPos) });
-    dot.setStyle?.({ text: " " });
-    rightTrack.setStyle?.({ text: " ".repeat(maxPos - clampedPos) });
+    leftTrack.setText?.(" ".repeat(clampedPos));
+    dot.setText?.(" ");
+    rightTrack.setText?.(" ".repeat(maxPos - clampedPos));
   });
 
   function clearTimer() {
@@ -91,9 +91,9 @@ export function LoadingBar(props: LoadingBarProps): LoadingBarController {
     active(false);
     position(0);
     // Clear all three segments
-    leftTrack.setStyle?.({ text: "" });
-    dot.setStyle?.({ text: "" });
-    rightTrack.setStyle?.({ text: "" });
+    leftTrack.setText?.("");
+    dot.setText?.("");
+    rightTrack.setText?.("");
   }
 
   return { node, start, stop };
