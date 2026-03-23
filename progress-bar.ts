@@ -1,5 +1,4 @@
-import type { Node } from "@frixaco/letui";
-import { $, ff, Row, Text } from "@frixaco/letui";
+import { $, ff, Row, Text, type Node } from "@frixaco/letui";
 
 export type LoadingBarProps = {
   dotColor: number;
@@ -36,7 +35,6 @@ export function LoadingBar(props: LoadingBarProps): LoadingBarController {
 
   const node = Row({ flexGrow }, [leftTrack, dot, rightTrack]);
 
-  // React to position changes
   ff(() => {
     const isActive = active();
     const pos = position();
@@ -90,7 +88,6 @@ export function LoadingBar(props: LoadingBarProps): LoadingBarController {
     clearTimer();
     active(false);
     position(0);
-    // Clear all three segments
     leftTrack.setText?.("");
     dot.setText?.("");
     rightTrack.setText?.("");
