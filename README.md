@@ -16,6 +16,29 @@ The project has been ported multiple times as I kept exploring different technol
 
 Status: almost finished
 
+### Releasing
+
+Preferred flow uses GitHub Actions.
+
+1. Update `version` in `package.json`
+2. Commit and push that change to `main`
+3. Create and push a matching tag:
+   - `git tag -a v0.1.1 -m "v0.1.1"`
+   - `git push origin v0.1.1`
+4. GitHub Actions workflow `.github/workflows/npm-publish.yml` will publish to npm
+
+Notes:
+
+- Tag must point at the commit containing the new `package.json` version
+- Tag name should match package version, e.g. `v0.1.1` -> `0.1.1`
+- Publishing requires `NPM_TOKEN` configured in GitHub repo secrets
+- If that version already exists on npm, publish will fail
+
+Manual fallback:
+
+1. Log in: `bunx npm login`
+2. Publish: `npm publish --access public`
+
 ### Python TUI
 
 1. Install `uv` (https://docs.astral.sh/uv/getting-started/installation/)
