@@ -1,25 +1,41 @@
-import { $, ff, Row, Text, type Node } from "@frixaco/letui";
+// Loading bar helper: animated single-dot progress track for demo screens.
+//
+// Data flow:
+// start() → timer interval → position/direction signals → ff() effect → Text node updates
+// stop() → clear timer → reset signals → UI clear
+
+import { Row, Text, $, ff } from "@frixaco/letui";
+import type { Node } from "@frixaco/letui";
+
+// --- Domain vocabulary ---
 
 export type LoadingBarProps = {
   dotColor: number;
   trackColor: number;
   flexGrow?: number;
-  interval?: number; // ms between frames
+  interval?: number;
 };
 
 export type LoadingBarController = {
   node: Node;
   start: () => void;
   stop: () => void;
+  setColors: (colors: { dotColor: number; trackColor: number }) => void;
 };
+
+// --- Primary abstraction ---
 
 export function LoadingBar(props: LoadingBarProps): LoadingBarController {
   const { dotColor, trackColor, flexGrow = 1, interval = 80 } = props;
 
+  // --- Internal state ---
+
   const position = $(0);
-  const direction = $(1); // 1 = right, -1 = left
+  const direction = $(1);
   const active = $(false);
   let timer: Timer | null = null;
+
+  // --- Core algorithm ---
 
   const leftTrack = Text({
     text: "",
@@ -48,6 +64,8 @@ export function LoadingBar(props: LoadingBarProps): LoadingBarController {
     dot.setText?.(" ");
     rightTrack.setText?.(" ".repeat(maxPos - clampedPos));
   });
+
+  // --- Helpers ---
 
   function clearTimer() {
     if (timer) {
@@ -93,5 +111,20 @@ export function LoadingBar(props: LoadingBarProps): LoadingBarController {
     rightTrack.setText?.("");
   }
 
-  return { node, start, stop };
+  function setColors(colors: { dotColor: number; trackColor: number }) {
+    leftTrack.setStyle?.({
+      background: colors.trackColor,
+      foreground: colors.trackColor,
+    });
+    dot.setStyle?.({
+      background: colors.dotColor,
+      foreground: colors.dotColor,
+    });
+    rightTrack.setStyle?.({
+      background: colors.trackColor,
+      foreground: colors.trackColor,
+    });
+  }
+
+  return { node, start, stop, setColors };
 }
