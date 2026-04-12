@@ -1,20 +1,11 @@
-# Anitrack - Simple TUI to stream anime
+## Anitrack - Simple TUI app I use to stream anime using my own `LeTUI` library
 
-The project has been ported multiple times as I kept exploring different technologies for fun:
-
-- Next.js app (auth, search, tracker, stream, etc.)
-- Go TUI using Bubbletea
-- Python TUI using Textual
-- `letui` TUI - my own TUI library written from scratch using TypeScript (Bun) and Rust
-
-### Bun+Rust TUI
-
-1. Install Bun (recommended) or Node
+1. Install [Bun](bun.sh)
 2. Install [mpv](github.com/mpv-player/mpv) player.
-3. (Optional) On desktop, set up **Anime4K** anime upscaler for **mpv**: https://github.com/bloc97/anime4k
+3. (Optional) On desktop, set up [**Anime4K**](https://github.com/bloc97/anime4k) anime upscaler for **mpv**
 4. `bunx @frixaco/anitrack`
 
-Status: almost finished
+Status: complete
 
 ### Releasing
 
@@ -38,6 +29,17 @@ Manual fallback:
 
 1. Log in: `bunx npm login`
 2. Publish: `npm publish --access public`
+
+## Legacy
+
+Note: Ignore everything under [legacy](./legacy/) 
+
+The project has been ported multiple times as I kept exploring different technologies for fun:
+
+- Next.js app (auth, search, tracker, stream, etc.)
+- Go TUI using Bubbletea
+- Python TUI using Textual
+- `letui` TUI - my own TUI library written from scratch using TypeScript (Bun) and Rust
 
 ### Python TUI
 
