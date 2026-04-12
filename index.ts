@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 // ANITRACK torrent search demo: terminal-first search and stream launcher.
 //
 // Data flow:
@@ -610,7 +611,6 @@ function startAniTrackDemo(): ReturnType<typeof run> {
   const app = run(root, { debug: true });
 
   onKey("q", () => {
-    saveMetrics();
     app.quit();
   });
 
