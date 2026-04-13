@@ -1,6 +1,6 @@
 {
   "name": "@frixaco/anitrack",
-  "version": "0.3.5",
+  "version": "0.3.9",
   "type": "module",
   "bin": {
     "anitrack": "./index.ts"
@@ -21,7 +21,7 @@
     "dev": "bun run index.ts"
   },
   "dependencies": {
-    "@frixaco/letui": "0.3.5"
+    "@frixaco/letui": "0.3.9"
   },
   "devDependencies": {
     "@types/bun": "1.3.12"

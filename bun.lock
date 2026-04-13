@@ -5,7 +5,7 @@
     "": {
       "name": "@frixaco/anitrack",
       "dependencies": {
-        "@frixaco/letui": "0.3.5",
+        "@frixaco/letui": "0.3.9",
       },
       "devDependencies": {
         "@types/bun": "1.3.12",
@@ -13,13 +13,13 @@
     },
   },
   "packages": {
-    "@frixaco/letui": ["@frixaco/letui@0.3.5", "", { "optionalDependencies": { "@frixaco/letui-darwin-arm64": "0.3.5", "@frixaco/letui-linux-x64": "0.3.5", "@frixaco/letui-win32-x64": "0.3.5" }, "peerDependencies": { "typescript": "^5.9.3" } }, "sha512-jgE7mYkcg46QDQEnv6wuVG+94SAHp8NoVOVkveAP0/ShkhjC7EtwCsgJXYS+p73UbXDzxGnc2J+zihOYcTvrRg=="],
+    "@frixaco/letui": ["@frixaco/letui@0.3.9", "", { "optionalDependencies": { "@frixaco/letui-darwin-arm64": "0.3.9", "@frixaco/letui-linux-x64": "0.3.9", "@frixaco/letui-win32-x64": "0.3.9" }, "peerDependencies": { "typescript": "^5.9.3" } }, "sha512-GcBYULHDPvHNvH5PREWiBy7q65Qe4EuUK++d8iI+L0mztr9bPw6C2eGBc1Yeb8iRwmnbN8GDpcS+dMtjJ4gI4w=="],
 
-    "@frixaco/letui-darwin-arm64": ["@frixaco/letui-darwin-arm64@0.3.5", "", { "os": "darwin", "cpu": "arm64" }, "sha512-SOIEaIh6A6Q1re1M7kWvO4YjOcbNOTnGzWbUC6D6LAvzcRqWjDqa/ArK3mSsxKaSZe0FurqF75vnuuV4pm28nQ=="],
+    "@frixaco/letui-darwin-arm64": ["@frixaco/letui-darwin-arm64@0.3.9", "", { "os": "darwin", "cpu": "arm64" }, "sha512-//GojdSJL5UI6Xyfbt4sxGDSZDq/1d/8GV9Mih0fkTuuGZKalzqE1M7uXSaEkPumKpjr9hfywSZe9kJ3AKwUJQ=="],
 
-    "@frixaco/letui-linux-x64": ["@frixaco/letui-linux-x64@0.3.5", "", { "os": "linux", "cpu": "x64" }, "sha512-eLmEwst2SYPc8rGl1bMIMonnW9va/2Ii6jHwGr4vnnGTY2baY0D3/BHYVzy5YhXeXIMc2H8Qu4lVwFQ79ADbzw=="],
+    "@frixaco/letui-linux-x64": ["@frixaco/letui-linux-x64@0.3.9", "", { "os": "linux", "cpu": "x64" }, "sha512-A8QD7Bhmba0P0BuJb/IXhQMTIoE+YX4TMnHs329z4/OYkTs5RQSCXTdZXmb8aYMcIPfk0adWg2LieNHmh4b3sg=="],
 
-    "@frixaco/letui-win32-x64": ["@frixaco/letui-win32-x64@0.3.5", "", { "os": "win32", "cpu": "x64" }, "sha512-Zzy4zx4Vf+Fy1C/FY73z9o8au/pyU2VeahSgzE9JQfI+N2NAK8HBZkwOHo1lW2SQyNzIwxa7F75N4Um28M87EQ=="],
+    "@frixaco/letui-win32-x64": ["@frixaco/letui-win32-x64@0.3.9", "", { "os": "win32", "cpu": "x64" }, "sha512-GaGk84sZhk+t+gQqBdHl/iTU2yWzIFHIZoI6F47+TTukLcTKSS9IXfMSdjDIva5PAZOyV914jNImBkZmvv2B3Q=="],
 
     "@types/bun": ["@types/bun@1.3.12", "", { "dependencies": { "bun-types": "1.3.12" } }, "sha512-DBv81elK+/VSwXHDlnH3Qduw+KxkTIWi7TXkAeh24zpi5l0B2kUg9Ga3tb4nJaPcOFswflgi/yAvMVBPrxMB+A=="],
 
