@@ -5,9 +5,10 @@
 // Search input → fetchResults() → scrape API → toScrapeResults() → results signal → ff() effect → result row tree render
 // Keyboard / wheel → pane focus → ScrollView methods → Rust layout metrics → clamped viewport state
 
-import { existsSync } from "fs";
-import { tmpdir } from "os";
-import { join } from "path";
+import { existsSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import process from "node:process";
 import {
   Button,
   Column,
@@ -21,9 +22,10 @@ import {
   onKey,
   run,
 } from "@frixaco/letui";
-import type { Appearance, StyledText, TextSpan } from "@frixaco/letui";
+import type { Appearance, StyledText } from "@frixaco/letui";
 import { COLORS } from "./colors.ts";
-import { LoadingBar } from "./progress-bar";
+import { styled, NAV_NEXT_KEYS, NAV_PREV_KEYS, NAV_TOGGLE_KEYS } from "./helpers.ts";
+import { LoadingBar } from "./progress-bar.ts";
 
 function startAniTrackDemo(): ReturnType<typeof run> {
   type Pane = "input" | "results";
@@ -39,8 +41,6 @@ function startAniTrackDemo(): ReturnType<typeof run> {
     infoHash: string;
     fileIndex: number;
   };
-
-  type StyledSegment = Omit<TextSpan, "start" | "end"> & { text: string };
 
   type DemoTheme = {
     surface: number;
@@ -65,53 +65,19 @@ function startAniTrackDemo(): ReturnType<typeof run> {
 
   async function waitForMpvIpc(path: string, timeoutMs: number): Promise<void> {
     if (process.platform === "win32") {
-      await Bun.sleep(Math.min(timeoutMs, 150));
+      await sleep(Math.min(timeoutMs, 150));
       return;
     }
 
     const deadline = Date.now() + timeoutMs;
     while (!existsSync(path) && Date.now() < deadline) {
-      await Bun.sleep(50);
+      await sleep(50);
     }
-  }
-
-  function styled(segments: readonly StyledSegment[]): StyledText {
-    let text = "";
-    let cursor = 0;
-    const spans: TextSpan[] = [];
-
-    for (const seg of segments) {
-      const start = cursor;
-      text += seg.text;
-      cursor += Array.from(seg.text).length;
-
-      if (
-        seg.foreground !== undefined ||
-        seg.background !== undefined ||
-        seg.bold !== undefined ||
-        seg.italic !== undefined ||
-        seg.underline !== undefined
-      ) {
-        spans.push({
-          start,
-          end: cursor,
-          foreground: seg.foreground,
-          background: seg.background,
-          bold: seg.bold,
-          italic: seg.italic,
-          underline: seg.underline,
-        });
-      }
-    }
-
-    return { text, spans };
   }
 
   function toScrapeResults(payload: unknown): ScrapeResultItem[] {
     const rawResults =
-      payload && typeof payload === "object"
-        ? (payload as any).results
-        : undefined;
+      payload && typeof payload === "object" ? (payload as any).results : undefined;
 
     if (!Array.isArray(rawResults)) return [];
 
@@ -139,11 +105,7 @@ function startAniTrackDemo(): ReturnType<typeof run> {
     const infoHash = details.info_hash;
     const files = details.files;
 
-    if (
-      typeof infoHash !== "string" ||
-      !Array.isArray(files) ||
-      files.length === 0
-    ) {
+    if (typeof infoHash !== "string" || !Array.isArray(files) || files.length === 0) {
       return null;
     }
 
@@ -203,6 +165,7 @@ function startAniTrackDemo(): ReturnType<typeof run> {
   const results = $<ScrapeResultItem[]>([]);
   const loading = $(false);
   const focusTarget = $<Pane>("input");
+  const activeResultIndex = $(0);
   const loadingBar = LoadingBar({
     dotColor: initialTheme.accent,
     trackColor: initialTheme.surfaceHighlight,
@@ -210,6 +173,7 @@ function startAniTrackDemo(): ReturnType<typeof run> {
 
   let lastResultsSnapshot: ScrapeResultItem[] | null = null;
   let lastAppearanceMode: Appearance | null = null;
+  let resultButtons: ReturnType<typeof Button>[] = [];
 
   const headerTitle = Text({
     text: "ANITRACK // TORRENT SEARCH",
@@ -291,10 +255,7 @@ function startAniTrackDemo(): ReturnType<typeof run> {
       flexShrink: 0,
     },
     [
-      Row({ gap: 1, alignItems: "center", flexWrap: "wrap" }, [
-        searchTitle,
-        searchHint,
-      ]),
+      Row({ gap: 1, alignItems: "center", flexWrap: "wrap" }, [searchTitle, searchHint]),
       Row({ alignItems: "stretch" }, [searchInput]),
       Row({}, [loadingBar.node]),
     ],
@@ -319,7 +280,7 @@ function startAniTrackDemo(): ReturnType<typeof run> {
   );
 
   const helpLine = Text({
-    text: "/ search   Tab pane   j/k or wheel scroll   h top   l +10   Enter/click stream   q quit",
+    text: "/ search   Tab pane   arrows move   j/k or wheel scroll   h top   l +10   Enter/click stream   q quit",
     foreground: initialTheme.muted,
   });
 
@@ -339,10 +300,15 @@ function startAniTrackDemo(): ReturnType<typeof run> {
     resultsPanel,
   ]);
 
+  const nextResultKeys = NAV_NEXT_KEYS;
+  const prevResultKeys = NAV_PREV_KEYS;
+  const togglePaneKeys = NAV_TOGGLE_KEYS;
+
   function setPane(target: Pane): void {
     if (target === "results" && results().length > 0) {
       focusTarget("results");
       if (searchInput.isFocused()) searchInput.blur();
+      focusResult(activeResultIndex());
       return;
     }
 
@@ -353,6 +319,8 @@ function startAniTrackDemo(): ReturnType<typeof run> {
   function clearResults(): void {
     results([]);
     resultsViewport.scrollToStart();
+    activeResultIndex(0);
+    resultButtons = [];
     setPane("input");
   }
 
@@ -386,13 +354,10 @@ function startAniTrackDemo(): ReturnType<typeof run> {
     loadingBar.start();
 
     try {
-      const response = await fetch(
-        "https://rqbit.anitrack.frixaco.com/torrents",
-        {
-          method: "post",
-          body: magnet,
-        },
-      );
+      const response = await fetch("https://rqbit.anitrack.frixaco.com/torrents", {
+        method: "post",
+        body: magnet,
+      });
 
       if (!response.ok) {
         throw new Error(`Stream failed with status ${response.status}`);
@@ -418,7 +383,7 @@ function startAniTrackDemo(): ReturnType<typeof run> {
     }
   }
 
-  function createResultRow(item: ScrapeResultItem): ReturnType<typeof Button> {
+  function createResultRow(item: ScrapeResultItem, index: number): ReturnType<typeof Button> {
     const title = Text({
       text: resultTitleText(item),
       wrap: "word",
@@ -435,11 +400,14 @@ function startAniTrackDemo(): ReturnType<typeof run> {
         border: undefined,
         paddingX: 1,
         foreground: currentTheme().fg,
+        onKeyDown: (key) => handleResultKey(key),
         onFocus: () => {
-          setPane("results");
+          focusTarget("results");
+          activeResultIndex(index);
+          resultsViewport.scrollNodeIntoView(button);
         },
         onClick: () => {
-          setPane("results");
+          focusResult(index);
           if (item.magnet.length > 0) streamResult(item.magnet);
         },
       },
@@ -451,7 +419,8 @@ function startAniTrackDemo(): ReturnType<typeof run> {
 
   function rebuildResultRows(items: readonly ScrapeResultItem[]): void {
     lastResultsSnapshot = [...items];
-    resultsViewport.setChildren?.(items.map(createResultRow));
+    resultButtons = items.map(createResultRow);
+    resultsViewport.setChildren?.(resultButtons);
   }
 
   function scrollResults(offset: number): void {
@@ -459,20 +428,62 @@ function startAniTrackDemo(): ReturnType<typeof run> {
     resultsViewport.scrollBy(offset);
   }
 
-  function scrollResultsFromPointer(
-    deltaY: number,
-    _x: number,
-    _y: number,
-  ): void {
+  function scrollResultsFromPointer(deltaY: number, _x: number, _y: number): void {
     if (deltaY === 0 || results().length === 0) return;
 
-    setPane("results");
+    if (focusTarget() !== "results") {
+      focusTarget("results");
+      if (searchInput.isFocused()) searchInput.blur();
+    }
     resultsViewport.scrollBy(deltaY);
   }
 
   function resetScroll(): void {
     if (focusTarget() !== "results") return;
     resultsViewport.scrollToStart();
+  }
+
+  function clampResultIndex(index: number): number {
+    return Math.max(0, Math.min(index, resultButtons.length - 1));
+  }
+
+  function focusResult(index: number): void {
+    if (resultButtons.length === 0) return;
+
+    const nextIndex = clampResultIndex(index);
+    const button = resultButtons[nextIndex];
+    if (!button) return;
+
+    activeResultIndex(nextIndex);
+    focusTarget("results");
+    button.focus();
+    resultsViewport.scrollNodeIntoView(button);
+  }
+
+  function moveResultFocus(delta: number): void {
+    if (focusTarget() !== "results" || resultButtons.length === 0) return;
+    focusResult(activeResultIndex() + delta);
+  }
+
+  function handleResultKey(key: string): boolean {
+    if (focusTarget() !== "results" || resultButtons.length === 0) return false;
+
+    if (nextResultKeys.has(key)) {
+      moveResultFocus(1);
+      return true;
+    }
+
+    if (prevResultKeys.has(key)) {
+      moveResultFocus(-1);
+      return true;
+    }
+
+    if (togglePaneKeys.has(key)) {
+      togglePane();
+      return true;
+    }
+
+    return false;
   }
 
   function togglePane(): void {
@@ -483,6 +494,7 @@ function startAniTrackDemo(): ReturnType<typeof run> {
     const all = results();
     const isLoading = loading();
     const activePane = focusTarget();
+    const activeIndex = activeResultIndex();
     const scrollY = resultsViewport.scrollY();
     const appearanceMode = appearance();
     const theme = themeForAppearance(appearanceMode);
@@ -537,9 +549,7 @@ function startAniTrackDemo(): ReturnType<typeof run> {
     });
 
     headerMeta.setText(
-      all.length > 0
-        ? `focus ${activePane}   scrollY ${scrollY}`
-        : `focus ${activePane}`,
+      all.length > 0 ? `focus ${activePane}   scrollY ${scrollY}` : `focus ${activePane}`,
     );
 
     resultsSummary.setText(
@@ -554,6 +564,7 @@ function startAniTrackDemo(): ReturnType<typeof run> {
     if (all.length === 0) {
       lastResultsSnapshot = [];
       lastAppearanceMode = appearanceMode;
+      resultButtons = [];
       resultsViewport.setChildren?.([]);
       if (activePane === "results") setPane("input");
       return;
@@ -565,6 +576,25 @@ function startAniTrackDemo(): ReturnType<typeof run> {
 
     if (resultsChanged || themeChanged) {
       rebuildResultRows(all);
+
+      if (resultsChanged) {
+        activeResultIndex(0);
+        focusResult(0);
+      } else {
+        activeResultIndex(clampResultIndex(activeIndex));
+        if (activePane === "results") {
+          focusResult(activeResultIndex());
+        }
+      }
+    }
+
+    const selectedIndex = clampResultIndex(activeResultIndex());
+    for (const [index, button] of resultButtons.entries()) {
+      const isActive = index === selectedIndex;
+      button.setStyle({
+        foreground: theme.fg,
+        border: isActive ? focusBorder() : idleBorder(),
+      });
     }
 
     lastAppearanceMode = appearanceMode;
@@ -572,16 +602,16 @@ function startAniTrackDemo(): ReturnType<typeof run> {
 
   onKey("/", () => setPane("input"));
 
-  for (const key of ["\t", "\x1b[Z"]) {
+  for (const key of togglePaneKeys) {
     onKey(key, () => togglePane());
   }
 
-  for (const key of ["j", "\x1b[B"]) {
-    onKey(key, () => scrollResults(1));
+  for (const key of nextResultKeys) {
+    onKey(key, () => moveResultFocus(1));
   }
 
-  for (const key of ["k", "\x1b[A"]) {
-    onKey(key, () => scrollResults(-1));
+  for (const key of prevResultKeys) {
+    onKey(key, () => moveResultFocus(-1));
   }
 
   for (const key of ["h"]) {
@@ -592,7 +622,11 @@ function startAniTrackDemo(): ReturnType<typeof run> {
     onKey(key, () => scrollResults(10));
   }
 
-  const app = run(root, { debug: true });
+  const app = run(root, {
+    debug: true,
+    metricsPath: "dump/metrics.txt",
+    appearance: "auto",
+  });
 
   onKey("q", () => {
     app.quit();
@@ -603,3 +637,7 @@ function startAniTrackDemo(): ReturnType<typeof run> {
 }
 
 startAniTrackDemo();
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
