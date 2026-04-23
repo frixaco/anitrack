@@ -32,7 +32,7 @@ Manual fallback:
 
 ## Legacy
 
-Note: Ignore everything under [legacy](./legacy/) 
+Note: Ignore everything under [legacy](./legacy/)
 
 The project has been ported multiple times as I kept exploring different technologies for fun:
 

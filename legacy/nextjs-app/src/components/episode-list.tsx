@@ -16,7 +16,7 @@ export async function EpisodeList({ className }: Props) {
     <div
       className={cn(
         "grid grid-cols-1 sm:grid-cols-2 gap-2 justify-around bg-background rounded-md border border-accent-foreground border-dotted p-2 overflow-auto",
-        className
+        className,
       )}
     >
       {episodes.length > 0 ? (
@@ -24,7 +24,7 @@ export async function EpisodeList({ className }: Props) {
           <div
             key={episode.id}
             className={cn(
-              "rounded-md flex max-h-[300px] relative border border-dashed group justify-between hover:border-accent-foreground"
+              "rounded-md flex max-h-[300px] relative border border-dashed group justify-between hover:border-accent-foreground",
             )}
           >
             <Image
@@ -52,9 +52,7 @@ export async function EpisodeList({ className }: Props) {
               </div>
 
               <div className="self-center flex-1 flex items-center gap-2">
-                <span className="text-4xl font-bold leading-none">
-                  {episode.episodeNumber}
-                </span>
+                <span className="text-4xl font-bold leading-none">{episode.episodeNumber}</span>
               </div>
 
               <div className="flex flex-col gap-1">

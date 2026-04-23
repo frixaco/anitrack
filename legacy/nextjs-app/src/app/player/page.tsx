@@ -17,12 +17,8 @@ export default async function Page({
     console.log("torrent already exists...");
     res = await fetch(`https://rqbit.anitrack.frixaco.com/torrents`);
     const torrents = (await res.json()).torrents;
-    const torrent = torrents.find((t: { info_hash: string }) =>
-      magnetLink.includes(t.info_hash)
-    );
-    res = await fetch(
-      `https://rqbit.anitrack.frixaco.com/torrents/${torrent.id}`
-    );
+    const torrent = torrents.find((t: { info_hash: string }) => magnetLink.includes(t.info_hash));
+    res = await fetch(`https://rqbit.anitrack.frixaco.com/torrents/${torrent.id}`);
     const torrentInfo = await res.json();
     console.log("fetched existing torrent...", torrentInfo);
 
@@ -66,8 +62,7 @@ export default async function Page({
             </video>
           )}
           <div className="mt-4 text-sm text-gray-500">
-            Note: Video may take a few moments to start as the torrent begins
-            downloading.
+            Note: Video may take a few moments to start as the torrent begins downloading.
           </div>
         </div>
       </div>

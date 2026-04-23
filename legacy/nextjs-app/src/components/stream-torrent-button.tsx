@@ -10,11 +10,7 @@ import {
 import { Play } from "lucide-react";
 import { SearchNyaaReleases } from "./search-nyaa-results";
 
-export function StreamTorrentButton({
-  defaultSearch,
-}: {
-  defaultSearch: string;
-}) {
+export function StreamTorrentButton({ defaultSearch }: { defaultSearch: string }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -26,8 +22,8 @@ export function StreamTorrentButton({
         <DialogHeader>
           <DialogTitle>Select the upload</DialogTitle>
           <DialogDescription>
-            Try searching with different titles if you don&apos;t find the right
-            release, sorted by seeders
+            Try searching with different titles if you don&apos;t find the right release, sorted by
+            seeders
           </DialogDescription>
         </DialogHeader>
 

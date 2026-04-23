@@ -28,16 +28,13 @@ export async function markAsWatched(episodeId: string) {
   if (!userId) {
     throw new Error("User not authenticated");
   }
-  await db
-    .update(episode)
-    .set({ isWatched: true })
-    .where(eq(episode.id, episodeId));
+  await db.update(episode).set({ isWatched: true }).where(eq(episode.id, episodeId));
 
   revalidatePath("/");
 }
 
 const processHianimeUrl = async (
-  hianimeUrl: string
+  hianimeUrl: string,
 ): Promise<{
   data: {
     episodes: {
@@ -126,8 +123,7 @@ const processHianimeUrl = async (
       error: "No title element found",
     };
   }
-  const title =
-    titleElement.getAttribute("data-jname") || titleElement.textContent!;
+  const title = titleElement.getAttribute("data-jname") || titleElement.textContent!;
   if (!title) {
     return {
       data: null,
@@ -140,18 +136,16 @@ const processHianimeUrl = async (
   const numbersDom = new JSDOM(numbersHTML);
   const numbersDoc = numbersDom.window.document;
 
-  const premieredElement = Array.from(
-    numbersDoc.querySelectorAll(".item-title")
-  ).find((el) => el.querySelector(".item-head")?.textContent === "Premiered:");
+  const premieredElement = Array.from(numbersDoc.querySelectorAll(".item-title")).find(
+    (el) => el.querySelector(".item-head")?.textContent === "Premiered:",
+  );
 
-  const seasonInfo = premieredElement
-    ?.querySelector(".name")
-    ?.textContent?.split(" ");
+  const seasonInfo = premieredElement?.querySelector(".name")?.textContent?.split(" ");
 
   const season = seasonInfo?.[0] || "Unknown"; // "Fall"
   const premieredYear = parseInt(seasonInfo?.[1] || "0"); // "2024"
   const totalEpisodes = parseInt(
-    numbersDoc.querySelector(".film-stats .tick-eps")?.textContent || "0"
+    numbersDoc.querySelector(".film-stats .tick-eps")?.textContent || "0",
   );
 
   return {

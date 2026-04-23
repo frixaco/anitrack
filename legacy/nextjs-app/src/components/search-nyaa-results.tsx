@@ -10,11 +10,7 @@ import { Download } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
 
-export function SearchNyaaReleases({
-  defaultSearch,
-}: {
-  defaultSearch: string;
-}) {
+export function SearchNyaaReleases({ defaultSearch }: { defaultSearch: string }) {
   const [searchTerm, setSearchTerm] = useState(defaultSearch);
   const debouncedSearch = useDebounce(searchTerm, 500);
   const [results, setResults] = useState<
@@ -27,12 +23,8 @@ export function SearchNyaaReleases({
       uploadDate: string;
     }[]
   >([]);
-  const [selectedMagnetLink, setSelectedMagnetLink] = useState<string | null>(
-    null
-  );
-  const [selectedTorrentLink, setSelectedTorrentLink] = useState<string | null>(
-    null
-  );
+  const [selectedMagnetLink, setSelectedMagnetLink] = useState<string | null>(null);
+  const [selectedTorrentLink, setSelectedTorrentLink] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
 
@@ -72,57 +64,40 @@ export function SearchNyaaReleases({
           <p className="text-xs text-secondary-foreground">searching...</p>
         ) : results.length > 0 ? (
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
-            {results.map(
-              ({
-                title,
-                magnetLink,
-                torrentLink,
-                seeders,
-                leechers,
-                uploadDate,
-              }) => (
-                <div
-                  key={title}
-                  className={cn(
-                    "flex items-stretch gap-2 border rounded-md hover:border-accent-foreground hover:border-dashed",
-                    {
-                      "border-accent-foreground hover:border-solid":
-                        selectedMagnetLink === magnetLink,
-                    }
-                  )}
-                  onClick={() => {
-                    setSelectedMagnetLink(magnetLink);
-                    setSelectedTorrentLink(torrentLink);
-                  }}
-                >
-                  <div className="flex flex-col gap-2 p-2">
-                    <p className="text-xs overflow-hidden text-ellipsis">
-                      {title}
+            {results.map(({ title, magnetLink, torrentLink, seeders, leechers, uploadDate }) => (
+              <div
+                key={title}
+                className={cn(
+                  "flex items-stretch gap-2 border rounded-md hover:border-accent-foreground hover:border-dashed",
+                  {
+                    "border-accent-foreground hover:border-solid":
+                      selectedMagnetLink === magnetLink,
+                  },
+                )}
+                onClick={() => {
+                  setSelectedMagnetLink(magnetLink);
+                  setSelectedTorrentLink(torrentLink);
+                }}
+              >
+                <div className="flex flex-col gap-2 p-2">
+                  <p className="text-xs overflow-hidden text-ellipsis">
+                    {title}
 
-                      <a
-                        href={torrentLink}
-                        target="_blank"
-                        className="inline-flex ml-2 align-middle"
-                      >
-                        <Download className="w-4 h-4" />
-                      </a>
+                    <a href={torrentLink} target="_blank" className="inline-flex ml-2 align-middle">
+                      <Download className="w-4 h-4" />
+                    </a>
+                  </p>
+
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xs text-secondary-foreground">seeders: {seeders}</p>
+                    <p className="text-xs text-secondary-foreground">leechers: {leechers}</p>
+                    <p className="text-xs text-secondary-foreground">
+                      uploaded: {new Date(uploadDate).toLocaleDateString()}
                     </p>
-
-                    <div className="flex flex-col gap-1">
-                      <p className="text-xs text-secondary-foreground">
-                        seeders: {seeders}
-                      </p>
-                      <p className="text-xs text-secondary-foreground">
-                        leechers: {leechers}
-                      </p>
-                      <p className="text-xs text-secondary-foreground">
-                        uploaded: {new Date(uploadDate).toLocaleDateString()}
-                      </p>
-                    </div>
                   </div>
                 </div>
-              )
-            )}
+              </div>
+            ))}
           </div>
         ) : (
           <p className="text-xs text-secondary-foreground">no results</p>
@@ -139,11 +114,7 @@ export function SearchNyaaReleases({
           </Link>
         )}
 
-        <Button
-          onClick={() =>
-            selectedTorrentLink && window.open(selectedTorrentLink, "_blank")
-          }
-        >
+        <Button onClick={() => selectedTorrentLink && window.open(selectedTorrentLink, "_blank")}>
           Download torrent
         </Button>
       </div>

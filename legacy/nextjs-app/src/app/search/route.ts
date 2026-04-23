@@ -18,14 +18,10 @@ function extractAnimeInfo(document: Document) {
     const title = titleElement ? titleElement.getAttribute("title") || "" : "";
 
     const imgElement = item.querySelector(".film-poster-img");
-    const thumbnail = imgElement
-      ? imgElement.getAttribute("data-src") || ""
-      : "";
+    const thumbnail = imgElement ? imgElement.getAttribute("data-src") || "" : "";
 
     const episodeElement = item.querySelector(".tick-eps");
-    const episodes = episodeElement
-      ? parseInt(episodeElement.textContent || "1")
-      : 1;
+    const episodes = episodeElement ? parseInt(episodeElement.textContent || "1") : 1;
 
     const infoElement = item.querySelector(".fd-infor");
     const type = infoElement
@@ -77,23 +73,15 @@ function extractTorrentInfo(document: Document) {
       title: title,
       magnetLink: magnetLink?.getAttribute("href") || "",
       torrentLink: "https://nyaa.si" + torrentLink?.getAttribute("href") || "",
-      seeders: parseInt(
-        row.querySelector("td:nth-last-child(3)")?.textContent || "0"
-      ),
-      leechers: parseInt(
-        row.querySelector("td:nth-last-child(2)")?.textContent || "0"
-      ),
-      uploadDate: new Date(
-        parseInt(dateCell?.getAttribute("data-timestamp") || "0") * 1000
-      ),
+      seeders: parseInt(row.querySelector("td:nth-last-child(3)")?.textContent || "0"),
+      leechers: parseInt(row.querySelector("td:nth-last-child(2)")?.textContent || "0"),
+      uploadDate: new Date(parseInt(dateCell?.getAttribute("data-timestamp") || "0") * 1000),
     };
   });
 }
 
 async function searchNyaa(searchTerm: string) {
-  const url = atob(
-    "aHR0cHM6Ly9ueWFhLnNpL3VzZXIvc3Vic3BsZWFzZT9mPTAmYz0wXzAmcT0="
-  );
+  const url = atob("aHR0cHM6Ly9ueWFhLnNpL3VzZXIvc3Vic3BsZWFzZT9mPTAmYz0wXzAmcT0=");
   const response = await fetch(`${url}${searchTerm.replace(" ", "+")}+1080p`);
   const html = await response.text();
   const dom = new JSDOM(html);
@@ -119,10 +107,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (!searchTerm) {
-    return NextResponse.json(
-      { error: "No search term provided" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "No search term provided" }, { status: 400 });
   }
 
   if (source !== "hianime" && source !== "nyaa") {
@@ -130,9 +115,7 @@ export async function GET(request: NextRequest) {
   }
 
   const results =
-    source === "hianime"
-      ? await searchHianime(searchTerm)
-      : await searchNyaa(searchTerm);
+    source === "hianime" ? await searchHianime(searchTerm) : await searchNyaa(searchTerm);
 
   return NextResponse.json(results);
 }

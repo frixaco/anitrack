@@ -16,9 +16,9 @@ export default new (class Tosho extends AbstractSource {
   buildQuery({ resolution, exclusions }) {
     let query = `&qx=1&q=!("${exclusions.join('"|"')}")`;
     if (resolution) {
-      query += `((${ANY}|"${resolution}") !"${QUALITIES.filter(
-        (q) => q !== resolution
-      ).join('" !"')}")`;
+      query += `((${ANY}|"${resolution}") !"${QUALITIES.filter((q) => q !== resolution).join(
+        '" !"',
+      )}")`;
     } else {
       query += ANY; // HACK: tosho NEEDS a search string, so we lazy search a single common vowel
     }
@@ -70,9 +70,9 @@ export default new (class Tosho extends AbstractSource {
     const query = this.buildQuery({ resolution, exclusions });
     const res = await fetch(this.url + "?order=size-d&aid=" + anidbAid + query);
 
-    const data = /** @type {import('./types.js').Tosho[]} */ (
-      await res.json()
-    ).filter((entry) => entry.num_files >= episodeCount);
+    const data = /** @type {import('./types.js').Tosho[]} */ (await res.json()).filter(
+      (entry) => entry.num_files >= episodeCount,
+    );
 
     if (data.length) return this.map(data, true);
     // TODO: this shouldn't really be required anymore? test.

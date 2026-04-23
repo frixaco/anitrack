@@ -7,16 +7,14 @@ export default new (class SeaDex extends AbstractSource {
   /** @type {import('./types.js').Accuracy} */
   accuracy = "High";
 
-  url = atob(
-    "aHR0cHM6Ly9iZXRhLnJlbGVhc2VzLm1vZS9hcGkvY29sbGVjdGlvbnMvZW50cmllcy9yZWNvcmRz"
-  );
+  url = atob("aHR0cHM6Ly9iZXRhLnJlbGVhc2VzLm1vZS9hcGkvY29sbGVjdGlvbnMvZW50cmllcy9yZWNvcmRz");
 
   /** @type {import('./types.js').SearchFunction} */
   async single({ anilistId, titles }) {
     if (!anilistId) throw new Error("No anilistId provided");
     if (!titles?.length) throw new Error("No titles provided");
     const res = await fetch(
-      `${this.url}?page=1&perPage=1&filter=alID%3D%22${anilistId}%22&skipTotal=1&expand=trs`
+      `${this.url}?page=1&perPage=1&filter=alID%3D%22${anilistId}%22&skipTotal=1&expand=trs`,
     );
 
     /** @type {import('./types.js').Seadex} */
@@ -32,9 +30,7 @@ export default new (class SeaDex extends AbstractSource {
         return {
           hash: torrent.infoHash,
           link: torrent.infoHash,
-          title: `[${torrent.releaseGroup}] ${titles[0]} ${
-            torrent.dualAudio ? "Dual Audio" : ""
-          }`,
+          title: `[${torrent.releaseGroup}] ${titles[0]} ${torrent.dualAudio ? "Dual Audio" : ""}`,
           size: torrent.files.reduce((prev, curr) => prev + curr.length, 0),
           type: torrent.isBest ? "best" : "alt",
           date: new Date(torrent.created),

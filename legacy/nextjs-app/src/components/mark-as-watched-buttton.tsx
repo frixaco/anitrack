@@ -7,12 +7,7 @@ export function MarkAsWatchedButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button
-      type="submit"
-      variant="outline"
-      className="w-full"
-      disabled={pending}
-    >
+    <Button type="submit" variant="outline" className="w-full" disabled={pending}>
       mark as watched
     </Button>
   );
