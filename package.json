@@ -1,6 +1,10 @@
 {
   "name": "@frixaco/anitrack",
   "version": "0.5.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frixaco/anitrack"
+  },
   "bin": {
     "anitrack": "index.ts"
   },
