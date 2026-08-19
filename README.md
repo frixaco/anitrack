@@ -9,26 +9,27 @@ Status: complete
 
 ### Releasing
 
-Preferred flow uses GitHub Actions.
+Publishing uses npm trusted publishing through `.github/workflows/npm-publish.yml`. The workflow receives a short-lived OpenID Connect credential from GitHub. It does not use an `NPM_TOKEN` secret.
 
-1. Update `version` in `package.json`
-2. Commit and push that change to `main`
-3. Create and push a matching tag:
-   - `git tag -a v0.1.1 -m "v0.1.1"`
-   - `git push origin v0.1.1`
-4. GitHub Actions workflow `.github/workflows/npm-publish.yml` will publish to npm
+1. Update `version` in `package.json`.
+2. Verify the package:
 
-Notes:
+   ```bash
+   bun x tsc --noEmit
+   npm pack --dry-run
+   ```
 
-- Tag must point at the commit containing the new `package.json` version
-- Tag name should match package version, e.g. `v0.1.1` -> `0.1.1`
-- Publishing requires `NPM_TOKEN` configured in GitHub repo secrets
-- If that version already exists on npm, publish will fail
+3. Commit the version change.
+4. Create a matching tag and push the commit and tag together:
 
-Manual fallback:
+   ```bash
+   git tag vX.Y.Z
+   git push --atomic origin main vX.Y.Z
+   ```
 
-1. Log in: `bunx npm login`
-2. Publish: `npm publish --access public`
+The tag must point to the commit containing version `X.Y.Z`. A tag push runs the publish workflow. npm rejects a version that already exists.
+
+The npm package must trust GitHub Actions for repository `frixaco/anitrack`, workflow `npm-publish.yml`, with `npm publish` permission.
 
 ## Legacy
 
